@@ -3,7 +3,7 @@
 I am trying to build up a personal web page. 
 Please [click here][website] to visit my website!
 
-# Diary
+# Worklog
 ### April 13, 2018
 I started by copying templates from the internet, cleaning them up, adding personal profiles and photos, fixing links. Now the 
 Photo and Blog section is working fine. 
@@ -13,3 +13,8 @@ Fixed links and added more articles and pictures.
 
 ### April 16, 2018
 I deleted some contents irrelevant to my website, and fixed more links so that they function well.
+
+### April 18, 2018
+- I tried to set up change the name of this website, but it failed. 
+- cleaned some files
+- renamed some files so that the codes seems more fluent
