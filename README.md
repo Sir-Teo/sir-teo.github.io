@@ -18,3 +18,7 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 - I tried to set up change the name of this website, but it failed. 
 - cleaned some files
 - renamed some files so that the codes seems more fluent
+
+### April 22, 2018
+- decided what to write with the third blog, NBA Prediction
+- added empty implementation
