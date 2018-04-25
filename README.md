@@ -19,12 +19,11 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 - cleaned some files
 - renamed some files so that the codes seems more fluent
 
-<<<<<<< HEAD
-### April 22, 2018
-- decided what to write with the third blog, NBA Prediction
-- added empty implementation
-=======
 ### April 19, 2018
 - fixed links
 - selected more pictures in my gallery
->>>>>>> c03ce841a0b112a0e68321ffa732ede7721ed5a3
+
+### April 22, 2018
+- decided what to write with the third blog, NBA Prediction
+- added empty implementation
+
