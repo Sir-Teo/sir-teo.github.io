@@ -27,3 +27,6 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 - decided what to write with the third blog, NBA Prediction
 - added empty implementation
 
+### April 25, 2018
+- added 20 photos in the gallery
+- fixed codes
