@@ -30,3 +30,8 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 ### April 25, 2018
 - added 20 photos in the gallery
 - fixed codes
+
+### April 26, 2018
+- now my gallery has 60 photos!
+updated index.html
+
