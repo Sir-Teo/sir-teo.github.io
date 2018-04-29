@@ -36,6 +36,6 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 updated index.html
 
 ### April 28, 2018
-- added a new folder called came
+- added a new folder called game
 
 
