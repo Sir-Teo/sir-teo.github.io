@@ -22,9 +22,9 @@
 
 		<script language='JavaScript'>
 			var password = "";
-			var username = "";
-			username = prompt('enter the username:','teo')
-			password = prompt('enter the password:','teo')
+			//var username = "";
+			//username = prompt('enter the username:','teo')
+			password = prompt('enter the password:','password')
 			if (password != 'teo'|| username != 'teo'){
 				alert("wrong password, BYE BYE");
 				window.opener=null;
@@ -85,9 +85,15 @@
 				<section class="box special">
 					<header class="major">
 						<h2>welcome to my website!</h2>
-						<p>This is a picture of my team. Can you find me?</p>
+						<p>Have a glance at my gallery</p>
 					</header>
-					<span class="image featured"> <img src="images/pic01.jpg" alt=""/></span>
+					<span class="image featured"> 
+						<script>// randomly select photos from the gallery and display
+						var rawNum = Math.random()*60;
+						var indexNum = parseInt(rawNum);
+						document.write("<img src=\"gallery/images/fulls/" + indexNum + ".jpg\"");
+						</script>
+					</span>
 				</section>
 						
 				<section class="box special features">
