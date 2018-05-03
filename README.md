@@ -41,4 +41,7 @@ updated index.html
 ### May 1st, 2018
 - added background music
 
+### May 3rd, 2018
+- uploaded an video on the website
+
 
