@@ -1,6 +1,7 @@
 [website]:https://sir-teo.github.io
 [gallery]:https://sir-teo.github.io/gallery
-[HTML5 up]: http://html5up.com
+[HTML5 up]: https://www.html5up.com
+[music]:
 # Sir-Teo.github.io
 I am trying to build up a personal web page. 
 Please [click here][website] to visit my website, and [click here][gallery] to visit my beautiful gallery(recommended)!
@@ -11,7 +12,7 @@ I started by copying [templates][HTML5 up] from the internet, cleaning them up, 
 Photo and Blog section is working fine. 
 
 ### April 14, 2018
-Fixed links and added more articles and pictures. 
+Fixed links and added more articles and [pictures][gallery]. 
 
 ### April 16, 2018
 I deleted some contents irrelevant to my website, and fixed more links so that they function well.
@@ -23,18 +24,18 @@ I deleted some contents irrelevant to my website, and fixed more links so that t
 
 ### April 19, 2018
 - fixed links
-- selected more pictures in my gallery
+- selected more pictures in my [gallery][gallery]
 
 ### April 22, 2018
 - decided what to write with the third blog, NBA Prediction
 - added empty implementation
 
 ### April 25, 2018
-- added 20 photos in the gallery
+- added 20 photos in the [gallery][gallery]
 - fixed codes
 
 ### April 26, 2018
-- now my gallery has 60 photos!
+- now my [gallery][gallery] has 60 photos!
 updated index.html
 
 ### April 28, 2018
