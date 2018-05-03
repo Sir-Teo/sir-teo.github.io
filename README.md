@@ -38,4 +38,7 @@ updated index.html
 ### April 28, 2018
 - added a new folder called game
 
+### May 1st, 2018
+- added background music
+
 
