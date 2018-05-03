@@ -1,11 +1,13 @@
 [website]:https://sir-teo.github.io
+[gallery]:https://sir-teo.github.io/gallery
+[HTML5 up]: http://html5up.com
 # Sir-Teo.github.io
 I am trying to build up a personal web page. 
-Please [click here][website] to visit my website!
+Please [click here][website] to visit my website, and [click here][gallery] to visit my beautiful gallery(recommended)!
 
 # Worklog
 ### April 13, 2018
-I started by copying templates from the internet, cleaning them up, adding personal profiles and photos, fixing links. Now the 
+I started by copying [templates][HTML5 up] from the internet, cleaning them up, adding personal profiles and photos, fixing links. Now the 
 Photo and Blog section is working fine. 
 
 ### April 14, 2018
@@ -43,5 +45,9 @@ updated index.html
 
 ### May 3rd, 2018
 - uploaded an video on the website
+- deleted useless contents
+- updated this file with more links
+
+
 
 
