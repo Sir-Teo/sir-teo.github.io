@@ -1,7 +1,7 @@
 [website]:https://sir-teo.github.io
 [gallery]:https://sir-teo.github.io/gallery
 [HTML5 up]: https://www.html5up.com
-[music]:
+[music]: http://www.qq.com
 # Sir-Teo.github.io
 I am trying to build up a personal web page. 
 Please [click here][website] to visit my website, and [click here][gallery] to visit my beautiful gallery(recommended)!
@@ -50,6 +50,10 @@ updated index.html
 - updated this file with more links
 
 ### May 8
+- did nothing
 
+### May 22th
+- updated site page
+- wrote a brief introduciton 
 
 
