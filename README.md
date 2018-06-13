@@ -56,4 +56,5 @@ updated index.html
 - updated site page
 - wrote a brief introduciton 
 
-
+### June 4th
+- added new contents into ```index.html```
