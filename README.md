@@ -58,3 +58,7 @@ updated index.html
 
 ### June 4th
 - added new contents into ```index.html```
+
+### June 13th
+- added a seciton where I will put some of my notes in it
+- created this seciton in ```index.html```
