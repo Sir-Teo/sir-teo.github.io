@@ -49,6 +49,7 @@ function useCanHover() {
 
 export default function Links() {
     const [activeCard, setActiveCard] = useState<string | null>(null)
+    const pinnedCardRef = useRef<string | null>(null)
     const [termOpen, setTermOpen] = useState(false)
     const [termLoaded, setTermLoaded] = useState(false)
     const termChipRef = useRef<HTMLButtonElement>(null)
@@ -85,7 +86,12 @@ export default function Links() {
                             <ul className="flex flex-wrap gap-2">
                                 {items.map(link => (
                                     <li key={link.label}>
-                                        <LinkChip link={link} activeCard={activeCard} setActiveCard={setActiveCard} />
+                                        <LinkChip
+                                            link={link}
+                                            activeCard={activeCard}
+                                            setActiveCard={setActiveCard}
+                                            pinnedCardRef={pinnedCardRef}
+                                        />
                                     </li>
                                 ))}
                             </ul>
@@ -345,10 +351,12 @@ function LinkChip({
     link,
     activeCard,
     setActiveCard,
+    pinnedCardRef,
 }: {
     link: LinkItem
     activeCard: string | null
     setActiveCard: Dispatch<SetStateAction<string | null>>
+    pinnedCardRef: RefObject<string | null>
 }) {
     const [qrOpen, setQrOpen] = useState(false)
     const cardOpen = activeCard === link.label
@@ -367,8 +375,11 @@ function LinkChip({
     const leaveTimerRef = useRef<number | null>(null)
     const canHover = useCanHover()
     useEffect(() => {
-        if (!cardOpen) interactingRef.current = false
-    }, [cardOpen])
+        if (!cardOpen) {
+            interactingRef.current = false
+            if (pinnedCardRef.current === link.label) pinnedCardRef.current = null
+        }
+    }, [cardOpen, link.label, pinnedCardRef])
     const cancelLeave = () => {
         if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
         leaveTimerRef.current = null
@@ -376,6 +387,7 @@ function LinkChip({
     const beginInteraction = () => {
         cancelLeave()
         interactingRef.current = true
+        pinnedCardRef.current = link.label
     }
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
     const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
@@ -416,6 +428,8 @@ function LinkChip({
         showCard && canHover
             ? {
                   onPointerEnter: () => {
+                      // Brushing over another pill should not erase a game in progress.
+                      if (pinnedCardRef.current && pinnedCardRef.current !== link.label) return
                       cancelLeave()
                       setCardOpen(true)
                   },
