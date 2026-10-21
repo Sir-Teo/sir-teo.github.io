@@ -24,6 +24,11 @@ snapshot-only because Enka does not allow cross-origin browser requests. Other
 platforms remain labeled profile snapshots. No API keys, proxy, scheduled workflow,
 or new GitHub Action is used for stats; the existing Pages deployment is unchanged.
 
+The Projects section uses the same pills as profile links. Edit the `projects` array
+in `app/data/profile.ts` to change each introduction, feature tags and destination.
+Previews open on hover or keyboard focus; on touch, tap once to preview and again
+to visit. Escape or tapping outside dismisses the preview.
+
 This project is a pure front-end website based on the Next.js framework, designed to showcase and introduce personal information.
 
 ## Getting Started

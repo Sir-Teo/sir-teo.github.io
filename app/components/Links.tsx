@@ -7,13 +7,16 @@ import {
     useRef,
     useState,
     type CSSProperties,
+    type FocusEvent,
     type RefCallback,
     type RefObject,
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
 import useProfileStats from './useProfileStats'
-import { categories, links, type LinkItem } from '../data/profile'
+import { categories, links, projects, type LinkItem } from '../data/profile'
+
+const allLinks = [...links, ...projects]
 
 // The terminal is roughly two thirds of this page's client code and hardly anyone
 // opens it. Split it into its own chunk and pull that chunk in once the page has
@@ -63,9 +66,9 @@ export default function Links() {
     return (
         <>
             <div className="space-y-5 sm:space-y-6">
-                {/* Chips grouped into a few categories; within each, ordered by rainbow hue. */}
+                {/* Profile links and projects share the same pills and preview behavior. */}
                 {categories.map(category => {
-                    const items = links.filter(
+                    const items = allLinks.filter(
                         link => link.category === category && (link.href || link.qrcode || link.handle)
                     )
                     if (items.length === 0) return null
@@ -176,7 +179,7 @@ type TooltipPosition = {
     top: number
 }
 
-// Hover/focus card that reveals a handle and any public stats (XP, streak, rating...).
+// Hover/focus card with profile stats or a project introduction and feature tags.
 // The card is reachable: the pointer can travel from the chip onto it without
 // dismissing it, and clicking it does exactly what clicking the chip does, so no
 // extra affordance is needed.
@@ -259,7 +262,9 @@ function StatCard({
                         onActivate()
                     })
                 }
-                className={`w-max min-w-40 rounded-lg bg-white/95 p-3 text-left shadow-lg ring-1 ring-slate-200 backdrop-blur dark:bg-slate-800/95 dark:ring-slate-700 ${
+                className={`${
+                    link.description ? 'w-64' : 'w-max min-w-40'
+                } max-w-full rounded-lg bg-white/95 p-3 text-left shadow-lg ring-1 ring-slate-200 backdrop-blur dark:bg-slate-800/95 dark:ring-slate-700 ${
                     onActivate ? 'cursor-pointer' : ''
                 }`}
             >
@@ -271,6 +276,23 @@ function StatCard({
                 </div>
                 {link.meta && (
                     <p className="mt-0.5 break-words text-xs text-slate-500 dark:text-slate-400">{link.meta}</p>
+                )}
+                {link.description && (
+                    <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                        {link.description}
+                    </p>
+                )}
+                {link.tags && link.tags.length > 0 && (
+                    <ul aria-label="Project features" className="mt-2.5 flex flex-wrap gap-1.5">
+                        {link.tags.map(tag => (
+                            <li
+                                key={tag}
+                                className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] leading-relaxed text-slate-600 dark:bg-slate-700/70 dark:text-slate-300"
+                            >
+                                {tag}
+                            </li>
+                        ))}
+                    </ul>
                 )}
                 {stats && stats.length > 0 && (
                     <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -315,7 +337,7 @@ function LinkChip({ link }: { link: LinkItem }) {
     const copyResetRef = useRef<number | null>(null)
     const canHover = useCanHover()
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
-    const showCard = !link.qrcode && Boolean(link.meta || link.stats?.length)
+    const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
     const setTriggerRef: RefCallback<HTMLElement> = node => {
         triggerRef.current = node
     }
@@ -324,8 +346,16 @@ function LinkChip({ link }: { link: LinkItem }) {
     const triggerCardProps = showCard
         ? {
               'aria-describedby': cardOpen ? statCardId : undefined,
-              onFocus: () => setCardOpen(true),
-              ...(canHover ? { onBlur: () => setCardOpen(false) } : {}),
+              onFocus: (event: FocusEvent<HTMLElement>) => {
+                  // Pointer focus on a phone precedes click: let the first tap open
+                  // the preview, while keyboard focus still reveals it immediately.
+                  if (canHover || event.currentTarget.matches(':focus-visible')) setCardOpen(true)
+              },
+              onBlur: (event: FocusEvent<HTMLElement>) => {
+                  // A tap on the preview itself has no focusable related target.
+                  // Keep it mounted long enough for its click to follow the link.
+                  if (canHover || event.relatedTarget) setCardOpen(false)
+              },
           }
         : {}
     // Hover lives on the wrapper, not the chip: the card renders inside the wrapper,
@@ -342,16 +372,16 @@ function LinkChip({ link }: { link: LinkItem }) {
         }
     }, [])
 
-    // On touch, a tapped-open stat card is dismissed by tapping outside it or Escape.
+    // Escape dismisses previews everywhere; touch previews also close on an outside tap.
     useEffect(() => {
-        if (canHover || !cardOpen) return
+        if (!cardOpen) return
         const closeOnOutsidePress = (event: PointerEvent) => {
             if (!wrapRef.current?.contains(event.target as Node)) setCardOpen(false)
         }
         const closeOnEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') setCardOpen(false)
         }
-        document.addEventListener('pointerdown', closeOnOutsidePress)
+        if (!canHover) document.addEventListener('pointerdown', closeOnOutsidePress)
         document.addEventListener('keydown', closeOnEscape)
         return () => {
             document.removeEventListener('pointerdown', closeOnOutsidePress)

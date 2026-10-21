@@ -5,7 +5,7 @@ import snapshots from './stats.json'
 
 // The few buckets the chips are grouped into on the homepage. Order here is the
 // order the sections render in.
-export const categories = ['Work & Research', 'Social', 'Play & Hobbies', 'Photography'] as const
+export const categories = ['Work & Research', 'Social', 'Play & Hobbies', 'Photography', 'Projects'] as const
 export type LinkCategory = (typeof categories)[number]
 
 // A single metric shown in a chip's hover/focus card (e.g. { label: 'Streak', value: '794 days' }).
@@ -24,6 +24,8 @@ export type LinkItem = {
     handle?: string // for copy-on-click handles with no URL (e.g. Discord)
     category: LinkCategory // which grouped section the chip lives in
     meta?: string // short subtitle (handle / id) shown in the hover card
+    description?: string // project introduction shown in the hover/focus/tap preview
+    tags?: string[] // a few useful features or topics for project previews
     stats?: LinkStat[] // optional metrics revealed on hover/focus
     statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
 }
@@ -341,5 +343,90 @@ export const links: LinkItem[] = [
         meta: 'Personal photo gallery',
         statsId: 'gallery',
         stats: statsSnapshots.gallery.stats,
+    },
+]
+
+// Kept separate from identity/profile links so projects do not become Person.sameAs URLs.
+export const projects: LinkItem[] = [
+    {
+        label: 'Explainer videos',
+        href: 'https://www.youtube.com/@teozeng3999/videos',
+        icon: '/icons/youtube.svg',
+        color: '#FF0000',
+        category: 'Projects',
+        meta: 'Animated explainers',
+        description:
+            'Visual deep dives into math, physics, machine learning and markets. Follow animated derivations and worked examples, built entirely from code.',
+        tags: ['Math & physics', 'AI & ML', 'English & 中文'],
+    },
+    {
+        label: 'Crown & Clan',
+        href: 'https://coc.teozeng.dev/',
+        icon: '/icons/clashofclans.svg',
+        color: '#E9A409',
+        category: 'Projects',
+        meta: 'Village-building strategy',
+        description:
+            'Build a village, train an army, and raid campaign maps. Upgrade your base and replay battles, with progress saved in your browser.',
+        tags: ['Build a village', 'Campaign raids', 'Battle replays'],
+    },
+    {
+        label: 'Summoner’s Rift',
+        href: 'https://teozeng.dev/web-lol/',
+        icon: '/icons/swords.svg',
+        color: '#B68B3C',
+        colorDark: '#E4BF72',
+        category: 'Projects',
+        meta: 'Browser MOBA · in progress',
+        description:
+            'Practice with Ashe or Lux, then play a lane match alongside bots. Fight through minion waves and towers on a recreation of Summoner’s Rift.',
+        tags: ['Ashe & Lux', 'Practice mode', 'Lane matches'],
+    },
+    {
+        label: 'San Andreas',
+        href: 'https://teozeng.dev/web-gta/',
+        icon: '/icons/car.svg',
+        color: '#16A34A',
+        colorDark: '#4ADE80',
+        category: 'Projects',
+        meta: 'Open-world recreation · in progress',
+        description:
+            'Explore San Andreas from Grove Street. Walk, drive, and fly through a continuous world that streams as you travel, right in your browser.',
+        tags: ['Open world', 'Driving & flying', 'Grove Street'],
+    },
+    {
+        label: 'Web Chess',
+        href: 'https://teozeng.dev/web-chess/',
+        icon: '/icons/chess.svg',
+        color: '#81B64C',
+        category: 'Projects',
+        meta: 'Chess · Stockfish analysis',
+        description:
+            'Play against Stockfish, import games, and review your moves with engine analysis. Explore alternative lines or pick up a saved game.',
+        tags: ['Play the engine', 'Import games', 'Move review'],
+    },
+    {
+        label: 'Web Xiangqi',
+        href: 'https://teozeng.dev/web-xiangqi/',
+        icon: '/icons/xiangqi.svg',
+        color: '#DC2626',
+        colorDark: '#F87171',
+        category: 'Projects',
+        meta: 'Chinese chess · Pikafish analysis',
+        description:
+            'Review annotated Xiangqi games, compare candidate moves, and play on from any position. Pikafish analysis helps you explore what could happen next.',
+        tags: ['Chinese chess', 'Move comparisons', 'Game library'],
+    },
+    {
+        label: 'Web KaTrain',
+        href: 'https://teozeng.dev/web-katrain/',
+        icon: '/icons/go-board.svg',
+        color: '#7C3AED',
+        colorDark: '#A78BFA',
+        category: 'Projects',
+        meta: 'Go / Weiqi study',
+        description:
+            'Study Go with neural-network analysis, move-quality reviews, and ownership maps. Play against the engine or revisit mistakes from a game.',
+        tags: ['Game analysis', 'Ownership maps', 'Practice mistakes'],
     },
 ]
