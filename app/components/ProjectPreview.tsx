@@ -183,7 +183,7 @@ export default function ProjectPreview({
                         <span aria-hidden>←</span> Back to preview
                     </button>
                 ) : (
-                    <span>{video ? 'Visual explainers' : 'Try it here'}</span>
+                    <span>{video ? 'Visual explainers' : canEmbed ? 'Try it here' : 'Opens in a new tab'}</span>
                 )}
                 <a href={fullUrl} target="_blank" rel="noopener noreferrer">
                     {video ? 'Watch on YouTube' : 'Open full project'} <span aria-hidden>↗</span>
