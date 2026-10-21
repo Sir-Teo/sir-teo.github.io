@@ -18,7 +18,9 @@ The three clips and posters total approximately **716 KiB**. `npm run build` che
 
 ## Board games
 
-Web Chess, Web Xiangqi and Web KaTrain open directly into playable analysis boards. Select a piece and a legal destination, place a Go stone, or click an engine suggestion. Undo, Reset, Go passes, chess promotion and arrow-key navigation work. These are live local searches: Stockfish, Pikafish and the Web KaTrain neural/MCTS worker. See [`../live-engines/README.md`](../live-engines/README.md) for sources and the small Go model's limits.
+Web Chess, Web Xiangqi and Web KaTrain use the same compact info card as Blog: icon, title, a short play-and-analyze subtitle, and two static details (engine and browser analysis). Hover, keyboard focus and touch follow the standard link behavior; the pill or card opens the full project.
+
+These cards do not load boards, workers, models or game rules. The old analysis preview components, vendored engines, sync script and preview-only chess dependency have been removed. The full apps still provide their own play and analysis tools.
 
 ## Explainers
 

@@ -8,9 +8,6 @@ import PreviewFilm from './PreviewFilm'
 const GamePreview = dynamic(() => import('./GamePreview'), {
     loading: () => <div className="preview-loading">Opening the preview…</div>,
 })
-const StudyPreview = dynamic(() => import('./StudyPreview'), {
-    loading: () => <div className="preview-loading">Opening the board…</div>,
-})
 
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
 
@@ -64,8 +61,6 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             </header>
             {preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
-            ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
-                <StudyPreview scene={preview.mode} />
             ) : (
                 <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
             )}

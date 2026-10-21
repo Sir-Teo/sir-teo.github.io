@@ -1,7 +1,0 @@
-{
-  "repository": "https://github.com/Sir-Teo/web-katrain",
-  "commit": "5875837466879933d62c789da0b3125f984a3754",
-  "source": "src/engine/katago/worker.ts",
-  "build": "node scripts/sync-preview-engines.mjs",
-  "model": "Bundled small test network; quick hints, not strong Go analysis."
-}
