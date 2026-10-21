@@ -58,7 +58,7 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             {preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
-                <StudyPreview scene={preview.mode} reducedMotion={reducedMotion} />
+                <StudyPreview scene={preview.mode} />
             ) : (
                 <ProjectIllustration scene={preview.mode} reducedMotion={reducedMotion} />
             )}
