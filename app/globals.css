@@ -210,7 +210,7 @@ html {
 }
 .mini-stage {
     position: relative;
-    width: min(100%, max(170px, calc((100dvh - 214px) * 1.2857)));
+    width: min(100%, max(170px, calc((100dvh - 260px) * 1.2857)));
     aspect-ratio: 9 / 7;
     margin: auto;
     overflow: hidden;
@@ -475,7 +475,7 @@ html {
         min-width: 16px;
     }
 }
-@media (max-height: 450px) {
+@media (max-height: 560px) {
     .mini-stage {
         width: min(100%, max(148px, calc((100dvh - 254px) * 1.2857)));
     }
@@ -507,7 +507,7 @@ html {
     }
 }
 
-@media (max-height: 450px) and (min-width: 520px) {
+@media (max-height: 560px) and (min-width: 520px) {
     [data-preview='crown'],
     [data-preview='rift'],
     [data-preview='postcard'] {
