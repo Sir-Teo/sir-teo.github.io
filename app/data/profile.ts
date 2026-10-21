@@ -407,7 +407,7 @@ export const projects: LinkItem[] = [
         color: '#E9A409',
         category: 'Projects',
         meta: 'Village-building strategy',
-        preview: { mode: 'crown', hint: 'Build. Raid. Repeat.', action: 'Open full game' },
+        preview: { mode: 'crown', hint: 'Build. Raid. Repeat.', action: 'Open game' },
     },
     {
         label: 'Summoner’s Rift',
@@ -417,7 +417,7 @@ export const projects: LinkItem[] = [
         colorDark: '#E4BF72',
         category: 'Projects',
         meta: 'Browser MOBA',
-        preview: { mode: 'rift', hint: 'Ashe · Lux · Browser practice', action: 'Open full game' },
+        preview: { mode: 'rift', hint: 'Ashe · Lux · Browser practice', action: 'Open game' },
     },
     {
         label: 'San Andreas',
@@ -427,7 +427,7 @@ export const projects: LinkItem[] = [
         colorDark: '#4ADE80',
         category: 'Projects',
         meta: 'Open-world recreation',
-        preview: { mode: 'postcard', hint: 'Los Santos, in the browser', action: 'Open full game' },
+        preview: { mode: 'postcard', hint: 'Los Santos, in the browser', action: 'Open game' },
     },
     {
         label: 'Web Chess',

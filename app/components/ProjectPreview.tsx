@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
 import dynamic from 'next/dynamic'
+import PreviewFilm from './PreviewFilm'
 
 const GamePreview = dynamic(() => import('./GamePreview'), {
     loading: () => <div className="preview-loading">Opening the preview…</div>,
@@ -29,15 +30,7 @@ function Arrow() {
     )
 }
 
-export default function ProjectPreview({
-    link,
-    onClose,
-    onPlayGame,
-}: {
-    link: LinkItem
-    onClose: () => void
-    onPlayGame: () => void
-}) {
+export default function ProjectPreview({ link, onClose }: { link: LinkItem; onClose: () => void }) {
     const preview = link.preview!
     const [reducedMotion, setReducedMotion] = useState(true)
     useEffect(() => {
@@ -74,7 +67,7 @@ export default function ProjectPreview({
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
                 <StudyPreview scene={preview.mode} />
             ) : (
-                <GamePreview key={preview.mode} scene={preview.mode} onPlay={onPlayGame} />
+                <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
             )}
             <footer className="preview-footer">
                 <span>{preview.hint}</span>
@@ -89,73 +82,21 @@ export default function ProjectPreview({
 
 function VideoGallery({ videos, reducedMotion }: { videos: Video[]; reducedMotion: boolean }) {
     const [selected, setSelected] = useState(0)
-    const [playIntent, setPlayIntent] = useState<boolean | null>(null)
     const [playing, setPlaying] = useState(false)
-    const [mediaError, setMediaError] = useState(false)
-    const videoRef = useRef<HTMLVideoElement>(null)
     const video = videos[selected]
-    const shouldPlay = playIntent ?? !reducedMotion
-
-    useEffect(() => {
-        const element = videoRef.current
-        if (!element) return
-        const update = () => {
-            if (shouldPlay && !document.hidden) void element.play().catch(() => setPlaying(false))
-            else element.pause()
-        }
-        update()
-        document.addEventListener('visibilitychange', update)
-        return () => {
-            element.pause()
-            document.removeEventListener('visibilitychange', update)
-        }
-    }, [video?.clip, shouldPlay])
-
-    const choose = (index: number) => {
-        if (selected === index) return
-        setSelected(index)
-        setMediaError(false)
-    }
+    const choose = (index: number) => setSelected(index)
     if (!video) return null
 
     return (
         <>
-            <div className="preview-film">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={video.image} alt={video.title} width={640} height={360} />
-                {!mediaError && (
-                    <video
-                        key={video.clip}
-                        ref={videoRef}
-                        src={video.clip}
-                        poster={video.image}
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        aria-label={`Silent preview: ${video.title}`}
-                        onPlay={() => setPlaying(true)}
-                        onPause={() => setPlaying(false)}
-                        onError={() => {
-                            setMediaError(true)
-                            setPlaying(false)
-                        }}
-                    />
-                )}
-                <span className="film-badge">SILENT PREVIEW</span>
-                {!mediaError && (
-                    <button
-                        type="button"
-                        className="film-playback"
-                        onClick={() => setPlayIntent(!playing)}
-                        aria-label={playing ? 'Pause preview' : 'Play preview'}
-                    >
-                        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor">
-                            {playing ? <path d="M4 3h3v10H4zm5 0h3v10H9z" /> : <path d="m5 2 8 6-8 6Z" />}
-                        </svg>
-                    </button>
-                )}
-            </div>
+            <PreviewFilm
+                key={video.clip}
+                clip={video.clip}
+                image={video.image}
+                title={video.title}
+                reducedMotion={reducedMotion}
+                onPlayingChange={setPlaying}
+            />
             <ul className="preview-video-list" aria-label="Explainer videos">
                 {videos.map((item, index) => (
                     <li key={item.id} data-selected={selected === index}>

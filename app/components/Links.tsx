@@ -27,7 +27,6 @@ const allLinks = [...links, ...projects]
 // gone idle (or right away if someone clicks first), so it stays off the initial
 // load without changing how the panel itself behaves.
 const Terminal = dynamic(() => import('./Terminal'), { ssr: false })
-const GameWindow = dynamic(() => import('./GameWindow'), { ssr: false })
 
 // Keyboard focus ring shared by every chip so tab-navigation is clearly visible
 // without affecting the resting (mouse) look.
@@ -50,21 +49,6 @@ function useCanHover() {
 
 export default function Links() {
     const [activeCard, setActiveCard] = useState<string | null>(null)
-    const [playing, setPlaying] = useState<LinkItem | null>(null)
-    const gameTrigger = useRef<HTMLElement | null>(null)
-    const playGame = (link: LinkItem, trigger: HTMLElement | null) => {
-        gameTrigger.current = trigger
-        setActiveCard(null)
-        setPlaying(link)
-    }
-    const closeGame = () => {
-        setPlaying(null)
-        // The modal unmounts before focus returns. Dismiss the focus-triggered card.
-        requestAnimationFrame(() => {
-            gameTrigger.current?.focus({ preventScroll: true })
-            setActiveCard(null)
-        })
-    }
     const [termOpen, setTermOpen] = useState(false)
     const [termLoaded, setTermLoaded] = useState(false)
     const termChipRef = useRef<HTMLButtonElement>(null)
@@ -101,12 +85,7 @@ export default function Links() {
                             <ul className="flex flex-wrap gap-2">
                                 {items.map(link => (
                                     <li key={link.label}>
-                                        <LinkChip
-                                            link={link}
-                                            activeCard={activeCard}
-                                            setActiveCard={setActiveCard}
-                                            onPlayGame={playGame}
-                                        />
+                                        <LinkChip link={link} activeCard={activeCard} setActiveCard={setActiveCard} />
                                     </li>
                                 ))}
                             </ul>
@@ -126,7 +105,6 @@ export default function Links() {
                 </div>
             </div>
             {termLoaded && <Terminal open={termOpen} onClose={closeTerm} />}
-            {playing && <GameWindow link={playing} onClose={closeGame} />}
         </>
     )
 }
@@ -214,14 +192,12 @@ function StatCard({
     id,
     onActivate,
     onClose,
-    onPlayGame,
 }: {
     link: LinkItem
     triggerRef: RefObject<HTMLElement | null>
     id: string
     onActivate?: () => void
     onClose?: () => void
-    onPlayGame?: () => void
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -278,11 +254,7 @@ function StatCard({
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                width: link.preview
-                    ? link.preview.mode === 'videos'
-                        ? '26rem'
-                        : 'var(--game-preview-width, 24rem)'
-                    : undefined,
+                width: link.preview ? (link.preview.mode === 'videos' ? '26rem' : '24rem') : undefined,
                 maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
                 visibility: position ? 'visible' : 'hidden',
             }}
@@ -293,7 +265,7 @@ function StatCard({
             }`}
         >
             {link.preview ? (
-                <ProjectPreview link={link} onClose={onClose ?? (() => {})} onPlayGame={onPlayGame ?? (() => {})} />
+                <ProjectPreview link={link} onClose={onClose ?? (() => {})} />
             ) : (
                 <div
                     onClick={
@@ -372,12 +344,10 @@ function LinkChip({
     link,
     activeCard,
     setActiveCard,
-    onPlayGame,
 }: {
     link: LinkItem
     activeCard: string | null
     setActiveCard: Dispatch<SetStateAction<string | null>>
-    onPlayGame: (link: LinkItem, trigger: HTMLElement | null) => void
 }) {
     const [qrOpen, setQrOpen] = useState(false)
     const cardOpen = activeCard === link.label
@@ -609,11 +579,6 @@ function LinkChip({
                     link={link}
                     onActivate={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
                     onClose={closeCard}
-                    onPlayGame={() => {
-                        cancelEnter()
-                        cancelLeave()
-                        onPlayGame(link, triggerRef.current)
-                    }}
                 />
             )}
         </div>

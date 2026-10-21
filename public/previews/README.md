@@ -1,30 +1,20 @@
 # Project hover previews
 
-The pills open anchored cards with lightweight interactions and links to the full projects. Keyboard focus and touch are supported. Cards stay within the viewport. Portrait layouts stack the scene and controls; short landscape screens use a wider card with the scene beside the controls.
+Project pills open anchored cards with keyboard and touch support. Cards stay within the viewport, including small portrait and short landscape screens.
 
-## Actual game previews
+## Game films
 
-`app/components/GamePreview.tsx` displays real app captures. Switch scenes, use **Look closer** to magnify, then move the pointer, drag on touch, or use arrow keys to inspect. Images are identified as captures; they do not simulate gameplay. Only the selected image is mounted. There are no animation loops or automatic game downloads.
+Each game has one nine-second silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and **Open game** link. Scene tabs, magnification, embedded games and their launch controls have been removed.
 
-- **Crown & Clan:** village and Goblin Forest raid.
-- **Summoner’s Rift:** Ashe and Lux in the real textured production map.
-- **San Andreas:** CJ on foot and driving a Greenwood, with native terrain and the actual HUD.
+- **Crown & Clan:** deploying barbarians and archers in a Goblin Forest raid.
+- **Summoner’s Rift:** Ashe attacking a target dummy and casting Volley on the production map.
+- **San Andreas:** CJ leaving the starting alley and exploring East Los Santos on foot.
 
-**Play here** opens the deployed app in `GameWindow.tsx`, a native modal dialog with an iframe. The game receives its real viewport and native controls. It uses its normal browser saves. Reload and Open tab remain available. Closing unmounts the frame, restores page scrolling, and returns focus to the project pill. Keyboard users can close from the toolbar; Escape inside a game belongs to that game's pause menu. Small screens get a full-viewport window, while the hover card itself stays anchored and clamped. Rift's live game requires a mouse and keyboard; the capture controls work on touch.
+Recorded through the deployed apps on October 21, 2026: `coc.teozeng.dev`, `teozeng.dev/web-lol`, and `teozeng.dev/web-gta`. Frames retain capture timestamps before conversion to 640 × 360 H.264 at 24 fps, CRF 28–29, with no audio and fast-start metadata. WebP posters come from the recordings. Artwork belongs to the source projects and their respective rights holders.
 
-The October 21 build measures **2.3 KiB gzip** for the two optional UI chunks combined, and **273.6 KiB** for all six captures. Initial scripts are **184.2 KiB gzip**. These are local compression measurements. A hover downloads only its selected capture; Play here downloads the full game's own assets separately, which can be substantial. Nothing from those engines or asset packs is copied into the homepage build.
+Only the open card mounts its clip. Closing unmounts and pauses it; hidden tabs pause playback. Reduced-motion users see the poster until they press Play, with `preload="none"` preventing automatic video downloads. Media errors retain a still preview and the external game link. No game engines, iframe windows, or asset packs are loaded by these previews.
 
-`npm run build` checks separate lazy chunks, a combined **8 KiB gzip / 20 KiB raw** UI limit, **96 KiB per capture / 384 KiB total**, and absence of these chunks and captures from initial HTML. The original simulated mini-games have been removed.
-
-### Capture provenance
-
-- `crown-clan.webp` and `summoners-rift.webp`: existing captures of the deployed projects, retained after checking against current app rendering.
-- `crown-raid.webp`: `coc.teozeng.dev`, Goblin Forest deployment screen, captured October 21, 2026.
-- `rift-lux.webp`: `teozeng.dev/web-lol`, production Lux practice, captured October 21, 2026.
-- `gta-grove.webp`: `teozeng.dev/web-gta`, CJ on foot after the introduction, captured October 21, 2026.
-- `gta-driving.webp`: `web-gta/artifacts/native-world-driving.png`, actual browser gameplay.
-
-New captures are encoded as 1000px-wide WebP at quality 72. Artwork belongs to the source projects and their respective rights holders.
+The three clips and posters total approximately **716 KiB**. `npm run build` checks a lazy game-film chunk capped at **4 KiB gzip / 8 KiB raw**, **600 KiB per clip / 50 KiB per poster / 1600 KiB combined**, and absence of game films and their UI chunk from the initial HTML. Replaced screenshot assets have been removed.
 
 ## Board games
 
@@ -34,4 +24,4 @@ Web Chess, Web Xiangqi and Web KaTrain open directly into playable analysis boar
 
 The thumbnail list selects nine-second silent excerpts from Teo’s local `explainer-videos/renders/{llm,quantum,relativity}.mp4` renders. Starts: 10:20, 22:50 and 19:05. YouTube IDs: `o0ENWGEVJm0`, `aaPbLBw0ZYc`, `vdroXP5hjjQ`. WebP posters come from the same first frames. Clips are 640px H.264, 24 fps, no audio. Only the selected clip is mounted; it pauses when closed or hidden. Reduced-motion users get a still frame with an explicit Play control.
 
-Other previously captured assets remain in this directory. Everything deploys through the existing GitHub Pages workflow; no new workflows or scheduled jobs are introduced.
+Everything deploys through the existing GitHub Pages workflow; no new workflows or scheduled jobs are introduced.
