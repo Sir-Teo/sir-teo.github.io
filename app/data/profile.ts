@@ -27,26 +27,13 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        image: string
-        alt: string
-        kind: string
-        action: string
-        mode: 'hotspots' | 'abilities' | 'scenes' | 'lenses' | 'videos'
+        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos'
         hint: string
-        details?: {
-            label: string
-            title: string
-            caption: string
-            x?: number
-            y?: number
-            scale?: number
-            image?: string
-        }[]
+        action: string
         videos?: {
             id: string
-            topic: string
             title: string
-            caption: string
+            topic: string
             image: string
             clip: string
             start: number
@@ -383,35 +370,29 @@ export const projects: LinkItem[] = [
         meta: 'Animated explainers',
         preview: {
             mode: 'videos',
-            image: '/previews/clip-llm.webp',
-            alt: 'Attention scores between words in a transformer',
-            kind: 'Animated explainers',
-            action: 'Watch on YouTube',
-            hint: 'A few seconds of the idea',
+            hint: 'Ideas, made visible.',
+            action: 'All videos',
             videos: [
                 {
                     id: 'o0ENWGEVJm0',
-                    topic: 'Attention',
-                    title: 'How words find their context',
-                    caption: '“Bank” means something different beside “river”.',
+                    title: 'How Large Language Models Work',
+                    topic: 'AI · attention & transformers',
                     image: '/previews/clip-llm.webp',
                     clip: '/previews/clip-llm.mp4',
                     start: 620,
                 },
                 {
                     id: 'aaPbLBw0ZYc',
-                    topic: 'Quantum',
-                    title: 'A wave that rebuilds itself',
-                    caption: 'A quantum wave packet spreads, interferes, and revives.',
+                    title: 'Quantum Mechanics, Visualized',
+                    topic: 'Physics · waves & interference',
                     image: '/previews/clip-quantum.webp',
                     clip: '/previews/clip-quantum.mp4',
                     start: 1370,
                 },
                 {
                     id: 'vdroXP5hjjQ',
-                    topic: 'Relativity',
-                    title: 'Curvature, from the inside',
-                    caption: 'You can measure curvature without leaving the surface.',
+                    title: 'General Relativity, Derived',
+                    topic: 'Physics · spacetime & curvature',
                     image: '/previews/clip-relativity.webp',
                     clip: '/previews/clip-relativity.mp4',
                     start: 1145,
@@ -426,37 +407,7 @@ export const projects: LinkItem[] = [
         color: '#E9A409',
         category: 'Projects',
         meta: 'Village-building strategy',
-        preview: {
-            mode: 'hotspots',
-            image: '/previews/crown-clan.webp',
-            alt: 'An isometric village with a town hall, resource collectors and army camp',
-            kind: 'Village-building strategy',
-            action: 'Build your village',
-            hint: 'Explore the village',
-            details: [
-                {
-                    label: 'Town hall',
-                    title: 'It starts with a town hall',
-                    caption: 'Grow a tiny settlement into a defended village.',
-                    x: 52,
-                    y: 35,
-                },
-                {
-                    label: 'Army camp',
-                    title: 'A village needs an army',
-                    caption: 'Train troops, then take them on campaign raids.',
-                    x: 20,
-                    y: 62,
-                },
-                {
-                    label: 'Resources',
-                    title: 'Keep the upgrades coming',
-                    caption: 'Collect gold and elixir to build what comes next.',
-                    x: 87,
-                    y: 42,
-                },
-            ],
-        },
+        preview: { mode: 'crown', hint: 'A little ambition.', action: 'Build a village' },
     },
     {
         label: 'Summoner’s Rift',
@@ -465,25 +416,8 @@ export const projects: LinkItem[] = [
         color: '#B68B3C',
         colorDark: '#E4BF72',
         category: 'Projects',
-        meta: 'Browser MOBA · in progress',
-        preview: {
-            mode: 'abilities',
-            image: '/previews/summoners-rift.webp',
-            alt: 'Ashe at the blue fountain on Summoner’s Rift',
-            kind: 'Browser MOBA · in progress',
-            action: 'Enter the Rift',
-            hint: 'Meet Ashe’s toolkit',
-            details: [
-                { label: 'Q', title: 'Ranger’s Focus', caption: 'Build up focus, then unleash a flurry of attacks.' },
-                { label: 'W', title: 'Volley', caption: 'A fan of arrows. A whole lane of enemies slowed.' },
-                { label: 'E', title: 'Hawkshot', caption: 'Send a hawk ahead. See what’s hiding in the fog.' },
-                {
-                    label: 'R',
-                    title: 'Enchanted Crystal Arrow',
-                    caption: 'One long-range arrow. One very unfortunate target.',
-                },
-            ],
-        },
+        meta: 'Browser MOBA',
+        preview: { mode: 'rift', hint: 'Make an entrance.', action: 'Enter the Rift' },
     },
     {
         label: 'San Andreas',
@@ -492,29 +426,8 @@ export const projects: LinkItem[] = [
         color: '#16A34A',
         colorDark: '#4ADE80',
         category: 'Projects',
-        meta: 'Open-world recreation · in progress',
-        preview: {
-            mode: 'scenes',
-            image: '/previews/san-andreas.webp',
-            alt: 'Palm-lined streets in the browser recreation of San Andreas',
-            kind: 'Open world · in progress',
-            action: 'Explore San Andreas',
-            hint: 'A little Los Santos nostalgia',
-            details: [
-                {
-                    label: 'The streets',
-                    title: 'Back in Los Santos',
-                    caption: 'Palm trees, familiar corners, and a whole city to wander.',
-                    image: '/previews/san-andreas.webp',
-                },
-                {
-                    label: 'The opening',
-                    title: 'Welcome home, CJ',
-                    caption: 'Even the opening gets its moment in the browser.',
-                    image: '/previews/san-andreas-story.webp',
-                },
-            ],
-        },
+        meta: 'Open-world recreation',
+        preview: { mode: 'postcard', hint: 'Wish you were here.', action: 'Visit Los Santos' },
     },
     {
         label: 'Web Chess',
@@ -522,37 +435,8 @@ export const projects: LinkItem[] = [
         icon: '/icons/chess.svg',
         color: '#81B64C',
         category: 'Projects',
-        meta: 'Chess · Stockfish analysis',
-        preview: {
-            mode: 'lenses',
-            image: '/previews/chess.webp',
-            alt: 'A Queen’s Gambit position with move arrows and Stockfish analysis',
-            kind: 'Chess · Stockfish',
-            action: 'Open the chessboard',
-            hint: 'Take a closer look',
-            details: [
-                {
-                    label: 'Board',
-                    title: 'Play it. Then question it.',
-                    caption: 'Explore a Queen’s Gambit, one move at a time.',
-                    x: 25,
-                    y: 50,
-                    scale: 1.2,
-                },
-                {
-                    label: 'Coach',
-                    title: 'What would Stockfish do?',
-                    caption: 'Compare your idea with the engine’s best move and reply.',
-                    image: '/previews/chess-coach.webp',
-                },
-                {
-                    label: 'Ideas',
-                    title: 'More than one good idea',
-                    caption: 'Green arrows show candidate moves worth exploring.',
-                    image: '/previews/chess-ideas.webp',
-                },
-            ],
-        },
+        meta: 'Chess · Stockfish',
+        preview: { mode: 'chess', hint: 'An unexpected move.', action: 'Play chess' },
     },
     {
         label: 'Web Xiangqi',
@@ -561,37 +445,8 @@ export const projects: LinkItem[] = [
         color: '#DC2626',
         colorDark: '#F87171',
         category: 'Projects',
-        meta: 'Chinese chess · Pikafish analysis',
-        preview: {
-            mode: 'lenses',
-            image: '/previews/xiangqi.webp',
-            alt: 'A wooden Xiangqi board with a Central Cannon opening and move tree',
-            kind: 'Xiangqi · Pikafish',
-            action: 'Explore the board',
-            hint: 'Take a closer look',
-            details: [
-                {
-                    label: 'Opening',
-                    title: 'The cannon takes the center',
-                    caption: 'A classic Xiangqi opening, ready to explore.',
-                    x: 28,
-                    y: 50,
-                    scale: 1.2,
-                },
-                {
-                    label: 'Notation',
-                    title: 'One move, two ways to read it',
-                    caption: 'C2=5 in traditional notation; h2e2 on the board.',
-                    image: '/previews/xiangqi-notation.webp',
-                },
-                {
-                    label: 'Book',
-                    title: 'Four replies to the cannon',
-                    caption: 'Explore the opening book before choosing Black’s reply.',
-                    image: '/previews/xiangqi-book.webp',
-                },
-            ],
-        },
+        meta: 'Chinese chess · Pikafish',
+        preview: { mode: 'xiangqi', hint: 'Across the river.', action: 'Play Xiangqi' },
     },
     {
         label: 'Web KaTrain',
@@ -601,35 +456,6 @@ export const projects: LinkItem[] = [
         colorDark: '#A78BFA',
         category: 'Projects',
         meta: 'Go / Weiqi study',
-        preview: {
-            mode: 'lenses',
-            image: '/previews/katrain.webp',
-            alt: 'Gu Li versus Lee Sedol at move 120, with a Go board and study tools',
-            kind: 'Go / Weiqi study',
-            action: 'Study a game',
-            hint: 'Inside a professional game',
-            details: [
-                {
-                    label: 'Game',
-                    title: 'Gu Li × Lee Sedol',
-                    caption: 'Move 120. Two great players, one very crowded board.',
-                    x: 20,
-                    y: 50,
-                    scale: 1.15,
-                },
-                {
-                    label: 'Variations',
-                    title: 'Follow the possibilities',
-                    caption: 'Move through the game tree to explore another sequence.',
-                    image: '/previews/go-tree.webp',
-                },
-                {
-                    label: 'Study',
-                    title: 'A little room to breathe',
-                    caption: 'A two-point jump is faster—but leaves room for invasion.',
-                    image: '/previews/go-study.webp',
-                },
-            ],
-        },
+        preview: { mode: 'go', hint: 'Room to think.', action: 'Explore Go' },
     },
 ]

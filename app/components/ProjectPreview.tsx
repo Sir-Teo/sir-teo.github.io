@@ -2,19 +2,29 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
+import ProjectIllustration from './ProjectIllustration'
+
+type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
+
+function Arrow() {
+    return (
+        <svg
+            viewBox="0 0 20 20"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            aria-hidden="true"
+        >
+            <path d="M5 15 15 5M5 5h10v10" />
+        </svg>
+    )
+}
 
 export default function ProjectPreview({ link, onClose }: { link: LinkItem; onClose: () => void }) {
     const preview = link.preview!
-    const [selected, setSelected] = useState(0)
     const [reducedMotion, setReducedMotion] = useState(true)
-    const [playIntent, setPlayIntent] = useState<boolean | null>(null)
-    const [playing, setPlaying] = useState(false)
-    const [mediaError, setMediaError] = useState(false)
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const detail = preview.details?.[selected]
-    const video = preview.videos?.[selected]
-    const shouldPlay = playIntent ?? !reducedMotion
-
     useEffect(() => {
         const query = window.matchMedia('(prefers-reduced-motion: reduce)')
         const update = () => setReducedMotion(query.matches)
@@ -22,6 +32,52 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
         query.addEventListener('change', update)
         return () => query.removeEventListener('change', update)
     }, [])
+
+    return (
+        <div
+            className={`project-preview project-preview-${preview.mode}`}
+            style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}
+        >
+            <header className="preview-header">
+                <h3>
+                    <span className="preview-title-dot" aria-hidden="true" />
+                    {link.label}
+                </h3>
+                <button
+                    type="button"
+                    className="preview-close"
+                    onClick={onClose}
+                    aria-label={`Close ${link.label} preview`}
+                >
+                    <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+                        <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                </button>
+            </header>
+            {preview.mode === 'videos' ? (
+                <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
+            ) : (
+                <ProjectIllustration scene={preview.mode} reducedMotion={reducedMotion} />
+            )}
+            <footer className="preview-footer">
+                <span>{preview.hint}</span>
+                <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {preview.action}
+                    <Arrow />
+                </a>
+            </footer>
+        </div>
+    )
+}
+
+function VideoGallery({ videos, reducedMotion }: { videos: Video[]; reducedMotion: boolean }) {
+    const [selected, setSelected] = useState(0)
+    const [playIntent, setPlayIntent] = useState<boolean | null>(null)
+    const [playing, setPlaying] = useState(false)
+    const [mediaError, setMediaError] = useState(false)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const video = videos[selected]
+    const shouldPlay = playIntent ?? !reducedMotion
 
     useEffect(() => {
         const element = videoRef.current
@@ -43,46 +99,14 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
         setSelected(index)
         setMediaError(false)
     }
-    const items = preview.videos?.map(item => item.topic) ?? preview.details?.map(item => item.label) ?? []
-    const destination = video ? `https://www.youtube.com/watch?v=${video.id}&t=${video.start}s` : link.href
+    if (!video) return null
 
     return (
-        <div className="project-preview" style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}>
-            <header className="preview-header">
-                <div>
-                    <h3>{link.label}</h3>
-                    <p>{preview.kind}</p>
-                </div>
-                <button
-                    type="button"
-                    className="preview-close"
-                    onClick={onClose}
-                    aria-label={`Close ${link.label} preview`}
-                >
-                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-                        <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                </button>
-            </header>
-            <div className={`preview-stage preview-stage-${preview.mode}`}>
-                {/* These are captures of the real projects. Only the selected clip loads. */}
+        <>
+            <div className="preview-film">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    className="preview-image"
-                    src={video?.image ?? detail?.image ?? preview.image}
-                    alt={video ? video.title : detail?.image ? `${link.label}: ${detail.title}` : preview.alt}
-                    width={840}
-                    height={525}
-                    style={
-                        preview.mode === 'lenses'
-                            ? {
-                                  transform: `scale(${detail?.scale ?? 1})`,
-                                  transformOrigin: `${detail?.x ?? 50}% ${detail?.y ?? 50}%`,
-                              }
-                            : undefined
-                    }
-                />
-                {video && !mediaError && (
+                <img src={video.image} alt={video.title} width={640} height={360} />
+                {!mediaError && (
                     <video
                         key={video.clip}
                         ref={videoRef}
@@ -92,7 +116,7 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
                         loop
                         playsInline
                         preload="metadata"
-                        aria-label={`Silent excerpt: ${video.title}`}
+                        aria-label={`Silent preview: ${video.title}`}
                         onPlay={() => setPlaying(true)}
                         onPause={() => setPlaying(false)}
                         onError={() => {
@@ -101,87 +125,64 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
                         }}
                     />
                 )}
-                {video && !mediaError && (
+                <span className="film-badge">SILENT PREVIEW</span>
+                {!mediaError && (
                     <button
                         type="button"
-                        className="preview-playback"
+                        className="film-playback"
                         onClick={() => setPlayIntent(!playing)}
-                        aria-label={playing ? 'Pause excerpt' : 'Play excerpt'}
+                        aria-label={playing ? 'Pause preview' : 'Play preview'}
                     >
-                        <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
-                        {playing ? 'Pause' : 'Play'}
+                        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor">
+                            {playing ? <path d="M4 3h3v10H4zm5 0h3v10H9z" /> : <path d="m5 2 8 6-8 6Z" />}
+                        </svg>
                     </button>
                 )}
-                {preview.mode === 'hotspots' &&
-                    preview.details?.map((point, index) => (
+            </div>
+            <ul className="preview-video-list" aria-label="Explainer videos">
+                {videos.map((item, index) => (
+                    <li key={item.id} data-selected={selected === index}>
                         <button
-                            key={point.label}
                             type="button"
-                            className="preview-hotspot"
-                            style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                            aria-label={`Explore ${point.label.toLowerCase()}`}
+                            className="video-preview-choice"
+                            aria-label={`Preview ${item.title}`}
                             aria-pressed={selected === index}
-                            onPointerEnter={() => choose(index)}
+                            onPointerEnter={event => {
+                                if (event.pointerType !== 'touch') choose(index)
+                            }}
                             onFocus={() => choose(index)}
                             onClick={() => choose(index)}
                         >
-                            <span aria-hidden="true">{index + 1}</span>
+                            <span className="video-thumbnail">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={item.image} alt="" width={80} height={45} />
+                                <span
+                                    className="video-playing-indicator"
+                                    data-playing={selected === index && playing}
+                                    aria-hidden="true"
+                                >
+                                    <i />
+                                    <i />
+                                    <i />
+                                </span>
+                            </span>
+                            <span className="video-row-text">
+                                <strong>{item.title}</strong>
+                                <span>{item.topic}</span>
+                            </span>
                         </button>
-                    ))}
-                {preview.mode === 'abilities' && (
-                    <span className="preview-scene-label">
-                        Ashe <span>the Frost Archer</span>
-                    </span>
-                )}
-                {preview.mode === 'lenses' && (
-                    <span className="preview-lens-label" aria-hidden="true">
-                        ⌕ {detail?.label}
-                    </span>
-                )}
-            </div>
-            <div className="preview-content">
-                <div className="preview-controls-heading">
-                    <span>{preview.hint}</span>
-                    <span className="preview-counter" aria-hidden="true">
-                        {String(selected + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-                    </span>
-                </div>
-                <div
-                    className={`preview-choices ${preview.mode === 'abilities' ? 'preview-keys' : ''}`}
-                    role="group"
-                    aria-label={preview.hint}
-                >
-                    {items.map((label, index) => (
-                        <button
-                            key={label}
-                            type="button"
-                            aria-pressed={selected === index}
-                            onPointerEnter={() => choose(index)}
-                            onFocus={() => choose(index)}
-                            onClick={() => choose(index)}
+                        <a
+                            href={`https://www.youtube.com/watch?v=${item.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="video-watch"
+                            aria-label={`Watch ${item.title} on YouTube`}
                         >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-                <div className="preview-caption" aria-live="polite" aria-atomic="true">
-                    <h4>{video?.title ?? detail?.title}</h4>
-                    <p>{video?.caption ?? detail?.caption}</p>
-                </div>
-            </div>
-            <footer className="preview-footer">
-                <span>
-                    {video
-                        ? 'From my explainers'
-                        : preview.mode === 'lenses'
-                        ? 'A look inside the app'
-                        : 'Made for the browser'}
-                </span>
-                <a href={destination} target="_blank" rel="noopener noreferrer">
-                    {preview.action}
-                    <span aria-hidden="true"> ↗</span>
-                </a>
-            </footer>
-        </div>
+                            <Arrow />
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </>
     )
 }

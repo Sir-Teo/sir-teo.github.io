@@ -253,7 +253,7 @@ function StatCard({
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                width: link.preview ? '26rem' : undefined,
+                width: link.preview ? (link.preview.mode === 'videos' ? '26rem' : '24rem') : undefined,
                 maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
                 visibility: position ? 'visible' : 'hidden',
             }}
