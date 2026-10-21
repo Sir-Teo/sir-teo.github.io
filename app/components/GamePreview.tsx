@@ -9,9 +9,12 @@ import {
     emptyInput,
     headline,
     HEIGHT,
+    nitro,
     pause,
+    project,
     start,
     step,
+    unproject,
     volley,
     WIDTH,
     type Game,
@@ -22,25 +25,28 @@ import {
 const sessions: Partial<Record<Mode, Game>> = {}
 const copy = {
     crown: {
-        name: 'Pocket raid',
-        title: 'Raid the village',
-        goal: 'Eight troops. Three stars. Your strategy.',
-        start: 'Try a raid',
-        hint: 'Tap the edge to deploy. Arrows + Enter work too.',
+        name: 'Village raid',
+        title: 'A little conquest.',
+        goal: 'Eight troops. One lightning spell.',
+        start: 'Raid',
+        hint: 'Choose a troop, then tap outside the walls.',
+        win: 'Three stars. All yours.',
     },
     rift: {
-        name: 'Volley practice',
-        title: 'Find your angle',
-        goal: 'Aim a frost volley. Clear six moving targets.',
-        start: 'Take aim',
-        hint: 'Drag & release to aim. W fires; ← → move.',
+        name: 'Skillshot lab',
+        title: 'Make a little magic.',
+        goal: 'Ashe or Lux. Aim. Cast. Repeat.',
+        start: 'Cast',
+        hint: 'Drag to aim, release to cast. Try both champions.',
+        win: 'That was a highlight reel.',
     },
     postcard: {
-        name: 'Sunset drive',
-        title: 'Back on Grove Street',
-        goal: 'Four checkpoints. Take the scenic route.',
-        start: 'Take the wheel',
-        hint: 'Hold the controls, or use arrows / WASD.',
+        name: 'Coast run',
+        title: 'One more sunset.',
+        goal: 'A short drive. A little too much nitro.',
+        start: 'Drive',
+        hint: 'Drag to steer. Arrows work too; Space boosts.',
+        win: 'See you at the coast.',
     },
 }
 
@@ -52,20 +58,20 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
     const canvas = useRef<HTMLCanvasElement>(null)
     const input = useRef<Input>(emptyInput())
     const engine = useRef({ refresh: () => {}, paint: () => {} })
-    const description = useId()
-    const text = copy[scene]
+    const description = useId(),
+        text = copy[scene]
 
     useEffect(() => {
-        const surface = canvas.current
-        const context = surface?.getContext('2d', { alpha: false })
+        const surface = canvas.current,
+            context = surface?.getContext('2d', { alpha: false })
         if (!surface || !context) {
             setSupported(false)
             return
         }
         let frame = 0,
             previous = 0,
-            lastUI = 0
-        let alive = true
+            lastUI = 0,
+            alive = true
         const paint = () => draw(context, game, reducedMotion)
         const tick = (time: number) => {
             frame = 0
@@ -95,10 +101,10 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
             }
         }
         const resize = () => {
-            const bounds = surface.getBoundingClientRect()
-            const density = Math.min(window.devicePixelRatio || 1, 2)
-            surface.width = Math.max(1, Math.round(bounds.width * density))
-            surface.height = Math.max(1, Math.round(bounds.height * density))
+            const r = surface.getBoundingClientRect(),
+                density = Math.min(window.devicePixelRatio || 1, 2)
+            surface.width = Math.max(1, Math.round(r.width * density))
+            surface.height = Math.max(1, Math.round(r.height * density))
             paint()
         }
         const suspend = () => {
@@ -153,36 +159,60 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
     }
     const place = () => {
         if (game.mode !== 'crown') return
+        const selected = game.selected
         if (deploy(game, game.cursor)) {
-            setNotice(`${game.selected === 'archer' ? 'Archer' : 'Barbarian'} deployed.`)
-            if (!game.army[game.selected]) game.selected = game.selected === 'archer' ? 'barbarian' : 'archer'
-        } else setNotice('Deploy in the grass outside the dotted border.')
+            setNotice(selected === 'spell' ? 'Lightning stuns defenses and damages buildings.' : '')
+            if (selected === 'spell' || !game.army[selected])
+                game.selected = game.army.barbarian ? 'barbarian' : game.army.archer ? 'archer' : 'spell'
+        } else
+            setNotice(
+                selected === 'spell' ? 'Aim the spell at a building.' : 'Deploy outside the walls, by the + marks.'
+            )
         refresh()
     }
     const aim = (event: PointerEvent<HTMLCanvasElement>) => {
         const r = event.currentTarget.getBoundingClientRect()
-        game.cursor = {
-            x: clamp(((event.clientX - r.left) / r.width) * WIDTH, 12, WIDTH - 12),
-            y: clamp(((event.clientY - r.top) / r.height) * HEIGHT, 12, HEIGHT - 12),
+        const p = { x: ((event.clientX - r.left) / r.width) * WIDTH, y: ((event.clientY - r.top) / r.height) * HEIGHT }
+        game.cursor =
+            game.mode === 'crown' ? unproject(p) : { x: clamp(p.x, 8, WIDTH - 8), y: clamp(p.y, 8, HEIGHT - 8) }
+        if (game.mode === 'crown' && game.selected === 'spell') {
+            // A finger lands on the roof/body, above the building's ground point.
+            const target = game.buildings
+                .filter(b => b.hp > 0)
+                .map(b => {
+                    const screen = project(b)
+                    return {
+                        building: b,
+                        gap: Math.hypot(screen.x - p.x, screen.y - (b.kind === 'hall' ? 27 : 13) - p.y),
+                    }
+                })
+                .sort((a, b) => a.gap - b.gap)[0]
+            if (target && target.gap < 37) game.cursor = { x: target.building.x, y: target.building.y }
         }
+        if (game.mode === 'postcard') game.target = clamp((p.x - WIDTH / 2) / (WIDTH * 0.4), -1, 1)
     }
     const pointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
-        if (game.phase !== 'running') return
+        if (game.phase !== 'running' || !event.isPrimary) return
         event.preventDefault()
         event.currentTarget.focus({ preventScroll: true })
         aim(event)
         if (game.mode === 'crown') place()
-        else if (game.mode === 'rift') {
+        else {
             event.currentTarget.setPointerCapture(event.pointerId)
-            game.aiming = true
+            if (game.mode === 'rift') game.aiming = true
             refresh()
         }
     }
-    const pointerUp = (event: PointerEvent<HTMLCanvasElement>) => {
-        if (game.mode !== 'rift' || !game.aiming) return
-        aim(event)
-        volley(game)
-        game.aiming = false
+    const release = (event: PointerEvent<HTMLCanvasElement>, cast = true) => {
+        if (!event.isPrimary) return
+        if (game.mode === 'rift' && game.aiming) {
+            if (cast) {
+                aim(event)
+                volley(game)
+            }
+            game.aiming = false
+        }
+        if (game.mode === 'postcard') game.target = null
         if (event.currentTarget.hasPointerCapture(event.pointerId))
             event.currentTarget.releasePointerCapture(event.pointerId)
         refresh()
@@ -202,27 +232,38 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
         )[key])
     const keyDown = (event: KeyboardEvent<HTMLCanvasElement>) => {
         if (game.phase !== 'running') return
-        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key
-        if (scene === 'crown' && direction(key)) {
+        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key,
+            dir = direction(key)
+        if (key === 'Escape') {
             event.preventDefault()
-            const dir = direction(key)
-            game.cursor.x = clamp(game.cursor.x + (dir === 'right' ? 16 : dir === 'left' ? -16 : 0), 12, 348)
-            game.cursor.y = clamp(game.cursor.y + (dir === 'down' ? 16 : dir === 'up' ? -16 : 0), 12, 248)
-            engine.current.paint()
-        } else if (
-            (scene === 'rift' && ['w', ' ', 'Enter'].includes(key)) ||
-            (scene === 'crown' && [' ', 'Enter'].includes(key))
-        ) {
+            stop()
+            return
+        }
+        if (game.mode === 'rift' && ['q', 'w', 'r', ' ', 'Enter'].includes(key)) {
             event.preventDefault()
-            if (event.repeat) return
-            if (game.mode === 'crown') place()
-            else if (game.mode === 'rift') {
+            if (!event.repeat) {
+                if (key === 'r') game.ability = 'ultimate'
+                else if (key === 'q' || key === 'w') game.ability = 'basic'
                 volley(game)
                 refresh()
             }
-        } else if (direction(key)) {
+        } else if (game.mode === 'postcard' && [' ', 'Enter', 'w', 'ArrowUp'].includes(key)) {
             event.preventDefault()
-            input.current[direction(key)!] = true
+            if (!event.repeat) {
+                nitro(game)
+                refresh()
+            }
+        } else if ((game.mode === 'crown' || (game.mode === 'rift' && key.startsWith('Arrow'))) && dir) {
+            event.preventDefault()
+            game.cursor.x = clamp(game.cursor.x + (dir === 'right' ? 16 : dir === 'left' ? -16 : 0), 12, 348)
+            game.cursor.y = clamp(game.cursor.y + (dir === 'down' ? 16 : dir === 'up' ? -16 : 0), 12, 268)
+            engine.current.paint()
+        } else if (game.mode === 'crown' && [' ', 'Enter'].includes(key)) {
+            event.preventDefault()
+            if (!event.repeat) place()
+        } else if (dir) {
+            event.preventDefault()
+            input.current[dir] = true
         }
     }
     const control = (dir: keyof Input, label: string, glyph: string) => (
@@ -231,17 +272,16 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
             className="mini-control"
             aria-label={label}
             disabled={game.phase !== 'running'}
-            onPointerDown={event => {
+            onPointerDown={e => {
                 if (game.phase !== 'running') return
-                event.preventDefault()
-                event.currentTarget.setPointerCapture(event.pointerId)
+                e.preventDefault()
+                e.currentTarget.setPointerCapture(e.pointerId)
                 input.current[dir] = true
                 refresh()
             }}
-            onPointerUp={event => {
+            onPointerUp={e => {
                 input.current[dir] = false
-                if (event.currentTarget.hasPointerCapture(event.pointerId))
-                    event.currentTarget.releasePointerCapture(event.pointerId)
+                if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
                 refresh()
             }}
             onPointerCancel={() => {
@@ -252,9 +292,9 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
                 input.current[dir] = false
                 refresh()
             }}
-            onKeyDown={event => {
-                if (event.key === ' ' || event.key === 'Enter') {
-                    event.preventDefault()
+            onKeyDown={e => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault()
                     input.current[dir] = true
                     refresh()
                 }
@@ -273,84 +313,58 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
             <small>{label}</small>
         </button>
     )
-
+    const running = game.phase === 'running'
     return (
         <div
             className={`mini-game mini-game-${scene}`}
-            onBlur={event => {
-                if (!event.currentTarget.contains(event.relatedTarget as Node)) stop()
+            data-phase={game.phase}
+            onBlur={e => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) stop()
             }}
         >
-            <div className="mini-toolbar">
-                <span>
-                    <i />
-                    {text.name}
-                </span>
-                <div>
-                    <button
-                        type="button"
-                        onClick={stop}
-                        disabled={game.phase !== 'running'}
-                        aria-label={`Pause ${text.name}`}
-                    >
-                        Ⅱ Pause
-                    </button>
-                    <button
-                        type="button"
-                        onClick={reset}
-                        disabled={game.phase === 'ready' || !supported}
-                        aria-label={`Restart ${text.name}`}
-                    >
-                        ↶ Reset
-                    </button>
-                </div>
-            </div>
             <div className="mini-stage">
                 <canvas
                     ref={canvas}
-                    tabIndex={game.phase === 'running' ? 0 : -1}
+                    tabIndex={running ? 0 : -1}
                     role="application"
                     aria-label={`${text.name} playable scene`}
                     aria-describedby={description}
                     onKeyDown={keyDown}
-                    onKeyUp={event => {
-                        const dir = direction(event.key.length === 1 ? event.key.toLowerCase() : event.key)
+                    onKeyUp={e => {
+                        const dir = direction(e.key.length === 1 ? e.key.toLowerCase() : e.key)
                         if (dir) {
-                            event.preventDefault()
+                            e.preventDefault()
                             input.current[dir] = false
                         }
                     }}
                     onPointerDown={pointerDown}
-                    onPointerMove={event => {
-                        if (game.phase !== 'running') return
-                        if (event.pointerType !== 'touch' || (game.mode === 'rift' && game.aiming)) {
-                            aim(event)
+                    onPointerMove={e => {
+                        if (!running || !e.isPrimary) return
+                        if (
+                            game.mode === 'postcard'
+                                ? e.currentTarget.hasPointerCapture(e.pointerId)
+                                : e.pointerType !== 'touch' || (game.mode === 'rift' && game.aiming)
+                        ) {
+                            aim(e)
                             engine.current.paint()
                         }
                     }}
-                    onPointerUp={pointerUp}
-                    onPointerCancel={() => {
-                        if (game.mode === 'rift') game.aiming = false
-                        input.current = emptyInput()
-                        refresh()
-                    }}
-                    onLostPointerCapture={() => {
-                        if (game.mode === 'rift') game.aiming = false
-                        engine.current.paint()
-                    }}
+                    onPointerUp={e => release(e)}
+                    onPointerCancel={e => release(e, false)}
+                    onLostPointerCapture={e => release(e, false)}
                 >
                     Use the full game link below if canvas is unavailable.
                 </canvas>
-                {(game.phase !== 'running' || !supported) && (
-                    <div className="mini-overlay">
+                {(!running || !supported) && (
+                    <div className="mini-overlay" data-ready={game.phase === 'ready'}>
                         <div>
                             <span className="mini-eyebrow">
                                 {game.phase === 'ready'
-                                    ? 'A LITTLE PLAY BREAK'
+                                    ? text.name
                                     : game.phase === 'paused'
-                                    ? 'TAKE YOUR TIME'
+                                    ? 'PAUSED'
                                     : game.phase === 'won'
-                                    ? 'NICELY DONE'
+                                    ? 'NICELY PLAYED'
                                     : 'ONE MORE TRY'}
                             </span>
                             <strong>
@@ -359,59 +373,71 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
                                     : game.phase === 'ready'
                                     ? text.title
                                     : game.phase === 'paused'
-                                    ? 'Right where you left off.'
+                                    ? 'Pick up where you left off.'
                                     : game.phase === 'won'
-                                    ? scene === 'crown'
-                                        ? 'A three-star raid.'
-                                        : scene === 'rift'
-                                        ? 'Six down. Ice cold.'
-                                        : 'Home before dark.'
-                                    : 'Try a different approach.'}
+                                    ? text.win
+                                    : 'A different strategy?'}
                             </strong>
-                            <p>{game.phase === 'ready' ? text.goal : headline(game)}</p>
-                            {supported && (
-                                <button type="button" className="mini-start" onClick={play}>
-                                    {game.phase === 'ready'
-                                        ? text.start
-                                        : game.phase === 'paused'
-                                        ? 'Resume'
-                                        : 'Play again'}{' '}
-                                    <span aria-hidden="true">↗</span>
-                                </button>
-                            )}
+                            <p>
+                                {game.phase === 'ready'
+                                    ? text.goal
+                                    : game.mode === 'postcard' && game.phase === 'won'
+                                    ? `${game.overtakes} overtakes · ${game.near} close calls`
+                                    : headline(game)}
+                            </p>
                         </div>
+                        {supported && (
+                            <button type="button" className="mini-start" onClick={play}>
+                                {game.phase === 'ready' ? text.start : game.phase === 'paused' ? 'Resume' : 'Replay'}{' '}
+                                <span aria-hidden="true">↗</span>
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
-            <div className="mini-score">
-                <output aria-live="polite">{headline(game)}</output>
-                <span>
-                    {game.phase === 'paused'
-                        ? 'Paused'
-                        : game.phase === 'won'
-                        ? 'Complete'
-                        : game.phase === 'lost'
-                        ? 'Try again'
-                        : game.mode === 'rift'
-                        ? game.cooldown > 0
-                            ? 'Recharging…'
-                            : 'Volley ready'
-                        : game.mode === 'postcard'
-                        ? `${Math.round(Math.abs(game.car.speed) * 0.7)} km/h`
-                        : game.army.barbarian + game.army.archer
-                        ? 'Choose your troops'
-                        : 'Raid in progress'}
-                </span>
+            <div className="mini-toolbar">
+                <div className="mini-score">
+                    <output aria-live={game.mode === 'postcard' ? 'off' : 'polite'}>{headline(game)}</output>
+                    <span>
+                        {game.mode === 'postcard'
+                            ? `${Math.round(game.car.speed)} km/h · ${game.overtakes} passes`
+                            : game.mode === 'rift'
+                            ? game.champion === 'ashe'
+                                ? 'FROST & FOCUS'
+                                : 'A LITTLE BRILLIANCE'
+                            : `${game.army.barbarian + game.army.archer} troops · ${game.spells} spell`}
+                    </span>
+                </div>
+                <div className="mini-tools">
+                    <button
+                        type="button"
+                        onClick={running ? stop : play}
+                        disabled={game.phase === 'ready' || !supported}
+                        aria-label={`${
+                            running ? 'Pause' : game.phase === 'won' || game.phase === 'lost' ? 'Replay' : 'Resume'
+                        } ${text.name}`}
+                    >
+                        {running ? 'Ⅱ' : '▷'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={reset}
+                        disabled={game.phase === 'ready' || !supported}
+                        aria-label={`Restart ${text.name}`}
+                    >
+                        ↶
+                    </button>
+                </div>
             </div>
             <div className="mini-controls" role="group" aria-label={`${text.name} controls`}>
                 {game.mode === 'crown' ? (
                     <>
-                        {(['barbarian', 'archer'] as const).map(kind => (
+                        {(['barbarian', 'archer', 'spell'] as const).map(kind => (
                             <button
                                 type="button"
                                 key={kind}
                                 aria-pressed={game.selected === kind}
-                                disabled={!game.army[kind] || game.phase !== 'running'}
+                                disabled={!running || !(kind === 'spell' ? game.spells : game.army[kind])}
                                 onClick={() => {
                                     game.selected = kind
                                     setNotice('')
@@ -419,41 +445,111 @@ export default function GamePreview({ scene, reducedMotion }: { scene: Mode; red
                                 }}
                             >
                                 <span className={`mini-unit mini-unit-${kind}`} aria-hidden="true">
-                                    {kind === 'archer' ? '➶' : '⚔'}
+                                    {kind === 'archer' ? '➶' : kind === 'spell' ? 'ϟ' : '⚔'}
                                 </span>
-                                <span>{kind === 'archer' ? 'Archers' : 'Barbarians'}</span>
-                                <b>{game.army[kind]}</b>
+                                <span>
+                                    {kind === 'archer' ? 'Archers' : kind === 'spell' ? 'Lightning' : 'Barbs'}
+                                    <small>×{kind === 'spell' ? game.spells : game.army[kind]}</small>
+                                </span>
                             </button>
                         ))}
                     </>
                 ) : game.mode === 'rift' ? (
                     <>
-                        {control('left', 'Move left', '←')}
-                        <button
-                            type="button"
-                            className="mini-volley"
-                            disabled={game.phase !== 'running'}
-                            aria-disabled={game.cooldown > 0}
-                            onClick={() => {
-                                volley(game)
-                                refresh()
-                            }}
-                        >
-                            <span aria-hidden="true">↟</span> W · Volley
-                        </button>
-                        {control('right', 'Move right', '→')}
+                        <div className="mini-champions" role="group" aria-label="Champion">
+                            {(['ashe', 'lux'] as const).map(hero => (
+                                <button
+                                    type="button"
+                                    key={hero}
+                                    aria-pressed={game.champion === hero}
+                                    disabled={!running}
+                                    onClick={() => {
+                                        game.champion = hero
+                                        game.arrows = []
+                                        game.ability = 'basic'
+                                        game.minions.forEach(m => (m.frozen = 0))
+                                        refresh()
+                                    }}
+                                >
+                                    {hero === 'ashe' ? 'Ashe' : 'Lux'}
+                                </button>
+                            ))}
+                        </div>
+                        {(['basic', 'ultimate'] as const).map(ability => {
+                            const remaining = ability === 'basic' ? game.cooldown : game.ultimateCooldown
+                            const name =
+                                ability === 'ultimate'
+                                    ? game.champion === 'ashe'
+                                        ? 'Crystal'
+                                        : 'Spark'
+                                    : game.champion === 'ashe'
+                                    ? 'Volley'
+                                    : 'Binding'
+                            return (
+                                <button
+                                    type="button"
+                                    key={ability}
+                                    className="mini-ability"
+                                    aria-label={`Cast ${name}`}
+                                    aria-pressed={game.ability === ability}
+                                    disabled={!running}
+                                    aria-disabled={remaining > 0}
+                                    onClick={() => {
+                                        game.ability = ability
+                                        volley(game)
+                                        refresh()
+                                    }}
+                                >
+                                    <b>
+                                        {remaining > 0
+                                            ? remaining.toFixed(1)
+                                            : ability === 'ultimate'
+                                            ? 'R'
+                                            : game.champion === 'ashe'
+                                            ? 'W'
+                                            : 'Q'}
+                                    </b>
+                                    <span>{name}</span>
+                                </button>
+                            )
+                        })}
                     </>
                 ) : (
                     <>
                         {control('left', 'Steer left', '←')}
-                        {control('up', 'Gas', '↑')}
-                        {control('down', 'Reverse', '↓')}
+                        <button
+                            type="button"
+                            className="mini-boost"
+                            aria-label="Nitro boost"
+                            disabled={!running}
+                            aria-disabled={game.fuel < 0.98}
+                            onClick={() => {
+                                nitro(game)
+                                refresh()
+                            }}
+                        >
+                            <span aria-hidden="true">ϟ</span>
+                            <span>
+                                {game.boost > 0 ? 'BOOSTING' : 'NITRO'}
+                                <small>{game.fuel < 0.98 ? `${Math.round(game.fuel * 100)}%` : 'READY'}</small>
+                            </span>
+                            <i style={{ width: `${game.fuel * 100}%` }} />
+                        </button>
                         {control('right', 'Steer right', '→')}
                     </>
                 )}
             </div>
             <p id={description} className="mini-instruction">
                 {notice || text.hint}
+                {scene === 'crown' && (
+                    <span className="sr-only"> Use arrow keys to position, and Enter to deploy.</span>
+                )}
+                {scene === 'rift' && (
+                    <span className="sr-only">
+                        {' '}
+                        Arrow keys aim; A and D move; W or Q casts the basic ability; R casts the ultimate.
+                    </span>
+                )}
             </p>
         </div>
     )

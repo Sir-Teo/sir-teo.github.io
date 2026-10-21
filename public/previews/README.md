@@ -1,20 +1,20 @@
 # Project hover previews
 
-The pills open anchored cards with lightweight interactions and links to the full projects. Keyboard focus and touch are supported. Cards stay within the viewport; game canvases also shrink for short landscape screens.
+The pills open anchored cards with lightweight interactions and links to the full projects. Keyboard focus and touch are supported. Cards stay within the viewport. Portrait layouts stack the scene and controls; short landscape screens use a wider card with the scene beside the controls.
 
 ## Playable game scenes
 
 `app/components/GamePreview.tsx` and `app/lib/game-previews/` implement original, self-contained 2D mini-games inspired by each project's core interaction. They do not embed the full games or import their code, artwork, audio, engines, or saved games.
 
-- **Crown & Clan — Pocket raid:** deploy four barbarians and four archers along the village edge. Units choose targets, move into range and attack; cannons return fire. Destroy the village for three stars. Touch/click places troops; arrows move the deployment cursor and Enter deploys.
-- **Summoner’s Rift — Volley practice:** drag and release to aim a seven-arrow frost volley at moving minions. Projectiles have collision, one hit per target per volley, a cooldown and respawning targets. Clear six targets. W fires; left/right arrows or held touch buttons move the archer.
-- **San Andreas — Sunset drive:** accelerate, steer and reverse a car through four ordered checkpoints. Road/grass speed, inertia and building collisions are simulated. Arrows/WASD or simultaneous held touch controls drive.
+- **Crown & Clan — Village raid:** an isometric village with raised buildings, depth-sorted troops, arcing projectiles and destructible defenses. Deploy four barbarians and four archers outside the walls. A targeted lightning spell damages nearby buildings and stuns cannons. Visual coordinates are inverse-projected for placement; spell targeting also accepts a tap on the visible roof. Arrows move the placement cursor; Enter deploys.
+- **Summoner’s Rift — Skillshot lab:** switch between Ashe's frost volleys/crystal arrow and Lux's binding/final spark. Drag and release to aim and cast the selected ability, with real projectile collisions, freezing/rooting, separate cooldowns and eight takedowns to finish. Arrow keys aim, A/D move, W/Q casts the basic skill and R casts the ultimate. Switching champions preserves shared cooldowns and clears in-flight projectiles.
+- **San Andreas — Coast run:** a perspective highway through palms and a Los Santos sunset. Drag or hold arrow controls to steer; acceleration is automatic. Dodge traffic, earn overtakes/close calls and use regenerating nitro (Space or the button). Down/S brakes. A 600 m route ends with the overtake and near-miss totals. Collisions reduce speed; roadside driving also slows the car.
 
-All graphics are drawn with Canvas 2D, without external assets or new dependencies. A single optional chunk contains all three scenes; it is fetched only when a game card opens. The board-analysis component is separately lazy-loaded. Replacing the previous SVG illustrations also removes their unused styles and animations.
+All graphics are drawn with Canvas 2D, without external assets or new dependencies. A single optional chunk contains all three scenes; it is fetched only when a game card opens. The board-analysis component is separately lazy-loaded. No additional media downloads are required.
 
-The October 21 build measured about **8 KB gzip** for all three scenes. Initial page scripts decreased from about **213 KB to 188 KB gzip**. These are local compression measurements, not a claim about a particular CDN transfer. `npm run build` enforces a **12 KiB gzip / 32 KiB raw** game-chunk budget and checks that the chunk is absent from the initial HTML's script list. Recheck with `npm run check:preview-size` after building.
+The October 21 build measured about **11 KiB gzip** for all three scenes. Initial page scripts decreased from about **213 KB to 188 KB gzip**. These are local compression measurements, not a claim about a particular CDN transfer. `npm run build` enforces a **12 KiB gzip / 32 KiB raw** game-chunk budget and checks that the chunk is absent from the initial HTML's script list. Recheck with `npm run check:preview-size` after building.
 
-Simulation starts only after Play. It draws at up to 30 fps, caps pixel density at 2× and bounds troops, projectiles and effects. HUD updates are throttled separately. Close, focus leaving the game, page hiding and window blur pause it and release held input. Reopening retains the current session, paused; Resume is explicit. No storage or background timers are needed. Reduced motion removes decorative hit effects; user-started gameplay remains functional.
+Simulation starts only after Play. It draws at up to 30 fps, caps pixel density at 2× and bounds troops, projectiles and effects. HUD updates are throttled separately. Close, focus leaving the game, page hiding and window blur pause it and release held input. Reopening retains the current session, paused; Resume is explicit. No storage or background timers are needed. Reduced motion removes decorative movement, nitro flames, and hit effects; user-started gameplay remains functional.
 
 ## Board games
 

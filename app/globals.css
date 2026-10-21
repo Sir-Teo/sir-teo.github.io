@@ -195,60 +195,23 @@ html {
     font-size: 11px;
     color: var(--preview-muted);
 }
+/* Each game is a little scene; controls share the site's quiet pill language. */
 .mini-game {
-    --game-accent: #567352;
-    --game-paper: #edf1e5;
+    --game-accent: #57774a;
+    --game-paper: #ecedda;
 }
 .mini-game-rift {
-    --game-accent: #367c90;
-    --game-paper: #e8f2f4;
+    --game-accent: #397c95;
+    --game-paper: #e4f2f7;
 }
 .mini-game-postcard {
-    --game-accent: #847052;
-    --game-paper: #f3ede3;
-}
-.mini-toolbar,
-.mini-score {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    color: var(--preview-muted);
-    padding: 0 14px 7px;
-    font-size: 10px;
-}
-.mini-toolbar > span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.mini-toolbar i {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--game-accent);
-}
-.mini-toolbar > div {
-    display: flex;
-    gap: 3px;
-}
-.mini-toolbar button {
-    padding: 7px 5px;
-    border-radius: 5px;
-    font-size: 10px;
-}
-.mini-toolbar button:hover {
-    background: var(--preview-soft);
-}
-.mini-game button:disabled,
-.mini-game button[aria-disabled='true'] {
-    opacity: 0.4;
-    cursor: default;
+    --game-accent: #9f6861;
+    --game-paper: #f6e6de;
 }
 .mini-stage {
     position: relative;
-    width: min(100%, max(180px, calc((100dvh - 230px) * 1.3846)));
-    aspect-ratio: 18 / 13;
+    width: min(100%, max(170px, calc((100dvh - 214px) * 1.2857)));
+    aspect-ratio: 9 / 7;
     margin: auto;
     overflow: hidden;
     background: var(--game-paper);
@@ -267,66 +230,107 @@ html {
 .mini-overlay {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 18px;
+    color: #fff9e9;
+    background: linear-gradient(transparent 20%, #162c3d18 40%, #162c3de8);
+}
+.mini-overlay[data-ready='false'] {
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
-    background: #17382d1f;
-    padding: 12px;
+    background: #122937b8;
+    backdrop-filter: blur(2px);
 }
 .mini-overlay > div {
-    width: min(100%, 270px);
-    border-radius: 12px;
-    padding: 19px 13px 15px;
-    color: #29443d;
-    background: #faf9f0f0;
-    box-shadow: 0 5px 25px #17382d1f;
-    backdrop-filter: blur(5px);
+    min-width: 0;
 }
 .mini-eyebrow {
     display: block;
-    font: 7px ui-monospace, monospace;
+    font: 8px ui-monospace, monospace;
     letter-spacing: 1.7px;
-    color: #6c7c68;
-    margin-bottom: 9px;
+    text-transform: uppercase;
+    color: #e6d6ae;
+    margin-bottom: 8px;
 }
 .mini-overlay strong {
     display: block;
-    font: italic 23px/1.1 Georgia, serif;
+    font: italic 25px/1.05 Georgia, serif;
     letter-spacing: -0.6px;
+    max-width: 210px;
 }
 .mini-overlay p {
     font-size: 10px;
-    margin: 9px 0 13px;
-    color: #617364;
+    line-height: 1.4;
+    margin: 9px 0 0;
+    color: #e8e2cf;
+    max-width: 180px;
 }
 .mini-start {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    min-height: 40px;
-    padding: 9px 16px;
-    background: #294b40;
-    color: #fbf8e9;
-    border-radius: 7px;
+    gap: 13px;
+    min-height: 44px;
+    padding: 10px 13px;
+    background: #fff6dc;
+    color: #2c4942;
+    border-radius: 24px;
     font-size: 11px;
-}
-.mini-game-rift .mini-start {
-    background: #245363;
-}
-.mini-game-postcard .mini-start {
-    background: #766445;
+    font-weight: 600;
+    flex-shrink: 0;
 }
 .mini-start:hover {
-    filter: brightness(1.15);
+    background: white;
+    transform: translateY(-1px);
+}
+.mini-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 3px 12px;
+    min-height: 49px;
 }
 .mini-score {
-    font: 9px ui-monospace, monospace;
-    padding-top: 10px;
-    padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font: 10px ui-monospace, monospace;
 }
 .mini-score output {
     color: var(--preview-text);
+}
+.mini-score > span {
+    color: var(--preview-muted);
+    font-size: 8px;
+    letter-spacing: 0.3px;
+}
+.mini-tools {
+    display: flex;
+}
+.mini-tools button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--preview-muted);
+    border-radius: 50%;
+    font-size: 16px;
+}
+.mini-tools button:hover {
+    background: var(--preview-soft);
+    color: var(--preview-text);
+}
+.mini-game button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.mini-game button[aria-disabled='true'] {
+    opacity: 0.6;
 }
 .mini-controls {
     display: flex;
@@ -334,10 +338,11 @@ html {
     padding: 0 12px;
 }
 .mini-controls button {
+    position: relative;
     min-width: 0;
-    min-height: 44px;
+    min-height: 46px;
     flex: 1;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--preview-line);
     background: var(--preview-soft);
     color: var(--preview-text);
@@ -357,75 +362,189 @@ html {
     border-color: var(--game-accent);
     box-shadow: inset 0 0 0 1px var(--game-accent);
 }
-.mini-controls b {
-    font: 10px ui-monospace, monospace;
-    margin-left: auto;
-    padding-right: 11px;
+.mini-controls small {
+    display: block;
+    margin-top: 3px;
+    font: 8px ui-monospace, monospace;
+    color: var(--preview-muted);
 }
 .mini-unit {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
-    font-size: 17px;
-    background: #e5d59d;
-    color: #796141;
-    margin-left: 6px;
+    width: 23px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 21px;
+    color: #9c7937;
 }
 .mini-unit-archer {
-    background: #e0cfe0;
-    color: #78547d;
+    color: #9b6e9d;
+}
+.mini-unit-spell {
+    color: #8f7ab9;
+    font-size: 29px;
+}
+.mini-champions {
+    display: flex;
+    gap: 2px;
+    flex: 1.4;
+}
+.mini-champions button {
+    font-size: 10px;
+}
+.mini-champions button:first-child {
+    border-radius: 10px 3px 3px 10px;
+}
+.mini-champions button:last-child {
+    border-radius: 3px 10px 10px 3px;
+}
+.mini-controls .mini-ability {
+    gap: 5px;
+}
+.mini-ability b {
+    display: grid;
+    place-items: center;
+    min-width: 21px;
+    height: 25px;
+    font: 11px ui-monospace, monospace;
+    color: var(--game-accent);
 }
 .mini-controls .mini-control {
     flex-direction: column;
-    gap: 1px;
+    gap: 0;
 }
 .mini-control > span {
-    font-size: 16px;
+    font-size: 19px;
     line-height: 19px;
 }
-.mini-control small {
-    font-size: 8px;
+.mini-controls .mini-boost {
+    flex: 1.5;
+    overflow: hidden;
 }
-.mini-controls .mini-volley {
-    flex: 1.6;
+.mini-boost > span:first-child {
+    font-size: 28px;
+    color: #bb8b51;
 }
-.mini-volley > span {
-    color: var(--game-accent);
-    font-size: 23px;
+.mini-boost > i {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #c7a26b;
 }
 .mini-instruction {
     margin: 8px 12px 0;
-    min-height: 22px;
+    min-height: 16px;
     font-size: 9px;
     line-height: 1.4;
     color: var(--preview-muted);
     text-align: center;
 }
-@media (max-height: 450px) {
-    .mini-toolbar {
-        padding-bottom: 2px;
+.mini-game + .preview-footer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.project-preview-crown .preview-close,
+.project-preview-rift .preview-close,
+.project-preview-postcard .preview-close {
+    width: 44px;
+    height: 44px;
+}
+@media (max-width: 380px) {
+    .mini-controls {
+        padding: 0 8px;
+        gap: 4px;
     }
-    .mini-overlay > div {
-        padding: 12px;
+    .mini-controls button {
+        font-size: 9px;
+        gap: 3px;
+    }
+    .mini-overlay {
+        padding: 14px;
     }
     .mini-overlay strong {
-        font-size: 19px;
+        font-size: 22px;
     }
     .mini-overlay p {
-        margin: 6px 0 9px;
+        font-size: 9px;
     }
+    .mini-unit {
+        width: 20px;
+    }
+    .mini-ability b {
+        min-width: 16px;
+    }
+}
+@media (max-height: 450px) {
+    .mini-stage {
+        width: min(100%, max(148px, calc((100dvh - 254px) * 1.2857)));
+    }
+    .mini-overlay {
+        padding: 10px;
+    }
+    .mini-overlay strong {
+        font-size: 18px;
+    }
+    .mini-overlay[data-ready='true'] p,
     .mini-eyebrow {
         display: none;
     }
+    .mini-start {
+        padding: 8px 10px;
+        gap: 5px;
+    }
+    .mini-toolbar {
+        min-height: 44px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
     .mini-instruction {
         margin-top: 5px;
-        min-height: 15px;
     }
     .mini-game + .preview-footer {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+}
+
+@media (max-height: 450px) and (min-width: 520px) {
+    [data-preview='crown'],
+    [data-preview='rift'],
+    [data-preview='postcard'] {
+        --game-preview-width: 34rem;
+    }
+    .mini-game {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        column-gap: 6px;
+        align-items: center;
+    }
+    .mini-stage {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 100%;
+    }
+    .mini-toolbar {
+        grid-column: 2;
+        align-self: end;
+        padding: 4px 8px;
+    }
+    .mini-controls {
+        grid-column: 2;
+        padding: 0 8px;
+        gap: 4px;
+    }
+    .mini-controls button {
+        font-size: 9px;
+        gap: 3px;
+    }
+    .mini-champions {
+        flex: 0 0 90px;
+    }
+    .mini-instruction {
+        grid-column: 2;
+        align-self: start;
+        margin: 8px;
     }
 }
 
