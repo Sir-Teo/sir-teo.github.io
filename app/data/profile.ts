@@ -436,7 +436,7 @@ export const projects: LinkItem[] = [
         color: '#81B64C',
         category: 'Projects',
         meta: 'Chess · Stockfish',
-        preview: { mode: 'chess', hint: 'An unexpected move.', action: 'Play chess' },
+        preview: { mode: 'chess', hint: 'Stockfish · in your browser', action: 'Play & analyze' },
     },
     {
         label: 'Web Xiangqi',
@@ -446,7 +446,7 @@ export const projects: LinkItem[] = [
         colorDark: '#F87171',
         category: 'Projects',
         meta: 'Chinese chess · Pikafish',
-        preview: { mode: 'xiangqi', hint: 'Across the river.', action: 'Play Xiangqi' },
+        preview: { mode: 'xiangqi', hint: 'Pikafish · in your browser', action: 'Play & analyze' },
     },
     {
         label: 'Web KaTrain',
@@ -455,7 +455,7 @@ export const projects: LinkItem[] = [
         color: '#7C3AED',
         colorDark: '#A78BFA',
         category: 'Projects',
-        meta: 'Go / Weiqi study',
-        preview: { mode: 'go', hint: 'Room to think.', action: 'Explore Go' },
+        meta: 'Go / Weiqi · play and analyze',
+        preview: { mode: 'go', hint: 'Neural Go · in your browser', action: 'Play & analyze' },
     },
 ]

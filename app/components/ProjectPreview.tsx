@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
 import ProjectIllustration from './ProjectIllustration'
+import StudyPreview from './StudyPreview'
 
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
 
@@ -56,6 +57,8 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             </header>
             {preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
+            ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
+                <StudyPreview scene={preview.mode} reducedMotion={reducedMotion} />
             ) : (
                 <ProjectIllustration scene={preview.mode} reducedMotion={reducedMotion} />
             )}
