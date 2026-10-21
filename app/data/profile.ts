@@ -417,7 +417,7 @@ export const projects: LinkItem[] = [
         colorDark: '#E4BF72',
         category: 'Projects',
         meta: 'Browser MOBA',
-        preview: { mode: 'rift', hint: 'A little spellcraft', action: 'Open full game' },
+        preview: { mode: 'rift', hint: 'Ashe · Lux · Browser practice', action: 'Open full game' },
     },
     {
         label: 'San Andreas',

@@ -5,7 +5,7 @@ import type { LinkItem } from '../data/profile'
 import dynamic from 'next/dynamic'
 
 const GamePreview = dynamic(() => import('./GamePreview'), {
-    loading: () => <div className="preview-loading">Opening the play space…</div>,
+    loading: () => <div className="preview-loading">Opening the preview…</div>,
 })
 const StudyPreview = dynamic(() => import('./StudyPreview'), {
     loading: () => <div className="preview-loading">Opening the board…</div>,
@@ -29,7 +29,15 @@ function Arrow() {
     )
 }
 
-export default function ProjectPreview({ link, onClose }: { link: LinkItem; onClose: () => void }) {
+export default function ProjectPreview({
+    link,
+    onClose,
+    onPlayGame,
+}: {
+    link: LinkItem
+    onClose: () => void
+    onPlayGame: () => void
+}) {
     const preview = link.preview!
     const [reducedMotion, setReducedMotion] = useState(true)
     useEffect(() => {
@@ -66,7 +74,7 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
                 <StudyPreview scene={preview.mode} />
             ) : (
-                <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
+                <GamePreview key={preview.mode} scene={preview.mode} onPlay={onPlayGame} />
             )}
             <footer className="preview-footer">
                 <span>{preview.hint}</span>
