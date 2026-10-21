@@ -26,6 +26,13 @@ export type LinkItem = {
     meta?: string // short subtitle (handle / id) shown in the hover card
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
+    preview?: {
+        image: string // locally hosted, compressed screenshot or original video thumbnail
+        alt: string
+        kind: string
+        action: string
+        status?: string
+    }
     stats?: LinkStat[] // optional metrics revealed on hover/focus
     statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
 }
@@ -358,6 +365,12 @@ export const projects: LinkItem[] = [
         description:
             'Visual deep dives into math, physics, machine learning and markets. Follow animated derivations and worked examples, built entirely from code.',
         tags: ['Math & physics', 'AI & ML', 'English & 中文'],
+        preview: {
+            image: '/previews/explainers.webp',
+            alt: 'An original Analysis, Built video thumbnail illustrating distributions and the Fourier transform',
+            kind: 'Animated explainers',
+            action: 'Watch on YouTube',
+        },
     },
     {
         label: 'Crown & Clan',
@@ -369,6 +382,12 @@ export const projects: LinkItem[] = [
         description:
             'Build a village, train an army, and raid campaign maps. Upgrade your base and replay battles, with progress saved in your browser.',
         tags: ['Build a village', 'Campaign raids', 'Battle replays'],
+        preview: {
+            image: '/previews/crown-clan.webp',
+            alt: 'An isometric village with a town hall, defenses, resource collectors and an army camp',
+            kind: 'Village-building strategy',
+            action: 'Build your village',
+        },
     },
     {
         label: 'Summoner’s Rift',
@@ -381,6 +400,13 @@ export const projects: LinkItem[] = [
         description:
             'Practice with Ashe or Lux, then play a lane match alongside bots. Fight through minion waves and towers on a recreation of Summoner’s Rift.',
         tags: ['Ashe & Lux', 'Practice mode', 'Lane matches'],
+        preview: {
+            image: '/previews/summoners-rift.webp',
+            alt: 'Ashe at the blue fountain on the 3D Summoner’s Rift battlefield',
+            kind: 'Browser MOBA',
+            action: 'Enter the Rift',
+            status: 'In progress',
+        },
     },
     {
         label: 'San Andreas',
@@ -393,6 +419,13 @@ export const projects: LinkItem[] = [
         description:
             'Explore San Andreas from Grove Street. Walk, drive, and fly through a continuous world that streams as you travel, right in your browser.',
         tags: ['Open world', 'Driving & flying', 'Grove Street'],
+        preview: {
+            image: '/previews/san-andreas.webp',
+            alt: 'Palm-lined Los Santos streets rendered in the browser recreation of San Andreas',
+            kind: 'Open-world recreation',
+            action: 'Explore San Andreas',
+            status: 'In progress',
+        },
     },
     {
         label: 'Web Chess',
@@ -404,6 +437,12 @@ export const projects: LinkItem[] = [
         description:
             'Play against Stockfish, import games, and review your moves with engine analysis. Explore alternative lines or pick up a saved game.',
         tags: ['Play the engine', 'Import games', 'Move review'],
+        preview: {
+            image: '/previews/chess.webp',
+            alt: 'A Queen’s Gambit position with move arrows and Stockfish analysis',
+            kind: 'Chess · Stockfish',
+            action: 'Open the chessboard',
+        },
     },
     {
         label: 'Web Xiangqi',
@@ -416,6 +455,12 @@ export const projects: LinkItem[] = [
         description:
             'Review annotated Xiangqi games, compare candidate moves, and play on from any position. Pikafish analysis helps you explore what could happen next.',
         tags: ['Chinese chess', 'Move comparisons', 'Game library'],
+        preview: {
+            image: '/previews/xiangqi.webp',
+            alt: 'A wooden Xiangqi board showing the Central Cannon opening and its move tree',
+            kind: 'Xiangqi · Pikafish',
+            action: 'Explore the board',
+        },
     },
     {
         label: 'Web KaTrain',
@@ -428,5 +473,11 @@ export const projects: LinkItem[] = [
         description:
             'Study Go with neural-network analysis, move-quality reviews, and ownership maps. Play against the engine or revisit mistakes from a game.',
         tags: ['Game analysis', 'Ownership maps', 'Practice mistakes'],
+        preview: {
+            image: '/previews/katrain.webp',
+            alt: 'Move 120 of Gu Li versus Lee Sedol, with a populated Go board and study tools',
+            kind: 'Go / Weiqi study',
+            action: 'Study a game',
+        },
     },
 ]

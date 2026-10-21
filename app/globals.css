@@ -13,8 +13,7 @@ html {
    removes itself; no theme state involved. */
 .eclipse-overlay {
     pointer-events: none;
-    background:
-        radial-gradient(circle at calc(100% - 2.1rem) 2.1rem, rgba(129, 140, 248, 0.3) 0, transparent 14rem),
+    background: radial-gradient(circle at calc(100% - 2.1rem) 2.1rem, rgba(129, 140, 248, 0.3) 0, transparent 14rem),
         radial-gradient(circle at 50% 40%, #1e1b4b 0%, #0b0a1f 100%);
     opacity: 0;
     animation: eclipse-dim 2.6s ease-in-out forwards;
@@ -88,4 +87,38 @@ html {
 .avatar-ring {
     display: inline-flex;
     border-radius: 9999px;
+}
+
+.project-preview {
+    max-height: calc(100dvh - 2.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 transparent;
+}
+
+.project-preview-image {
+    height: clamp(140px, 28dvh, 260px);
+}
+
+.project-preview-copy {
+    background-image: radial-gradient(
+        ellipse at top right,
+        color-mix(in srgb, var(--preview-accent) 9%, transparent),
+        transparent 75%
+    );
+}
+
+.project-preview-icon {
+    background-color: color-mix(in srgb, var(--preview-accent) 12%, transparent);
+}
+
+.project-preview-dot {
+    background-color: var(--preview-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .project-preview * {
+        transition: none;
+    }
 }

@@ -1,18 +1,22 @@
 'use client'
 import {
     forwardRef,
+    useCallback,
     useEffect,
     useId,
     useLayoutEffect,
     useRef,
     useState,
     type CSSProperties,
+    type Dispatch,
     type FocusEvent,
     type RefCallback,
     type RefObject,
+    type SetStateAction,
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
+import ProjectPreview from './ProjectPreview'
 import useProfileStats from './useProfileStats'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
@@ -44,6 +48,7 @@ function useCanHover() {
 }
 
 export default function Links() {
+    const [activeCard, setActiveCard] = useState<string | null>(null)
     const [termOpen, setTermOpen] = useState(false)
     const [termLoaded, setTermLoaded] = useState(false)
     const termChipRef = useRef<HTMLButtonElement>(null)
@@ -80,7 +85,7 @@ export default function Links() {
                             <ul className="flex flex-wrap gap-2">
                                 {items.map(link => (
                                     <li key={link.label}>
-                                        <LinkChip link={link} />
+                                        <LinkChip link={link} activeCard={activeCard} setActiveCard={setActiveCard} />
                                     </li>
                                 ))}
                             </ul>
@@ -179,20 +184,20 @@ type TooltipPosition = {
     top: number
 }
 
-// Hover/focus card with profile stats or a project introduction and feature tags.
-// The card is reachable: the pointer can travel from the chip onto it without
-// dismissing it, and clicking it does exactly what clicking the chip does, so no
-// extra affordance is needed.
+// Profile stats stay compact; projects get a larger, image-led linked preview.
+// Padding bridges the pointer's path from the chip to the visible surface.
 function StatCard({
     link,
     triggerRef,
     id,
     onActivate,
+    onClose,
 }: {
     link: LinkItem
     triggerRef: RefObject<HTMLElement | null>
     id: string
     onActivate?: () => void
+    onClose?: () => void
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -210,8 +215,7 @@ function StatCard({
             const margin = 12
             const availableWidth = Math.max(0, window.innerWidth - margin * 2)
             const cardWidth = Math.min(cardRect.width || 240, availableWidth)
-            // Includes the `py-2` stand-off, so the visible surface still sits 8px
-            // clear of the chip while the box itself touches it.
+            // Includes the padding that bridges the gap between chip and card.
             const cardHeight = cardRect.height || 120
             const preferredTop = triggerRect.top - cardHeight
             const opensAbove = preferredTop >= margin
@@ -226,11 +230,14 @@ function StatCard({
 
         updatePosition()
         const frame = window.requestAnimationFrame(updatePosition)
+        const observer = new ResizeObserver(updatePosition)
+        if (cardRef.current) observer.observe(cardRef.current)
         window.addEventListener('resize', updatePosition)
         window.addEventListener('scroll', updatePosition, true)
 
         return () => {
             window.cancelAnimationFrame(frame)
+            observer.disconnect()
             window.removeEventListener('resize', updatePosition)
             window.removeEventListener('scroll', updatePosition, true)
         }
@@ -240,94 +247,112 @@ function StatCard({
         <div
             id={id}
             ref={cardRef}
-            role="tooltip"
+            role={link.preview ? 'dialog' : 'tooltip'}
+            aria-label={link.preview ? `${link.label} preview` : undefined}
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                maxWidth: 'min(16rem, calc(100vw - 1.5rem))',
+                width: link.preview ? '26rem' : undefined,
+                maxWidth: `min(${link.preview ? '26rem' : '16rem'}, calc(100vw - 1.5rem))`,
                 visibility: position ? 'visible' : 'hidden',
             }}
             // py-2 keeps the visible surface clear of the chip while leaving the box
             // flush against it, so crossing the gap never counts as leaving.
-            className={`fixed z-50 py-2 transition duration-150 ease-out ${
+            className={`fixed z-50 py-2 motion-safe:transition motion-safe:duration-150 motion-safe:ease-out ${
                 position ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
             }`}
         >
-            <div
-                onClick={
-                    onActivate &&
-                    (() => {
-                        // Let people select a UID or handle without navigating away.
-                        if (window.getSelection()?.toString()) return
-                        onActivate()
-                    })
-                }
-                className={`${
-                    link.description ? 'w-64' : 'w-max min-w-40'
-                } max-w-full rounded-lg bg-white/95 p-3 text-left shadow-lg ring-1 ring-slate-200 backdrop-blur dark:bg-slate-800/95 dark:ring-slate-700 ${
-                    onActivate ? 'cursor-pointer' : ''
-                }`}
-            >
-                <div className="flex items-center gap-2">
-                    <IconMask link={link} className="h-3.5 w-3.5" />
-                    <span className="min-w-0 break-words text-sm font-medium text-slate-800 dark:text-slate-100">
-                        {link.label}
-                    </span>
-                </div>
-                {link.meta && (
-                    <p className="mt-0.5 break-words text-xs text-slate-500 dark:text-slate-400">{link.meta}</p>
-                )}
-                {link.description && (
-                    <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                        {link.description}
-                    </p>
-                )}
-                {link.tags && link.tags.length > 0 && (
-                    <ul aria-label="Project features" className="mt-2.5 flex flex-wrap gap-1.5">
-                        {link.tags.map(tag => (
-                            <li
-                                key={tag}
-                                className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] leading-relaxed text-slate-600 dark:bg-slate-700/70 dark:text-slate-300"
-                            >
-                                {tag}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                {stats && stats.length > 0 && (
-                    <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
-                        {stats.map(stat => (
-                            <div key={stat.label} className="flex min-w-0 flex-col">
-                                <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                    {stat.label}
-                                </dt>
-                                <dd className="break-words text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">
-                                    {stat.value}
-                                </dd>
-                            </div>
-                        ))}
-                    </dl>
-                )}
-                {stats && stats.length > 0 && (
-                    <p className="mt-2 border-t border-slate-100 pt-2 text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                        <span
-                            className="inline-flex items-center gap-1.5"
-                            title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}
-                        >
-                            {current && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                            {freshness}
+            {link.preview ? (
+                <ProjectPreview link={link} onClose={onClose ?? (() => {})} />
+            ) : (
+                <div
+                    onClick={
+                        onActivate &&
+                        (() => {
+                            // Let people select a UID or handle without navigating away.
+                            if (window.getSelection()?.toString()) return
+                            onActivate()
+                        })
+                    }
+                    className={`${
+                        link.description ? 'w-64' : 'w-max min-w-40'
+                    } max-w-full rounded-lg bg-white/95 p-3 text-left shadow-lg ring-1 ring-slate-200 backdrop-blur dark:bg-slate-800/95 dark:ring-slate-700 ${
+                        onActivate ? 'cursor-pointer' : ''
+                    }`}
+                >
+                    <div className="flex items-center gap-2">
+                        <IconMask link={link} className="h-3.5 w-3.5" />
+                        <span className="min-w-0 break-words text-sm font-medium text-slate-800 dark:text-slate-100">
+                            {link.label}
                         </span>
-                        {unavailable && <span className="block">Refresh unavailable</span>}
-                    </p>
-                )}
-            </div>
+                    </div>
+                    {link.meta && (
+                        <p className="mt-0.5 break-words text-xs text-slate-500 dark:text-slate-400">{link.meta}</p>
+                    )}
+                    {link.description && (
+                        <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                            {link.description}
+                        </p>
+                    )}
+                    {link.tags && link.tags.length > 0 && (
+                        <ul aria-label="Project features" className="mt-2.5 flex flex-wrap gap-1.5">
+                            {link.tags.map(tag => (
+                                <li
+                                    key={tag}
+                                    className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] leading-relaxed text-slate-600 dark:bg-slate-700/70 dark:text-slate-300"
+                                >
+                                    {tag}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    {stats && stats.length > 0 && (
+                        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                            {stats.map(stat => (
+                                <div key={stat.label} className="flex min-w-0 flex-col">
+                                    <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                        {stat.label}
+                                    </dt>
+                                    <dd className="break-words text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+                                        {stat.value}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    )}
+                    {stats && stats.length > 0 && (
+                        <p className="mt-2 border-t border-slate-100 pt-2 text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                            <span
+                                className="inline-flex items-center gap-1.5"
+                                title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}
+                            >
+                                {current && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                                {freshness}
+                            </span>
+                            {unavailable && <span className="block">Refresh unavailable</span>}
+                        </p>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
 
-function LinkChip({ link }: { link: LinkItem }) {
+function LinkChip({
+    link,
+    activeCard,
+    setActiveCard,
+}: {
+    link: LinkItem
+    activeCard: string | null
+    setActiveCard: Dispatch<SetStateAction<string | null>>
+}) {
     const [qrOpen, setQrOpen] = useState(false)
-    const [cardOpen, setCardOpen] = useState(false)
+    const cardOpen = activeCard === link.label
+    const setCardOpen = useCallback(
+        (open: boolean) => setActiveCard(current => (open ? link.label : current === link.label ? null : current)),
+        [link.label, setActiveCard]
+    )
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'showing'>('idle')
     const qrPopoverId = useId()
     const statCardId = useId()
@@ -338,6 +363,12 @@ function LinkChip({ link }: { link: LinkItem }) {
     const canHover = useCanHover()
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
     const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
+    const closeCard = () => {
+        // Focus first: its focus handler runs before the explicit dismissal.
+        // This returns keyboard users from the card without reopening it.
+        triggerRef.current?.focus({ preventScroll: true })
+        setCardOpen(false)
+    }
     const setTriggerRef: RefCallback<HTMLElement> = node => {
         triggerRef.current = node
     }
@@ -345,13 +376,17 @@ function LinkChip({ link }: { link: LinkItem }) {
     // are tap-to-open (handled in onClick below), closed by an outside tap / Escape.
     const triggerCardProps = showCard
         ? {
-              'aria-describedby': cardOpen ? statCardId : undefined,
+              'aria-describedby': !link.preview && cardOpen ? statCardId : undefined,
+              'aria-haspopup': link.preview ? ('dialog' as const) : undefined,
+              'aria-expanded': link.preview ? cardOpen : undefined,
+              'aria-controls': link.preview && cardOpen ? statCardId : undefined,
               onFocus: (event: FocusEvent<HTMLElement>) => {
                   // Pointer focus on a phone precedes click: let the first tap open
                   // the preview, while keyboard focus still reveals it immediately.
                   if (canHover || event.currentTarget.matches(':focus-visible')) setCardOpen(true)
               },
               onBlur: (event: FocusEvent<HTMLElement>) => {
+                  if (wrapRef.current?.contains(event.relatedTarget as Node)) return
                   // A tap on the preview itself has no focusable related target.
                   // Keep it mounted long enough for its click to follow the link.
                   if (canHover || event.relatedTarget) setCardOpen(false)
@@ -379,15 +414,19 @@ function LinkChip({ link }: { link: LinkItem }) {
             if (!wrapRef.current?.contains(event.target as Node)) setCardOpen(false)
         }
         const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setCardOpen(false)
+            if (event.key !== 'Escape') return
+            if (link.preview && wrapRef.current?.contains(document.activeElement)) {
+                triggerRef.current?.focus({ preventScroll: true })
+            }
+            setCardOpen(false)
         }
-        if (!canHover) document.addEventListener('pointerdown', closeOnOutsidePress)
+        if (!canHover || link.preview) document.addEventListener('pointerdown', closeOnOutsidePress)
         document.addEventListener('keydown', closeOnEscape)
         return () => {
             document.removeEventListener('pointerdown', closeOnOutsidePress)
             document.removeEventListener('keydown', closeOnEscape)
         }
-    }, [canHover, cardOpen])
+    }, [canHover, cardOpen, link.preview, setCardOpen])
 
     useEffect(() => {
         if (!qrOpen || !link.qrcode) return
@@ -473,7 +512,16 @@ function LinkChip({ link }: { link: LinkItem }) {
     }
 
     return (
-        <div ref={wrapRef} className="relative inline-block" {...wrapHoverProps}>
+        <div
+            ref={wrapRef}
+            className="relative inline-block"
+            {...wrapHoverProps}
+            onBlur={event => {
+                if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) {
+                    setCardOpen(false)
+                }
+            }}
+        >
             <a
                 ref={setTriggerRef}
                 href={link.href}
@@ -498,6 +546,7 @@ function LinkChip({ link }: { link: LinkItem }) {
                     triggerRef={triggerRef}
                     link={link}
                     onActivate={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
+                    onClose={closeCard}
                 />
             )}
         </div>
