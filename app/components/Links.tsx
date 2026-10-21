@@ -16,7 +16,7 @@ import {
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
-import ProjectPreview from './ProjectPreview'
+import ProjectPreview, { type ProjectWindowSize } from './ProjectPreview'
 import useProfileStats from './useProfileStats'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
@@ -190,7 +190,7 @@ type TooltipPosition = {
     top: number
 }
 
-// Profile stats stay compact; projects get a small interactive playground.
+// Profile stats stay compact; projects open the actual application in an expandable window.
 // Padding bridges the pointer's path from the chip to the visible surface.
 function StatCard({
     link,
@@ -209,6 +209,8 @@ function StatCard({
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
+    const [previewSize, setPreviewSize] = useState<ProjectWindowSize>('peek')
+    const previewWidth = previewSize === 'wide' ? '70rem' : previewSize === 'open' ? '50rem' : '30rem'
     const { stats: refreshedStats, freshness, checkedAt, current, unavailable } = useProfileStats(link.statsId)
     const stats = refreshedStats ?? link.stats
 
@@ -233,7 +235,7 @@ function StatCard({
             const centeredLeft = triggerRect.left + triggerRect.width / 2 - cardWidth / 2
             const left = Math.min(Math.max(centeredLeft, margin), window.innerWidth - cardWidth - margin)
 
-            // A pinned playground stays reachable even if its pill scrolls offscreen.
+            // A pinned project stays reachable even if its pill scrolls offscreen.
             setPosition({ left, top: Math.max(margin, Math.min(top, window.innerHeight - cardHeight - margin)) })
         }
 
@@ -261,8 +263,8 @@ function StatCard({
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                width: link.preview ? '26rem' : undefined,
-                maxWidth: `min(${link.preview ? '26rem' : '16rem'}, calc(100vw - 1.5rem))`,
+                width: link.preview ? previewWidth : undefined,
+                maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
                 visibility: position ? 'visible' : 'hidden',
             }}
             // py-2 keeps the visible surface clear of the chip while leaving the box
@@ -272,7 +274,13 @@ function StatCard({
             }`}
         >
             {link.preview ? (
-                <ProjectPreview link={link} onClose={onClose ?? (() => {})} onInteract={onInteract ?? (() => {})} />
+                <ProjectPreview
+                    link={link}
+                    size={previewSize}
+                    onSizeChange={setPreviewSize}
+                    onClose={onClose ?? (() => {})}
+                    onInteract={onInteract ?? (() => {})}
+                />
             ) : (
                 <div
                     onClick={

@@ -1,38 +1,81 @@
-import dynamic from 'next/dynamic'
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
 
-// Load the demos only when someone opens a project.
-const ProjectDemo = dynamic(() => import('./projectDemos'), {
-    ssr: false,
-    loading: () => (
-        <div className="mini-loading" role="status">
-            Opening the playground…
-        </div>
-    ),
-})
+export type ProjectWindowSize = 'peek' | 'open' | 'wide'
 
 export default function ProjectPreview({
     link,
+    size,
+    onSizeChange,
     onClose,
     onInteract,
 }: {
     link: LinkItem
+    size: ProjectWindowSize
+    onSizeChange: (size: ProjectWindowSize) => void
     onClose: () => void
     onInteract: () => void
 }) {
-    const [round, setRound] = useState(0)
+    const [running, setRunning] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [slowLoad, setSlowLoad] = useState(false)
+    const [canIsolate, setCanIsolate] = useState(false)
+    const [videoIndex, setVideoIndex] = useState(0)
+    const launchRef = useRef<HTMLButtonElement>(null)
     const preview = link.preview
+
+    useEffect(() => {
+        setCanIsolate('credentialless' in HTMLIFrameElement.prototype)
+    }, [])
+
+    useEffect(() => {
+        if (!loading) return
+        const timer = window.setTimeout(() => setSlowLoad(true), 15000)
+        return () => window.clearTimeout(timer)
+    }, [loading])
+
     if (!preview || !link.href) return null
+    const video = preview.videos?.[videoIndex]
+    const source = video
+        ? `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&playsinline=1&rel=0`
+        : preview.embedUrl
+    const canEmbed = Boolean(source && (video || canIsolate))
+    const fullUrl = video ? `https://www.youtube.com/watch?v=${video.id}` : link.href
+    const launch = () => {
+        onInteract()
+        setLoading(true)
+        setSlowLoad(false)
+        setRunning(true)
+        onSizeChange('open')
+    }
+    const back = () => {
+        setRunning(false)
+        setLoading(false)
+        setSlowLoad(false)
+        onSizeChange('peek')
+        window.requestAnimationFrame(() => launchRef.current?.focus({ preventScroll: true }))
+    }
+    const selectVideo = (index: number) => {
+        onInteract()
+        setVideoIndex(index)
+        if (running) {
+            setLoading(true)
+            setSlowLoad(false)
+        }
+    }
+
     return (
         <div
             className="project-preview relative isolate rounded-2xl bg-white text-left shadow-2xl ring-1 ring-slate-900/10 dark:bg-slate-900 dark:ring-white/15"
+            data-size={size}
             style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}
+            onPointerDownCapture={onInteract}
+            onKeyDownCapture={onInteract}
         >
-            <div className="mini-window-bar">
+            <div className="project-window-bar">
                 <span
                     aria-hidden
-                    className="link-icon h-3.5 w-3.5"
+                    className="link-icon h-3.5 w-3.5 shrink-0"
                     style={
                         {
                             '--ic': link.color,
@@ -43,37 +86,108 @@ export default function ProjectPreview({
                     }
                 />
                 <h3>{link.label}</h3>
-                <span className="mini-window-tag">mini playground</span>
+                {running ? (
+                    <button
+                        type="button"
+                        className="project-window-control"
+                        onClick={() => onSizeChange(size === 'wide' ? 'open' : 'wide')}
+                        aria-label={`${size === 'wide' ? 'Compact' : 'Expand'} ${link.label} window`}
+                    >
+                        <span aria-hidden>{size === 'wide' ? '↙' : '↗'}</span>
+                        <span>{size === 'wide' ? 'Compact' : 'Expand'}</span>
+                    </button>
+                ) : (
+                    <span className="project-window-kind">{preview.kind}</span>
+                )}
                 <button
                     type="button"
-                    className="mini-close"
+                    className="project-window-close"
                     onClick={onClose}
                     aria-label={`Close ${link.label} preview`}
                 >
                     ×
                 </button>
             </div>
-            <div onPointerDownCapture={onInteract} onKeyDownCapture={onInteract}>
-                <ProjectDemo id={preview.demo} key={round} />
-                <div className="mini-window-footer">
-                    <button
-                        type="button"
-                        className="mini-reset"
-                        onClick={() => setRound(r => r + 1)}
-                        aria-label={`Reset ${link.label} playground`}
-                    >
-                        <span aria-hidden>↻</span> Reset
-                    </button>
-                    <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${preview.action} — ${link.label} (opens in a new tab)`}
-                    >
-                        {preview.demo === 'fourier' ? 'Watch on YouTube' : 'Open full project'}{' '}
-                        <span aria-hidden>↗</span>
-                    </a>
+            {running && source ? (
+                <div className={`project-frame-stage ${video ? 'project-frame-video' : ''}`}>
+                    <iframe
+                        key={source}
+                        src={source}
+                        title={video ? video.title : `${link.label} — interactive preview`}
+                        // Set at creation, before navigation. Unsupported browsers use the
+                        // full-project link instead so previews never share saved-game storage.
+                        {...{ credentialless: true }}
+                        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
+                        allow="autoplay; fullscreen; gamepad; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        onLoad={() => setLoading(false)}
+                    />
+                    {loading && (
+                        <div className="project-frame-loading" role="status">
+                            <span className="project-loading-dot" aria-hidden />
+                            {slowLoad
+                                ? 'Still loading. You can also open the full project below.'
+                                : `Opening ${link.label}…`}
+                        </div>
+                    )}
                 </div>
+            ) : (
+                <div className={`project-cover ${video ? 'project-cover-video' : ''}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={video?.image ?? preview.image}
+                        alt={video?.title ?? preview.alt}
+                        width={840}
+                        height={525}
+                    />
+                    <div className="project-cover-action">
+                        {canEmbed ? (
+                            <button ref={launchRef} type="button" className="project-launch" onClick={launch}>
+                                <span aria-hidden>{video ? '▶' : '↗'}</span>
+                                {preview.launchLabel}
+                            </button>
+                        ) : (
+                            <a className="project-launch" href={fullUrl} target="_blank" rel="noopener noreferrer">
+                                Open project <span aria-hidden>↗</span>
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
+            {preview.videos && video && (
+                <div className="project-video-picker">
+                    <div className="project-video-title">
+                        <span>{String(videoIndex + 1).padStart(2, '0')}</span>
+                        <p>{video.title}</p>
+                    </div>
+                    <div className="project-video-options" aria-label="Choose an explainer video">
+                        {preview.videos.map((item, index) => (
+                            <button
+                                key={item.id}
+                                type="button"
+                                aria-label={`Select ${item.title}`}
+                                aria-pressed={index === videoIndex}
+                                onClick={() => selectVideo(index)}
+                            >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={item.image} alt="" width={160} height={90} />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+            <div className="project-window-footer">
+                {running ? (
+                    <button type="button" onClick={back}>
+                        <span aria-hidden>←</span> Back to preview
+                    </button>
+                ) : (
+                    <span>{video ? 'Visual explainers' : 'Try it here'}</span>
+                )}
+                <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+                    {video ? 'Watch on YouTube' : 'Open full project'} <span aria-hidden>↗</span>
+                </a>
             </div>
         </div>
     )
