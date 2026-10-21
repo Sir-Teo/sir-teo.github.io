@@ -434,3 +434,66 @@ li[data-selected='true'] .video-playing-indicator {
         transform: none;
     }
 }
+
+/* One recorded game, with the blog's engine analysis, in each board preview. */
+.recorded-review { padding: 0 14px; }
+.review-layout { display: grid; gap: 10px; }
+.review-stage { min-width: 0; }
+.review-game-title { margin: 0 0 7px; font-size: 10px; color: var(--preview-muted); }
+.review-board { display: block; width: min(100%, 252px); margin: 0 auto; border-radius: 6px; }
+.review-board-xiangqi { width: min(100%, 230px); }
+.review-xiangqi-piece { font: 600 .56px 'Songti SC', 'SimSun', serif; text-anchor: middle; dominant-baseline: middle; }
+.review-river { font: .31px 'Songti SC', serif; text-anchor: middle; dominant-baseline: middle; }
+.review-go-number { font: 600 .36px system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+.review-arrows { color: #168977; pointer-events: none; }
+.review-inspector { min-width: 0; }
+.review-move, .review-evaluation { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.review-move { min-height: 22px; font-size: 12px; }
+.review-move strong { font-weight: 600; }
+.review-move > span { flex-shrink: 0; font-size: 9px; color: #3d8a69; }
+.review-move > span[data-quality='Mistake'], .review-move > span[data-quality='Blunder'] { color: #d76b60; }
+.review-move > span[data-quality='Inaccuracy'], .review-move > span[data-quality='Slight loss'] { color: #b88a38; }
+.review-evaluation { min-height: 25px; font-size: 10px; }
+.review-evaluation strong { font-weight: 500; }
+.review-evaluation > span { color: var(--preview-muted); font-size: 9px; }
+.review-graph { position: relative; height: 44px; margin: 3px 0; border-radius: 5px; background: var(--preview-soft); }
+.review-graph svg, .review-graph input { position: absolute; inset: 0; width: 100%; height: 100%; }
+.review-graph svg { overflow: visible; fill: var(--preview-accent); }
+.review-curve { fill: none; stroke: var(--preview-accent); stroke-width: 1.5; }
+.review-zero { stroke: var(--preview-line); stroke-width: 1; }
+.review-cursor { stroke: var(--preview-text); stroke-width: 1; opacity: .45; }
+.review-graph input { opacity: 0; cursor: ew-resize; margin: 0; }
+.review-graph:focus-within { outline: 2px solid var(--preview-accent); outline-offset: 2px; }
+.review-transport { display: flex; align-items: center; gap: 2px; }
+.review-transport button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 7px; }
+.review-transport button:hover:not(:disabled) { background: var(--preview-soft); }
+.review-transport button:disabled { opacity: .25; }
+.review-transport > span { margin-left: auto; font-size: 10px; color: var(--preview-muted); font-variant-numeric: tabular-nums; }
+.review-lines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.review-lines button { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px 4px; min-height: 44px; padding: 5px 7px; border: 1px solid var(--preview-line); border-radius: 7px; text-align: left; font-size: 11px; }
+.review-lines button strong { font-weight: 500; }
+.review-lines button span { font-size: 9px; color: var(--preview-muted); font-variant-numeric: tabular-nums; }
+.review-lines button[aria-pressed='true'] { background: var(--preview-soft); border-color: var(--preview-accent); }
+.review-continuation { min-height: 17px; margin-top: 7px; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.review-source { font-size: 9px; color: var(--preview-muted); margin-top: 2px; }
+.review-end { grid-column: 1 / -1; display: grid; place-items: center; min-height: 44px; font-size: 10px; color: var(--preview-muted); }
+.project-preview-chess .preview-close, .project-preview-xiangqi .preview-close, .project-preview-go .preview-close { width: 44px; height: 44px; }
+.recorded-review + .preview-footer { padding-top: 3px; padding-bottom: 3px; }
+.recorded-review + .preview-footer a { min-height: 44px; }
+@media (min-width: 760px) {
+    [data-preview='chess'], [data-preview='xiangqi'], [data-preview='go'] { --review-preview-width: 36rem; }
+    .review-layout { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); gap: 16px; align-items: center; }
+}
+@media (max-height: 560px) and (min-width: 520px) {
+    [data-preview='chess'], [data-preview='xiangqi'], [data-preview='go'] { --review-preview-width: 36rem; }
+    .review-layout { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); gap: 16px; align-items: center; }
+    .review-board { width: min(100%, 218px); }
+    .review-board-xiangqi { width: min(100%, 196px); }
+    .review-game-title { margin-bottom: 4px; }
+    .recorded-review { padding: 0 12px; }
+    .project-preview-chess .preview-header, .project-preview-xiangqi .preview-header, .project-preview-go .preview-header { padding-top: 0; padding-bottom: 0; }
+}
+@media (max-height: 380px) and (min-width: 520px) {
+    .review-board { width: min(100%, 190px); }
+    .review-board-xiangqi { width: min(100%, 171px); }
+}

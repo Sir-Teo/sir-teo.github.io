@@ -16,11 +16,19 @@ Only the open card mounts its clip. Closing unmounts and pauses it; hidden tabs 
 
 The three clips and posters total approximately **716 KiB**. `npm run build` checks a lazy game-film chunk capped at **4 KiB gzip / 8 KiB raw**, **600 KiB per clip / 50 KiB per poster / 1600 KiB combined**, and absence of game films and their UI chunk from the initial HTML. Replaced screenshot assets have been removed.
 
-## Board games
+## Single-game board reviews
 
-Web Chess, Web Xiangqi and Web KaTrain use the same compact info card as Blog: icon, title, a short play-and-analyze subtitle, and two static details (engine and browser analysis). Hover, keyboard focus and touch follow the standard link behavior; the pill or card opens the full project.
+Each board pill opens one complete game from the blog's interactive review figures:
 
-These cards do not load boards, workers, models or game rules. The old analysis preview components, vendored engines, sync script and preview-only chess dependency have been removed. The full apps still provide their own play and analysis tools.
+- **Chess:** Club vs Intermediate, 57 half-moves, recorded Stockfish 18 Lite analysis at depth 16. Opens on 19…Kf8, the game's blunder.
+- **Xiangqi:** Easy vs Medium, 100 half-moves, recorded Pikafish analysis at depth 16. Opens on the largest winning-chance loss.
+- **Go:** the blog's 9×9 self-play game, 72 moves, 200-visit neural/MCTS analysis with the small bundled model. Opens on move 37, explicitly labeled as a planted slip. These are demonstration-model estimates.
+
+Use previous/play/next, keyboard arrows, or the draggable evaluation curve to navigate. Hover, focus or tap one of three candidate lines to see its first two arrows (chess/xiangqi) or up to four numbered stones (Go). The board stays at the recorded game position; these markings preview continuations. State is retained across incidental hover closures. Replay is opt-in, pauses when the tab hides, and stops on unmount. Desktop and short landscape cards place controls beside the board; phone cards stack them.
+
+Evaluations and candidate lines come from the apps' actual offline engine runs already used by the blog. They are labeled as recorded analysis, not fresh searches. Scores identify the favored color (W/B/R in candidate chips). The curve uses the blog's White/Red winning-chance formula for chess/xiangqi and Black's neural win estimate for Go. No engine, rules library, model, or iframe is loaded by these previews. The full apps remain available through **Open app**.
+
+`ReviewPreview.tsx` loads only the selected game's JSON. The three records plus the blog's Cburnett chess pieces total about **144 KiB**, with a roughly **3.2 KiB gzip** UI chunk. Build checks cap the UI at 8 KiB gzip, each record at 80 KiB, and total review assets at 160 KiB, all excluded from initial loading. `scripts/sync-review-previews.mjs [path/to/blogs]` regenerates the checked-in records from the sibling blog's data and notation/score helpers; normal builds do not require that repository. Each record includes its source path and SHA-256. See [reviews/README.md](reviews/README.md) for provenance.
 
 ## Explainers
 

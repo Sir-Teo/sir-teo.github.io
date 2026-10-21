@@ -203,7 +203,6 @@ function StatCard({
     const [position, setPosition] = useState<TooltipPosition | null>(null)
     const { stats: refreshedStats, freshness, checkedAt, current, unavailable } = useProfileStats(link.statsId)
     const stats = refreshedStats ?? link.stats
-    const details = stats ?? link.details
 
     useLayoutEffect(() => {
         const updatePosition = () => {
@@ -255,7 +254,13 @@ function StatCard({
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                width: link.preview ? (link.preview.mode === 'videos' ? '26rem' : '24rem') : undefined,
+                width: link.preview
+                    ? link.preview.mode === 'videos'
+                        ? '26rem'
+                        : ['chess', 'xiangqi', 'go'].includes(link.preview.mode)
+                        ? 'var(--review-preview-width, 22rem)'
+                        : '24rem'
+                    : undefined,
                 maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
                 visibility: position ? 'visible' : 'hidden',
             }}
@@ -309,9 +314,9 @@ function StatCard({
                             ))}
                         </ul>
                     )}
-                    {details && details.length > 0 && (
+                    {stats && stats.length > 0 && (
                         <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
-                            {details.map(stat => (
+                            {stats.map(stat => (
                                 <div key={stat.label} className="flex min-w-0 flex-col">
                                     <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                         {stat.label}
@@ -375,8 +380,7 @@ function LinkChip({
         enterTimerRef.current = null
     }
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
-    const showCard =
-        !link.qrcode && Boolean(link.meta || link.description || link.stats?.length || link.details?.length)
+    const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
     const closeCard = () => {
         cancelEnter()
         cancelLeave()

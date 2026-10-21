@@ -15,8 +15,10 @@ async function javascript(directory) {
 }
 const files = await javascript(resolve(root, '_next/static/chunks'))
 const games = []
+const reviews = []
 for (const path of files) {
     const source = await readFile(path)
+    if (source.includes('recorded-review')) reviews.push({ path, bytes: source.length, gzip: gzipSync(source).length })
     if (source.includes('game-film'))
         games.push({ path, bytes: source.length, gzip: gzipSync(source).length })
 }
@@ -31,7 +33,7 @@ const scripts = [...new Set([...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)]
 let initialGzip = 0
 for (const script of scripts) {
     const path = resolve(root, script.replace(/^\//, ''))
-    if (games.some(game => path === game.path)) throw new Error('Game previews must remain lazy-loaded')
+    if ([...games, ...reviews].some(game => path === game.path)) throw new Error('Game previews must remain lazy-loaded')
     initialGzip += gzipSync(await readFile(path)).length
 }
 console.log(
@@ -51,3 +53,15 @@ for (const game of ['crown', 'rift', 'gta']) {
 if (mediaBytes > 1600 * 1024) throw new Error('Game media exceeds 1600 KiB total')
 console.log(`All three films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
 console.log(`Initial page scripts: ${(initialGzip / 1024).toFixed(1)} KiB gzip (measured locally).`)
+
+if (reviews.length !== 1 || reviews[0].gzip > 8 * 1024) throw new Error('Recorded review UI must stay in one lazy chunk below 8 KiB gzip')
+let reviewBytes = 0
+for (const name of ['chess.json', 'xiangqi.json', 'go.json', 'chess-pieces.svg']) {
+    const file = `/previews/reviews/${name}`
+    const size = (await readFile(resolve(root, file.slice(1)))).length
+    if (size > 80 * 1024) throw new Error(`Recorded review asset exceeds 80 KiB: ${name}`)
+    if (html.includes(file)) throw new Error(`Review asset must load only on demand: ${name}`)
+    reviewBytes += size
+}
+if (reviewBytes > 160 * 1024) throw new Error('Recorded game assets exceed 160 KiB total')
+console.log(`Recorded reviews: ${(reviews[0].gzip / 1024).toFixed(1)} KiB gzip UI; ${(reviewBytes / 1024).toFixed(1)} KiB total data and pieces, loaded per open board.`)

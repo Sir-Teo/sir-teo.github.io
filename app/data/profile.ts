@@ -27,7 +27,7 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        mode: 'crown' | 'rift' | 'postcard' | 'videos'
+        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos'
         hint: string
         action: string
         videos?: {
@@ -39,7 +39,6 @@ export type LinkItem = {
             start: number
         }[]
     }
-    details?: LinkStat[] // static project facts, shown in the same compact card as profile stats
     stats?: LinkStat[] // optional metrics revealed on hover/focus
     statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
 }
@@ -437,10 +436,7 @@ export const projects: LinkItem[] = [
         color: '#81B64C',
         category: 'Projects',
         meta: 'Chess · play & analyze',
-        details: [
-            { label: 'Engine', value: 'Stockfish' },
-            { label: 'Analysis', value: 'In browser' },
-        ],
+        preview: { mode: 'chess', hint: 'Recorded game review', action: 'Open app' },
     },
     {
         label: 'Web Xiangqi',
@@ -450,10 +446,7 @@ export const projects: LinkItem[] = [
         colorDark: '#F87171',
         category: 'Projects',
         meta: 'Chinese chess · play & analyze',
-        details: [
-            { label: 'Engine', value: 'Pikafish' },
-            { label: 'Analysis', value: 'In browser' },
-        ],
+        preview: { mode: 'xiangqi', hint: 'Recorded game review', action: 'Open app' },
     },
     {
         label: 'Web KaTrain',
@@ -463,9 +456,6 @@ export const projects: LinkItem[] = [
         colorDark: '#A78BFA',
         category: 'Projects',
         meta: 'Go / Weiqi · play & analyze',
-        details: [
-            { label: 'Engine', value: 'Neural Go' },
-            { label: 'Analysis', value: 'In browser' },
-        ],
+        preview: { mode: 'go', hint: 'Recorded game review', action: 'Open app' },
     },
 ]

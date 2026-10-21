@@ -9,6 +9,10 @@ const GamePreview = dynamic(() => import('./GamePreview'), {
     loading: () => <div className="preview-loading">Opening the preview…</div>,
 })
 
+const ReviewPreview = dynamic(() => import('./ReviewPreview'), {
+    loading: () => <div className="preview-loading">Opening the game…</div>,
+})
+
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
 
 function Arrow() {
@@ -61,6 +65,8 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             </header>
             {preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
+            ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
+                <ReviewPreview key={preview.mode} scene={preview.mode} />
             ) : (
                 <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
             )}
