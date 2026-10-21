@@ -2,8 +2,14 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
-import ProjectIllustration from './ProjectIllustration'
-import StudyPreview from './StudyPreview'
+import dynamic from 'next/dynamic'
+
+const GamePreview = dynamic(() => import('./GamePreview'), {
+    loading: () => <div className="preview-loading">Opening the play space…</div>,
+})
+const StudyPreview = dynamic(() => import('./StudyPreview'), {
+    loading: () => <div className="preview-loading">Opening the board…</div>,
+})
 
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
 
@@ -60,7 +66,7 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
                 <StudyPreview scene={preview.mode} />
             ) : (
-                <ProjectIllustration scene={preview.mode} reducedMotion={reducedMotion} />
+                <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
             )}
             <footer className="preview-footer">
                 <span>{preview.hint}</span>
