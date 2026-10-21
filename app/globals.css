@@ -97,28 +97,549 @@ html {
     scrollbar-color: #94a3b8 transparent;
 }
 
-.project-preview-image {
-    height: clamp(140px, 28dvh, 260px);
+/* A quiet window frame around a deliberately tiny, playable slice of each project. */
+.mini-window-bar,
+.mini-window-footer {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
+    color: #475569;
+}
+.mini-window-bar h3 {
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: #1e293b;
+}
+.mini-window-tag {
+    margin-left: auto;
+    font-size: 9px;
+    color: #64748b;
+    letter-spacing: 0.02em;
+}
+.mini-close {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 21px;
+    line-height: 1;
+    color: #64748b;
+}
+.mini-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.mini-window-footer {
+    justify-content: space-between;
+    border-top: 1px solid #e2e8f0;
+    font-size: 11px;
+}
+.mini-window-footer a {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-weight: 600;
+    color: #334155;
+}
+.mini-window-footer a:hover {
+    color: #0284c7;
+}
+.mini-window-footer a span {
+    font-size: 17px;
+}
+.mini-reset {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    color: #64748b;
+}
+.mini-reset span {
+    font-size: 19px;
+}
+.mini-reset:hover {
+    color: #0284c7;
+}
+.project-preview button:focus-visible,
+.project-preview a:focus-visible,
+.project-preview input:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+.mini-stage {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+.mini-loading {
+    display: grid;
+    place-items: center;
+    height: 330px;
+    font-size: 12px;
+    color: #64748b;
+}
+.mini-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 43px;
+    padding: 10px 14px;
+    font-size: 11px;
+    line-height: 1.5;
+    text-align: center;
+    color: #64748b;
+}
+.mini-scene {
+    width: 100%;
+    height: 100%;
+}
+.mini-scene-label {
+    position: absolute;
+    left: 15px;
+    right: 15px;
+    top: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+    pointer-events: none;
+    font-size: 8px;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+}
+.mini-celebration {
+    position: absolute;
+    left: 50%;
+    bottom: 15px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none;
+    padding: 7px 14px;
+    border-radius: 99px;
+    background: #122e29ed;
+    box-shadow: 0 3px 18px #0f172a33;
+    color: #c5f5ce;
+    font-size: 11px;
+    font-weight: 600;
+    animation: mini-appear 250ms ease-out;
+}
+.mini-control {
+    display: grid;
+    place-items: center;
+    width: 37px;
+    height: 33px;
+    border: 1px solid #ffffff25;
+    border-radius: 8px;
+    background: #182b36e8;
+    color: #e2e8f0;
+    font-size: 16px;
+    box-shadow: 0 2px 5px #0002;
+    touch-action: none;
+    user-select: none;
+}
+.mini-control:hover {
+    background: #334155;
+}
+.mini-control:active {
+    background: #0e7490;
+    transform: translateY(1px);
 }
 
-.project-preview-copy {
-    background-image: radial-gradient(
-        ellipse at top right,
-        color-mix(in srgb, var(--preview-accent) 9%, transparent),
-        transparent 75%
-    );
+/* Board puzzles retain real rules, with a single tab stop and arrow-key navigation. */
+.mini-board {
+    position: relative;
+    flex: none;
+    box-shadow: 0 6px 24px #11182738;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.mini-board-cells {
+    position: absolute;
+    inset: 0;
+    display: grid;
+}
+.mini-board-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.mini-square {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 0;
+    border: 0;
+    background: transparent;
+    touch-action: manipulation;
+}
+.project-preview .mini-square:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: -3px;
+    border-radius: 0;
+    z-index: 1;
+}
+.mini-square:hover {
+    box-shadow: inset 0 0 0 2px #ffffff80;
+}
+.mini-chess-stage,
+.mini-xiangqi-stage,
+.mini-go-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    min-height: 304px;
+}
+.mini-chess-stage {
+    background: radial-gradient(ellipse at top, #b1b9a1, #6b7b69);
+}
+.mini-chess {
+    width: min(272px, 100%);
+    aspect-ratio: 1;
+    font-family: 'Arial Unicode MS', 'Apple Symbols', 'Segoe UI Symbol', serif;
+    font-size: 31px;
+    line-height: 1;
+}
+.chess-light {
+    background: #e8e6d4;
+}
+.chess-dark {
+    background: #77917a;
+}
+.chess-white-piece {
+    color: #fffdf5;
+    text-shadow: 0 1px 1px #192a24, 1px 0 #192a24, -1px 0 #192a24, 0 -1px #192a24;
+}
+.chess-black-piece {
+    color: #26352e;
+    text-shadow: 0 1px 1px #fff8;
+}
+.mini-selected {
+    background: #d3cd75;
+}
+.mini-move-dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #334d4266;
+}
+.mini-won {
+    box-shadow: 0 0 0 2px #d9e9a1, 0 6px 24px #11182738;
+}
+.mini-xiangqi-stage {
+    background: radial-gradient(ellipse at top, #d6c5a6, #988064);
+    min-height: 312px;
+}
+.mini-xiangqi {
+    width: min(252px, 100%);
+    aspect-ratio: 9 / 10;
+}
+.xiangqi-piece {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #705330;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 25%, #fce6b7, #d4ae72);
+    box-shadow: 0 2px 2px #63462670, inset 0 0 0 2px #e9cd9e;
+    font: 17px/1 Georgia, 'Songti SC', serif;
+    color: #3e3932;
+}
+.xiangqi-piece.red {
+    color: #ad362f;
+}
+.xiangqi-piece.chosen {
+    outline: 2px solid #b12c29;
+    outline-offset: 1px;
+}
+.mini-go-stage {
+    background: radial-gradient(ellipse at top, #dfceab, #aa916a);
+}
+.mini-go {
+    width: min(270px, 100%);
+    aspect-ratio: 1;
+}
+.go-stone {
+    display: grid;
+    place-items: center;
+    width: 87%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow: 1px 2px 3px #392a2277;
+}
+.go-stone.black {
+    background: radial-gradient(circle at 32% 27%, #626367, #1b1d20 68%);
+}
+.go-stone.white {
+    background: radial-gradient(circle at 32% 27%, #fffef5, #dddcd5 75%);
+}
+.go-last {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f4d178;
 }
 
-.project-preview-icon {
-    background-color: color-mix(in srgb, var(--preview-accent) 12%, transparent);
+/* An isometric village: collect from the mine and spend gold on cottages. */
+.mini-village,
+.mini-rift,
+.mini-city {
+    aspect-ratio: 400 / 270;
+}
+.mini-village {
+    background: #89a074;
+}
+.mini-village .mini-scene-label {
+    color: #304c39;
+}
+.mini-gold {
+    background: #304c39;
+    color: #ffe3a1;
+    padding: 4px 8px;
+    border-radius: 99px;
+    letter-spacing: 0;
+    font-size: 10px;
+}
+.mini-townhall {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    width: 20%;
+    transform: translate(-50%, -70%);
+    pointer-events: none;
+}
+.mini-mine {
+    position: absolute;
+    left: 71%;
+    top: 45%;
+    transform: translate(-50%, -60%);
+    width: 17%;
+    color: #fff0b5;
+}
+.mini-mine span {
+    display: block;
+    border-radius: 99px;
+    background: #384e35;
+    font-size: 10px;
+    font-weight: 650;
+    padding: 2px 0;
+}
+.mini-mine:hover svg {
+    transform: translateY(-3px);
+}
+.mini-mine:active svg {
+    transform: translateY(1px);
+}
+.mini-mine svg {
+    transition: transform 150ms;
+}
+.mini-plot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 17%;
+    height: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #edf4d8a6;
+    border-radius: 12px;
+    background: #3c603840;
+    color: #fff7db;
+    font-size: 9px;
+    transition: background 150ms;
+}
+.mini-plot-plus {
+    font-size: 21px;
+    line-height: 1.1;
+}
+.mini-plot:not(:disabled):hover {
+    background: #355b3d88;
+    border-style: solid;
+}
+.mini-plot:disabled:not(.is-built) {
+    opacity: 0.5;
+}
+.mini-plot.is-built {
+    height: 27%;
+    background: none;
+    border: 0;
+}
+.mini-plot.is-built svg {
+    width: 100%;
+    height: 100%;
+    animation: mini-build 250ms ease-out;
 }
 
-.project-preview-dot {
-    background-color: var(--preview-accent);
+/* A tiny practice lane. Only a shot animates; nothing runs while the card is idle. */
+.mini-rift .mini-scene-label {
+    color: #b1d4c7;
+}
+.mini-dummy {
+    position: absolute;
+    width: 13%;
+    height: 26%;
+    transform: translate(-50%, -50%);
+    transition: opacity 200ms, filter 150ms;
+}
+.mini-dummy svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(2px 3px 2px #102b2b66);
+}
+.mini-dummy:hover:not(:disabled) {
+    filter: brightness(1.25);
+}
+.mini-dummy.is-down {
+    opacity: 0.2;
+}
+.mini-health {
+    display: block;
+    position: absolute;
+    width: 70%;
+    top: 0;
+    left: 15%;
+    height: 4px;
+    background: #102c29;
+    border: 1px solid #c7e3c533;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.mini-health i {
+    display: block;
+    height: 100%;
+    background: #94ce8c;
+    transition: width 150ms;
+}
+.mini-arrow-shot {
+    stroke-dasharray: 10 500;
+    animation: mini-shot 400ms ease-out forwards;
 }
 
+/* A pocket neighborhood, with physical controls for touch and keys for desktop. */
+.mini-city .mini-scene-label {
+    color: #3b4240;
+    top: 10px;
+}
+.mini-drive-controls {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+}
+.mini-city .mini-celebration {
+    bottom: 50px;
+}
+
+/* The circles and the plotted series are the same Fourier sum. */
+.mini-fourier {
+    background: #171a2b;
+    color: #a8aeca;
+}
+.mini-fourier > svg {
+    display: block;
+    width: 100%;
+}
+.mini-fourier-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 5px 20px 17px;
+}
+.mini-fourier-controls label {
+    font-size: 11px;
+    white-space: nowrap;
+    min-width: 42px;
+}
+.mini-fourier-controls input {
+    width: 100%;
+    min-width: 0;
+    accent-color: #c4b5fd;
+    cursor: pointer;
+}
+.mini-fourier .mini-control {
+    background: #2b2e47;
+    color: #e9d5ff;
+    flex: none;
+}
+
+.dark .mini-window-bar,
+.dark .mini-window-footer {
+    color: #94a3b8;
+}
+.dark .mini-window-bar h3,
+.dark .mini-window-footer a {
+    color: #e2e8f0;
+}
+.dark .mini-window-tag,
+.dark .mini-reset,
+.dark .mini-hint {
+    color: #94a3b8;
+}
+.dark .mini-close:hover {
+    background: #334155;
+    color: #f1f5f9;
+}
+.dark .mini-window-footer {
+    border-color: #ffffff12;
+}
+@keyframes mini-appear {
+    from {
+        opacity: 0;
+        margin-bottom: -5px;
+    }
+    to {
+        opacity: 1;
+        margin-bottom: 0;
+    }
+}
+@keyframes mini-build {
+    from {
+        transform: translateY(-8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+@keyframes mini-shot {
+    0% {
+        stroke-dashoffset: 10;
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: -260;
+        opacity: 0;
+    }
+}
+@media (max-width: 370px) {
+    .mini-window-tag {
+        font-size: 8px;
+    }
+    .mini-window-bar {
+        gap: 7px;
+        padding-inline: 10px;
+    }
+    .mini-scene-label {
+        font-size: 7px;
+    }
+}
 @media (prefers-reduced-motion: reduce) {
     .project-preview * {
         transition: none;
+        animation-duration: 0.01ms;
     }
 }

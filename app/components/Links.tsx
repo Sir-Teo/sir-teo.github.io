@@ -184,7 +184,7 @@ type TooltipPosition = {
     top: number
 }
 
-// Profile stats stay compact; projects get a larger, image-led linked preview.
+// Profile stats stay compact; projects get a small interactive playground.
 // Padding bridges the pointer's path from the chip to the visible surface.
 function StatCard({
     link,
@@ -192,12 +192,14 @@ function StatCard({
     id,
     onActivate,
     onClose,
+    onInteract,
 }: {
     link: LinkItem
     triggerRef: RefObject<HTMLElement | null>
     id: string
     onActivate?: () => void
     onClose?: () => void
+    onInteract?: () => void
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -225,7 +227,8 @@ function StatCard({
             const centeredLeft = triggerRect.left + triggerRect.width / 2 - cardWidth / 2
             const left = Math.min(Math.max(centeredLeft, margin), window.innerWidth - cardWidth - margin)
 
-            setPosition({ left, top: Math.max(margin, top) })
+            // A pinned playground stays reachable even if its pill scrolls offscreen.
+            setPosition({ left, top: Math.max(margin, Math.min(top, window.innerHeight - cardHeight - margin)) })
         }
 
         updatePosition()
@@ -263,7 +266,7 @@ function StatCard({
             }`}
         >
             {link.preview ? (
-                <ProjectPreview link={link} onClose={onClose ?? (() => {})} />
+                <ProjectPreview link={link} onClose={onClose ?? (() => {})} onInteract={onInteract ?? (() => {})} />
             ) : (
                 <div
                     onClick={
@@ -360,7 +363,20 @@ function LinkChip({
     const wrapRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLElement | null>(null)
     const copyResetRef = useRef<number | null>(null)
+    const interactingRef = useRef(false)
+    const leaveTimerRef = useRef<number | null>(null)
     const canHover = useCanHover()
+    useEffect(() => {
+        if (!cardOpen) interactingRef.current = false
+    }, [cardOpen])
+    const cancelLeave = () => {
+        if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
+        leaveTimerRef.current = null
+    }
+    const beginInteraction = () => {
+        cancelLeave()
+        interactingRef.current = true
+    }
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
     const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
     const closeCard = () => {
@@ -389,7 +405,7 @@ function LinkChip({
                   if (wrapRef.current?.contains(event.relatedTarget as Node)) return
                   // A tap on the preview itself has no focusable related target.
                   // Keep it mounted long enough for its click to follow the link.
-                  if (canHover || event.relatedTarget) setCardOpen(false)
+                  if (!interactingRef.current && (canHover || event.relatedTarget)) setCardOpen(false)
               },
           }
         : {}
@@ -398,12 +414,24 @@ function LinkChip({
     // could never reach the card to click it.
     const wrapHoverProps =
         showCard && canHover
-            ? { onPointerEnter: () => setCardOpen(true), onPointerLeave: () => setCardOpen(false) }
+            ? {
+                  onPointerEnter: () => {
+                      cancelLeave()
+                      setCardOpen(true)
+                  },
+                  onPointerLeave: () => {
+                      if (interactingRef.current || (link.preview && wrapRef.current?.contains(document.activeElement)))
+                          return
+                      cancelLeave()
+                      leaveTimerRef.current = window.setTimeout(() => setCardOpen(false), 160)
+                  },
+              }
             : {}
 
     useEffect(() => {
         return () => {
             if (copyResetRef.current !== null) window.clearTimeout(copyResetRef.current)
+            if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
         }
     }, [])
 
@@ -517,7 +545,11 @@ function LinkChip({
             className="relative inline-block"
             {...wrapHoverProps}
             onBlur={event => {
-                if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) {
+                if (
+                    !interactingRef.current &&
+                    event.relatedTarget &&
+                    !event.currentTarget.contains(event.relatedTarget as Node)
+                ) {
                     setCardOpen(false)
                 }
             }}
@@ -547,6 +579,7 @@ function LinkChip({
                     link={link}
                     onActivate={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
                     onClose={closeCard}
+                    onInteract={beginInteraction}
                 />
             )}
         </div>
