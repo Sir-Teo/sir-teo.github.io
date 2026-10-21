@@ -54,6 +54,19 @@ if (mediaBytes > 1600 * 1024) throw new Error('Game media exceeds 1600 KiB total
 console.log(`All three films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
 console.log(`Initial page scripts: ${(initialGzip / 1024).toFixed(1)} KiB gzip (measured locally).`)
 
+let explainerBytes = 0
+for (const name of ['llm', 'quantum', 'relativity']) {
+    for (const extension of ['mp4', 'webp']) {
+        const file = `/previews/clip-${name}.${extension}`
+        const size = (await readFile(resolve(root, file.slice(1)))).length
+        if (size > (extension === 'mp4' ? 250 : 50) * 1024) throw new Error(`Explainer asset exceeds budget: ${file}`)
+        if (html.includes(file)) throw new Error(`Explainer media must not load on initial page: ${file}`)
+        explainerBytes += size
+    }
+}
+if (explainerBytes > 500 * 1024) throw new Error('Explainer media exceeds 500 KiB total')
+console.log(`All three explainers + posters: ${(explainerBytes / 1024).toFixed(1)} KiB; only the selected clip plays.`)
+
 if (reviews.length !== 1 || reviews[0].gzip > 8 * 1024) throw new Error('Recorded review UI must stay in one lazy chunk below 8 KiB gzip')
 let reviewBytes = 0
 for (const name of ['chess.json', 'xiangqi.json', 'go.json', 'chess-pieces.svg']) {

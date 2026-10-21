@@ -256,7 +256,7 @@ function StatCard({
                 top: position?.top ?? 0,
                 width: link.preview
                     ? link.preview.mode === 'videos'
-                        ? '26rem'
+                        ? 'var(--video-preview-width, 26rem)'
                         : ['chess', 'xiangqi', 'go'].includes(link.preview.mode)
                         ? 'var(--review-preview-width, 22rem)'
                         : '24rem'

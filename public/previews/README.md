@@ -12,7 +12,7 @@ Each game has one nine-second silent loop of actual gameplay, using the same `Pr
 
 Recorded through the deployed apps on October 21, 2026: `coc.teozeng.dev`, `teozeng.dev/web-lol`, and `teozeng.dev/web-gta`. Frames retain capture timestamps before conversion to 640 × 360 H.264 at 24 fps, CRF 28–29, with no audio and fast-start metadata. WebP posters come from the recordings. Artwork belongs to the source projects and their respective rights holders.
 
-Only the open card mounts its clip. Closing unmounts and pauses it; hidden tabs pause playback. Reduced-motion users see the poster until they press Play, with `preload="none"` preventing automatic video downloads. Media errors retain a still preview and the external game link. No game engines, iframe windows, or asset packs are loaded by these previews.
+Only the open card mounts its clip. Closing unmounts and pauses it; hidden tabs pause playback. Reduced-motion users see the poster until they press Play, with `preload="none"` preventing automatic video downloads. Media errors retain a still preview and the external game link. Both film types use an inset rounded frame, a 44px play/pause target and a subtle loop-progress line; the footage has no overlaid labels during normal playback. No game engines, iframe windows, or asset packs are loaded by these previews.
 
 The three clips and posters total approximately **716 KiB**. `npm run build` checks a lazy game-film chunk capped at **4 KiB gzip / 8 KiB raw**, **600 KiB per clip / 50 KiB per poster / 1600 KiB combined**, and absence of game films and their UI chunk from the initial HTML. Replaced screenshot assets have been removed.
 
@@ -33,5 +33,7 @@ Evaluations and candidate lines come from the apps' actual offline engine runs a
 ## Explainers
 
 The thumbnail list selects nine-second silent excerpts from Teo’s local `explainer-videos/renders/{llm,quantum,relativity}.mp4` renders. Starts: 10:20, 22:50 and 19:05. YouTube IDs: `o0ENWGEVJm0`, `aaPbLBw0ZYc`, `vdroXP5hjjQ`. WebP posters come from the same first frames. Clips are 640px H.264, 24 fps, no audio. Only the selected clip is mounted; it pauses when closed or hidden. Reduced-motion users get a still frame with an explicit Play control.
+
+The gallery remembers a manual pause while changing clips, holds the poster until the next clip is ready, and lets Up/Down or Home/End select videos. A short hover delay avoids flickering through rows when crossing the list. All playback, close and watch-link targets are at least 44px. Narrow phones stack the film above the list; short landscape screens put them side by side and hide secondary topic text when needed. The three clips and posters total **229 KiB**; the build caps them at 500 KiB total (250 KiB per clip, 50 KiB per poster) and checks they stay out of initial loading.
 
 Everything deploys through the existing GitHub Pages workflow; no new workflows or scheduled jobs are introduced.
