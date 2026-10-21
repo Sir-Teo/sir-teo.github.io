@@ -2,6 +2,18 @@
 
 code for [teozeng.dev](https://teozeng.dev/)
 
+Hosted on GitHub Pages from `Sir-Teo/sir-teo.github.io`. The former `aboutme`
+repository was renamed here so its history stays with the current site.
+The previous personal website is preserved in the read-only
+[`sir-teo.github.io-archive`](https://github.com/Sir-Teo/sir-teo.github.io-archive)
+repository; its gallery remains available through the homepage and `/gallery/`.
+
+Pushes to `main` run lint, type checks, tests and a static build, then deploy
+`publish/` through `.github/workflows/deploy.yml`. Pull requests run the same
+checks without publishing. Pages must use GitHub Actions as its build source,
+with `teozeng.dev` as the custom domain. No hosting credentials are needed by CI.
+The Firebase configuration is retained only for rollback to the former host.
+
 This project is a pure front-end website based on the Next.js framework, designed to showcase and introduce personal information.
 
 ## Getting Started

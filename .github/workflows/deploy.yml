@@ -1,59 +1,50 @@
-name: Deploy to Firebase Hosting
-
-# Builds the Next static export and deploys it to Firebase Hosting on every
-# push to main. Requires one repo secret: FIREBASE_TOKEN.
-# Generate it locally with:  firebase login:ci
-# then add it under GitHub repo Settings -> Secrets and variables -> Actions
-# as a secret named FIREBASE_TOKEN.
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
-# Serialize deploys to the live channel. Back-to-back pushes otherwise race:
-# two runs upload near-identical content and the slower one tries to release a
-# version that is already live, which Firebase rejects. Cancel any in-flight
-# deploy so only the newest commit reaches the live channel.
+permissions:
+  contents: read
+
 concurrency:
-  group: firebase-hosting-live
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
-
       - run: npm ci
-
-      # Gate the deploy on the same checks that run locally: a lint error, a type
-      # error or a failing test should stop the release, not ship.
       - run: npm run lint
       - run: npm run check-types
       - run: npm test
-
       - run: npm run build
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: publish
 
-      - name: Deploy to Firebase Hosting
-        # Treat the "version is already the current active version" response as
-        # success: it means the live channel already serves this exact build, so
-        # there is nothing to release. Any other non-zero exit still fails the job.
-        run: |
-          set -o pipefail
-          out=$(npx --yes firebase-tools@latest deploy --only hosting \
-            --project personal-website-3bc37 --non-interactive 2>&1 | tee /dev/stderr) || code=$?
-          if [ -n "${code:-}" ]; then
-            if printf '%s' "$out" | grep -qiE 'current active version|Nothing to deploy|no changes'; then
-              echo "::notice::Live channel already serves this build — nothing new to release."
-              exit 0
-            fi
-            exit "$code"
-          fi
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

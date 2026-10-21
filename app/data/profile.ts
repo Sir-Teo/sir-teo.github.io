@@ -335,7 +335,7 @@ export const links: LinkItem[] = [
     // ── Photography ──────────────────────────────────────────────────
     {
         label: 'Gallery',
-        href: 'https://sir-teo.github.io/gallery/index.html',
+        href: 'https://teozeng.dev/sir-teo.github.io-archive/gallery/index.html',
         icon: '/icons/gallery.svg',
         color: '#7C3AED',
         colorDark: '#a78bfa',
