@@ -10,6 +10,7 @@ import {
     type CSSProperties,
     type Dispatch,
     type FocusEvent,
+    type PointerEvent as ReactPointerEvent,
     type RefCallback,
     type RefObject,
     type SetStateAction,
@@ -172,7 +173,7 @@ function IconMask({ link, className = 'h-4 w-4' }: { link: LinkItem; className?:
 
 function ChipInner({ link }: { link: LinkItem }) {
     return (
-        <span className="group inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] ring-1 ring-slate-200 transition active:scale-[0.97] hover:ring-slate-300 motion-safe:hover:-translate-y-0.5 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-slate-600 sm:gap-2 sm:text-sm">
+        <span className="link-chip group inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] ring-1 ring-slate-200 transition active:scale-[0.97] hover:ring-slate-300 motion-safe:hover:-translate-y-0.5 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-slate-600 sm:gap-2 sm:text-sm">
             <IconMask link={link} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-slate-700 dark:text-slate-200">{link.label}</span>
         </span>
@@ -190,14 +191,16 @@ function StatCard({
     link,
     triggerRef,
     id,
-    onActivate,
+    onCopy,
+    copyStatus,
     onClose,
 }: {
     link: LinkItem
     triggerRef: RefObject<HTMLElement | null>
     id: string
-    onActivate?: () => void
-    onClose?: () => void
+    onCopy?: () => void
+    copyStatus?: 'idle' | 'copied' | 'showing'
+    onClose: () => void
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
@@ -248,9 +251,9 @@ function StatCard({
         <div
             id={id}
             ref={cardRef}
-            role={link.preview ? 'dialog' : 'tooltip'}
+            role="dialog"
             data-preview={link.preview?.mode}
-            aria-label={link.preview ? `${link.label} preview` : undefined}
+            aria-label={`${link.label} ${link.preview ? 'preview' : 'details'}`}
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
@@ -260,8 +263,8 @@ function StatCard({
                         : ['chess', 'xiangqi', 'go'].includes(link.preview.mode)
                         ? 'var(--review-preview-width, 22rem)'
                         : '24rem'
-                    : undefined,
-                maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
+                    : '20rem',
+                maxWidth: 'calc(100vw - 1.5rem)',
                 visibility: position ? 'visible' : 'hidden',
             }}
             // py-2 keeps the visible surface clear of the chip while leaving the box
@@ -271,75 +274,109 @@ function StatCard({
             }`}
         >
             {link.preview ? (
-                <ProjectPreview link={link} onClose={onClose ?? (() => {})} />
+                <ProjectPreview link={link} onClose={onClose} />
             ) : (
-                <div
-                    onClick={
-                        onActivate &&
-                        (() => {
-                            // Let people select a UID or handle without navigating away.
-                            if (window.getSelection()?.toString()) return
-                            onActivate()
-                        })
-                    }
-                    className={`${
-                        link.description ? 'w-64' : 'w-max min-w-40'
-                    } max-w-full rounded-lg bg-white/95 p-3 text-left shadow-lg ring-1 ring-slate-200 backdrop-blur dark:bg-slate-800/95 dark:ring-slate-700 ${
-                        onActivate ? 'cursor-pointer' : ''
-                    }`}
-                >
-                    <div className="flex items-center gap-2">
-                        <IconMask link={link} className="h-3.5 w-3.5" />
-                        <span className="min-w-0 break-words text-sm font-medium text-slate-800 dark:text-slate-100">
-                            {link.label}
-                        </span>
-                    </div>
-                    {link.meta && (
-                        <p className="mt-0.5 break-words text-xs text-slate-500 dark:text-slate-400">{link.meta}</p>
-                    )}
-                    {link.description && (
-                        <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                            {link.description}
-                        </p>
-                    )}
+                <div className="project-preview profile-card">
+                    <header className="profile-card-header">
+                        <div className="profile-card-identity">
+                            <div className="profile-card-title">
+                                <IconMask link={link} />
+                                <h3>{link.label}</h3>
+                            </div>
+                            {(link.handle || link.meta) && (
+                                <p className="profile-card-meta">{link.handle ?? link.meta}</p>
+                            )}
+                        </div>
+                        <button
+                            type="button"
+                            className="preview-close"
+                            onClick={onClose}
+                            aria-label={`Close ${link.label} details`}
+                        >
+                            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+                                <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                            </svg>
+                        </button>
+                    </header>
+                    {link.description && <p className="profile-card-description">{link.description}</p>}
                     {link.tags && link.tags.length > 0 && (
-                        <ul aria-label="Project features" className="mt-2.5 flex flex-wrap gap-1.5">
+                        <ul className="profile-card-tags" aria-label="Features">
                             {link.tags.map(tag => (
-                                <li
-                                    key={tag}
-                                    className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] leading-relaxed text-slate-600 dark:bg-slate-700/70 dark:text-slate-300"
-                                >
-                                    {tag}
-                                </li>
+                                <li key={tag}>{tag}</li>
                             ))}
                         </ul>
                     )}
                     {stats && stats.length > 0 && (
-                        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                        <dl className="profile-card-stats" aria-label={`${link.label} stats`}>
                             {stats.map(stat => (
-                                <div key={stat.label} className="flex min-w-0 flex-col">
-                                    <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                        {stat.label}
-                                    </dt>
-                                    <dd className="break-words text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">
-                                        {stat.value}
-                                    </dd>
+                                <div key={stat.label}>
+                                    <dt>{stat.label}</dt>
+                                    <dd data-numeric={/^[\d,.+−%-]+$/.test(stat.value)}>{stat.value}</dd>
                                 </div>
                             ))}
                         </dl>
                     )}
-                    {stats && stats.length > 0 && (
-                        <p className="mt-2 border-t border-slate-100 pt-2 text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                            <span
-                                className="inline-flex items-center gap-1.5"
-                                title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}
-                            >
-                                {current && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                                {freshness}
-                            </span>
-                            {unavailable && <span className="block">Refresh unavailable</span>}
-                        </p>
-                    )}
+                    <footer className="profile-card-footer">
+                        <div className="profile-card-status" role="status">
+                            {stats && stats.length > 0 && (
+                                <>
+                                    <span title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}>
+                                        {current && <i aria-hidden="true" />}
+                                        {freshness}
+                                    </span>
+                                    {unavailable && <span>Refresh unavailable</span>}
+                                </>
+                            )}
+                            {copyStatus === 'copied' && <span>Handle copied</span>}
+                            {copyStatus === 'showing' && <span>Select the handle above to copy.</span>}
+                        </div>
+                        {onCopy ? (
+                            <button type="button" className="profile-card-action" onClick={onCopy}>
+                                {copyStatus === 'copied' ? 'Copied' : 'Copy handle'}
+                                <svg
+                                    viewBox="0 0 20 20"
+                                    width="15"
+                                    height="15"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.4"
+                                    aria-hidden="true"
+                                >
+                                    <rect x="7" y="7" width="9" height="10" rx="2" />
+                                    <path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
+                                </svg>
+                            </button>
+                        ) : (
+                            link.href && (
+                                <a
+                                    className="profile-card-action"
+                                    href={link.href}
+                                    target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+                                    rel="noopener noreferrer"
+                                    aria-label={`Open ${link.label}`}
+                                >
+                                    {link.href.startsWith('mailto:')
+                                        ? 'Write email'
+                                        : link.label === 'Blog'
+                                        ? 'Read blog'
+                                        : link.label === 'Gallery'
+                                        ? 'View gallery'
+                                        : 'Open profile'}
+                                    <svg
+                                        viewBox="0 0 20 20"
+                                        width="15"
+                                        height="15"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.4"
+                                        aria-hidden="true"
+                                    >
+                                        <path d="M5 15 15 5M5 5h10v10" />
+                                    </svg>
+                                </a>
+                            )
+                        )}
+                    </footer>
                 </div>
             )}
         </div>
@@ -355,12 +392,13 @@ function LinkChip({
     activeCard: string | null
     setActiveCard: Dispatch<SetStateAction<string | null>>
 }) {
-    const [qrOpen, setQrOpen] = useState(false)
     const cardOpen = activeCard === link.label
     const setCardOpen = useCallback(
         (open: boolean) => setActiveCard(current => (open ? link.label : current === link.label ? null : current)),
         [link.label, setActiveCard]
     )
+    const qrOpen = Boolean(link.qrcode && cardOpen)
+    const pointerTypeRef = useRef('')
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'showing'>('idle')
     const qrPopoverId = useId()
     const statCardId = useId()
@@ -396,23 +434,29 @@ function LinkChip({
     // are tap-to-open (handled in onClick below), closed by an outside tap / Escape.
     const triggerCardProps = showCard
         ? {
-              'aria-describedby': !link.preview && cardOpen ? statCardId : undefined,
-              'aria-haspopup': link.preview ? ('dialog' as const) : undefined,
-              'aria-expanded': link.preview ? cardOpen : undefined,
-              'aria-controls': link.preview && cardOpen ? statCardId : undefined,
+              'aria-haspopup': 'dialog' as const,
+              'aria-expanded': cardOpen,
+              'aria-controls': cardOpen ? statCardId : undefined,
+              onPointerDown: (event: ReactPointerEvent<HTMLElement>) => {
+                  pointerTypeRef.current = event.pointerType
+              },
+              onKeyDown: () => {
+                  pointerTypeRef.current = ''
+              },
               onFocus: (event: FocusEvent<HTMLElement>) => {
                   // Pointer focus on a phone precedes click: let the first tap open
                   // the preview, while keyboard focus still reveals it immediately.
-                  if (event.currentTarget.matches(':focus-visible')) {
+                  if (pointerTypeRef.current !== 'touch' && event.currentTarget.matches(':focus-visible')) {
                       cancelEnter()
                       setCardOpen(true)
                   }
               },
               onBlur: (event: FocusEvent<HTMLElement>) => {
+                  pointerTypeRef.current = ''
                   if (wrapRef.current?.contains(event.relatedTarget as Node)) return
-                  // A tap on the preview itself has no focusable related target.
-                  // Keep it mounted long enough for its click to follow the link.
-                  if (canHover || event.relatedTarget) setCardOpen(false)
+                  // Selecting a stat has no focusable related target. Outside
+                  // pointer presses are handled separately, so keep the card open.
+                  if (event.relatedTarget) setCardOpen(false)
               },
           }
         : {}
@@ -422,12 +466,14 @@ function LinkChip({
     const wrapHoverProps =
         showCard && canHover
             ? {
-                  onPointerEnter: () => {
+                  onPointerEnter: (event: ReactPointerEvent<HTMLElement>) => {
+                      if (event.pointerType === 'touch') return
                       cancelLeave()
                       cancelEnter()
                       if (!cardOpen) enterTimerRef.current = window.setTimeout(() => setCardOpen(true), 90)
                   },
-                  onPointerLeave: () => {
+                  onPointerLeave: (event: ReactPointerEvent<HTMLElement>) => {
+                      if (event.pointerType === 'touch') return
                       cancelEnter()
                       const focused = document.activeElement
                       if (focused?.matches(':focus-visible') && wrapRef.current?.contains(focused)) return
@@ -447,32 +493,16 @@ function LinkChip({
 
     // Escape dismisses previews everywhere; touch previews also close on an outside tap.
     useEffect(() => {
-        if (!cardOpen) return
+        if (!cardOpen || link.qrcode) return
         const closeOnOutsidePress = (event: PointerEvent) => {
             if (!wrapRef.current?.contains(event.target as Node)) setCardOpen(false)
         }
         const closeOnEscape = (event: KeyboardEvent) => {
             if (event.key !== 'Escape') return
-            if (link.preview && wrapRef.current?.contains(document.activeElement)) {
+            if (wrapRef.current?.contains(document.activeElement)) {
                 triggerRef.current?.focus({ preventScroll: true })
             }
             setCardOpen(false)
-        }
-        if (!canHover || link.preview) document.addEventListener('pointerdown', closeOnOutsidePress)
-        document.addEventListener('keydown', closeOnEscape)
-        return () => {
-            document.removeEventListener('pointerdown', closeOnOutsidePress)
-            document.removeEventListener('keydown', closeOnEscape)
-        }
-    }, [canHover, cardOpen, link.preview, setCardOpen])
-
-    useEffect(() => {
-        if (!qrOpen || !link.qrcode) return
-        const closeOnOutsidePress = (event: PointerEvent) => {
-            if (!qrWrapRef.current?.contains(event.target as Node)) setQrOpen(false)
-        }
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setQrOpen(false)
         }
         document.addEventListener('pointerdown', closeOnOutsidePress)
         document.addEventListener('keydown', closeOnEscape)
@@ -480,15 +510,42 @@ function LinkChip({
             document.removeEventListener('pointerdown', closeOnOutsidePress)
             document.removeEventListener('keydown', closeOnEscape)
         }
-    }, [qrOpen, link.qrcode])
+    }, [cardOpen, link.qrcode, setCardOpen])
+
+    useEffect(() => {
+        if (!qrOpen || !link.qrcode) return
+        const closeOnOutsidePress = (event: PointerEvent) => {
+            if (!qrWrapRef.current?.contains(event.target as Node)) setCardOpen(false)
+        }
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                triggerRef.current?.focus({ preventScroll: true })
+                setCardOpen(false)
+            }
+        }
+        document.addEventListener('pointerdown', closeOnOutsidePress)
+        document.addEventListener('keydown', closeOnEscape)
+        return () => {
+            document.removeEventListener('pointerdown', closeOnOutsidePress)
+            document.removeEventListener('keydown', closeOnEscape)
+        }
+    }, [qrOpen, link.qrcode, setCardOpen])
 
     // QR-only link (WeChat): click/tap toggles the code; outside click or Escape closes it.
     if (link.qrcode) {
         return (
-            <div ref={qrWrapRef} className="relative inline-block">
+            <div
+                ref={qrWrapRef}
+                className="relative inline-block"
+                onBlur={event => {
+                    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node))
+                        setCardOpen(false)
+                }}
+            >
                 <button
                     type="button"
-                    onClick={() => setQrOpen(current => !current)}
+                    ref={setTriggerRef}
+                    onClick={() => setCardOpen(!qrOpen)}
                     aria-haspopup="dialog"
                     aria-expanded={qrOpen}
                     aria-controls={qrOpen ? qrPopoverId : undefined}
@@ -503,7 +560,7 @@ function LinkChip({
                     isOpen={qrOpen}
                     qrCodeImg={link.qrcode}
                     label={link.label}
-                    onClose={() => setQrOpen(false)}
+                    onClose={closeCard}
                 />
             </div>
         )
@@ -530,11 +587,23 @@ function LinkChip({
                 ? { ...link, label: handle }
                 : link
         return (
-            <div ref={wrapRef} className="relative inline-block" {...wrapHoverProps}>
+            <div
+                ref={wrapRef}
+                className="relative inline-block"
+                {...wrapHoverProps}
+                onBlur={event => {
+                    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node))
+                        setCardOpen(false)
+                }}
+            >
                 <button
                     ref={setTriggerRef}
                     type="button"
-                    onClick={copy}
+                    onClick={event => {
+                        if (event.detail !== 0 && (!canHover || pointerTypeRef.current === 'touch'))
+                            setCardOpen(!cardOpen)
+                        else void copy()
+                    }}
                     aria-label={`Copy ${link.label} handle ${handle}`}
                     title={`${handle} - click to copy`}
                     className={`inline-flex cursor-pointer ${FOCUS_RING}`}
@@ -543,7 +612,14 @@ function LinkChip({
                     <ChipInner link={visibleLink} />
                 </button>
                 {showCard && cardOpen && (
-                    <StatCard id={statCardId} triggerRef={triggerRef} link={link} onActivate={copy} />
+                    <StatCard
+                        id={statCardId}
+                        triggerRef={triggerRef}
+                        link={link}
+                        onCopy={copy}
+                        copyStatus={copyStatus}
+                        onClose={closeCard}
+                    />
                 )}
             </div>
         )
@@ -567,11 +643,11 @@ function LinkChip({
                 rel="noopener noreferrer"
                 className={`inline-flex ${FOCUS_RING}`}
                 // On touch, the first tap reveals the stat card instead of navigating;
-                // a second tap — on the chip or the card — then follows the link.
+                // tapping the chip again dismisses it. The card has an explicit Open action.
                 onClick={event => {
-                    if (!canHover && showCard && !cardOpen) {
+                    if (event.detail !== 0 && showCard && (!canHover || pointerTypeRef.current === 'touch')) {
                         event.preventDefault()
-                        setCardOpen(true)
+                        setCardOpen(!cardOpen)
                     }
                 }}
                 {...triggerCardProps}
@@ -579,13 +655,7 @@ function LinkChip({
                 <ChipInner link={link} />
             </a>
             {showCard && cardOpen && (
-                <StatCard
-                    id={statCardId}
-                    triggerRef={triggerRef}
-                    link={link}
-                    onActivate={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
-                    onClose={closeCard}
-                />
+                <StatCard id={statCardId} triggerRef={triggerRef} link={link} onClose={closeCard} />
             )}
         </div>
     )
