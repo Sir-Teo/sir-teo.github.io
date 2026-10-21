@@ -1,31 +1,11 @@
-# Real project previews
+# Project hover media
 
-Cover images come from the projects' own running interfaces, captured on
-2026-10-21 and encoded as 840 × 525 WebP. Hovering loads only the cover; clicking
-its launch button mounts the deployed application in an expandable iframe.
-Closing the window or returning to the cover unmounts the app.
+The cards use small, locally hosted captures of the actual projects. They do not embed or start the applications. Hover, focus, or tap a control to explore a detail; the footer opens the full project in another tab.
 
-App frames use `credentialless` to isolate their storage from real saved games.
-Browsers without that capability get an ordinary link to the full project.
-Video frames use YouTube's privacy-enhanced embed domain and start only after a
-click. No project engines or third-party frames load on an incidental hover.
+-   Crown & Clan: the village capture has three annotated building hotspots.
+-   Summoner’s Rift: Ashe at the fountain, with Q/W/E/R ability introductions.
+-   San Andreas: the original Los Santos street capture and a capture from the opening sequence (`san-andreas-story.webp`, October 21, 2026).
+-   Chess, Xiangqi, and KaTrain: the original interface captures, with focus areas for the board and study tools. These are still images, not live engine evaluations.
+-   Explainers: nine-second silent excerpts from Teo’s local `explainer-videos/renders/{llm,quantum,relativity}.mp4` renders. Starts: 10:20, 22:50, and 19:05. Corresponding YouTube IDs: `o0ENWGEVJm0`, `aaPbLBw0ZYc`, `vdroXP5hjjQ`. WebP posters come from the same first frames. Clips are 640px H.264, 24 fps, no audio. Only the selected clip is mounted; it pauses when the card closes or the page is hidden. Reduced-motion users get a still frame and can explicitly press Play.
 
--   `crown-clan.webp`: Crown & Clan home village, from its local production build.
--   `summoners-rift.webp`: Ashe practice mode at the blue fountain.
--   `san-andreas.webp`: Los Santos in the browser recreation's opening sequence.
--   `chess.webp`: Queen's Gambit position, move arrows, and Stockfish analysis.
-    The live preview uses the app's native game share link for the first 8 moves.
--   `xiangqi.webp`: Central Cannon opening, book continuations, and move tree.
-    The live preview uses the app's native share link for the first 4 plies.
--   `katrain.webp`: Gu Li vs Lee Sedol, 10th LG Cup semi-final, move 120.
-    The live preview opens an explicitly labeled 120-move excerpt from the app's
-    bundled `__go4go_20051019_Gu-Li_Lee-Sedol.sgf`, with its result left unknown.
--   `video-llm.webp`, `video-quantum.webp`, `video-relativity.webp`: Original
-    thumbnails from `explainer-videos/renders/youtube/`. Their actual YouTube IDs
-    and titles are in `app/data/profile.ts`.
--   `explainers.webp`: Earlier original thumbnail for _Analysis, Built — Part 9:
-    Distributions and the Fourier Transform_, retained as an available asset.
-
-To refresh a cover, capture the relevant interface, keep the subject recognizable
-at card size, and replace its WebP. URLs, launch labels, and video selections live
-in `app/data/profile.ts`.
+Media was prepared October 21, 2026. Images and clips are served from GitHub Pages without API keys or third-party embed requests. No new build jobs or scheduled refreshes are needed.

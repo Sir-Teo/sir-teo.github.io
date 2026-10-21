@@ -27,14 +27,30 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        embedUrl?: string // the real deployed application, opened in an isolated frame
-        launchLabel: string
-        videos?: { id: string; title: string; image: string }[]
-        image: string // locally hosted, compressed screenshot or original video thumbnail
+        image: string
         alt: string
         kind: string
         action: string
-        status?: string
+        mode: 'hotspots' | 'abilities' | 'scenes' | 'lenses' | 'videos'
+        hint: string
+        details?: {
+            label: string
+            title: string
+            caption: string
+            x?: number
+            y?: number
+            scale?: number
+            image?: string
+        }[]
+        videos?: {
+            id: string
+            topic: string
+            title: string
+            caption: string
+            image: string
+            clip: string
+            start: number
+        }[]
     }
     stats?: LinkStat[] // optional metrics revealed on hover/focus
     statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
@@ -365,20 +381,42 @@ export const projects: LinkItem[] = [
         color: '#FF0000',
         category: 'Projects',
         meta: 'Animated explainers',
-        description:
-            'Visual deep dives into math, physics, machine learning and markets. Follow animated derivations and worked examples, built entirely from code.',
-        tags: ['Math & physics', 'AI & ML', 'English & 中文'],
         preview: {
-            launchLabel: 'Watch here',
-            videos: [
-                { id: 'o0ENWGEVJm0', title: 'How Large Language Models Work', image: '/previews/video-llm.webp' },
-                { id: 'aaPbLBw0ZYc', title: 'Quantum Mechanics, Visualized', image: '/previews/video-quantum.webp' },
-                { id: 'vdroXP5hjjQ', title: 'General Relativity, Derived', image: '/previews/video-relativity.webp' },
-            ],
-            image: '/previews/video-llm.webp',
-            alt: 'Original thumbnail for How Large Language Models Work: The Transformer, Visualized',
+            mode: 'videos',
+            image: '/previews/clip-llm.webp',
+            alt: 'Attention scores between words in a transformer',
             kind: 'Animated explainers',
             action: 'Watch on YouTube',
+            hint: 'A few seconds of the idea',
+            videos: [
+                {
+                    id: 'o0ENWGEVJm0',
+                    topic: 'Attention',
+                    title: 'How words find their context',
+                    caption: '“Bank” means something different beside “river”.',
+                    image: '/previews/clip-llm.webp',
+                    clip: '/previews/clip-llm.mp4',
+                    start: 620,
+                },
+                {
+                    id: 'aaPbLBw0ZYc',
+                    topic: 'Quantum',
+                    title: 'A wave that rebuilds itself',
+                    caption: 'A quantum wave packet spreads, interferes, and revives.',
+                    image: '/previews/clip-quantum.webp',
+                    clip: '/previews/clip-quantum.mp4',
+                    start: 1370,
+                },
+                {
+                    id: 'vdroXP5hjjQ',
+                    topic: 'Relativity',
+                    title: 'Curvature, from the inside',
+                    caption: 'You can measure curvature without leaving the surface.',
+                    image: '/previews/clip-relativity.webp',
+                    clip: '/previews/clip-relativity.mp4',
+                    start: 1145,
+                },
+            ],
         },
     },
     {
@@ -388,16 +426,36 @@ export const projects: LinkItem[] = [
         color: '#E9A409',
         category: 'Projects',
         meta: 'Village-building strategy',
-        description:
-            'Build a village, train an army, and raid campaign maps. Upgrade your base and replay battles, with progress saved in your browser.',
-        tags: ['Build a village', 'Campaign raids', 'Battle replays'],
         preview: {
-            launchLabel: 'Explore the village',
-            embedUrl: 'https://coc.teozeng.dev/',
+            mode: 'hotspots',
             image: '/previews/crown-clan.webp',
-            alt: 'An isometric village with a town hall, defenses, resource collectors and an army camp',
+            alt: 'An isometric village with a town hall, resource collectors and army camp',
             kind: 'Village-building strategy',
             action: 'Build your village',
+            hint: 'Explore the village',
+            details: [
+                {
+                    label: 'Town hall',
+                    title: 'It starts with a town hall',
+                    caption: 'Grow a tiny settlement into a defended village.',
+                    x: 52,
+                    y: 35,
+                },
+                {
+                    label: 'Army camp',
+                    title: 'A village needs an army',
+                    caption: 'Train troops, then take them on campaign raids.',
+                    x: 20,
+                    y: 62,
+                },
+                {
+                    label: 'Resources',
+                    title: 'Keep the upgrades coming',
+                    caption: 'Collect gold and elixir to build what comes next.',
+                    x: 87,
+                    y: 42,
+                },
+            ],
         },
     },
     {
@@ -408,17 +466,23 @@ export const projects: LinkItem[] = [
         colorDark: '#E4BF72',
         category: 'Projects',
         meta: 'Browser MOBA · in progress',
-        description:
-            'Practice with Ashe or Lux, then play a lane match alongside bots. Fight through minion waves and towers on a recreation of Summoner’s Rift.',
-        tags: ['Ashe & Lux', 'Practice mode', 'Lane matches'],
         preview: {
-            launchLabel: 'Enter the Rift',
-            embedUrl: 'https://teozeng.dev/web-lol/',
+            mode: 'abilities',
             image: '/previews/summoners-rift.webp',
-            alt: 'Ashe at the blue fountain on the 3D Summoner’s Rift battlefield',
-            kind: 'Browser MOBA',
+            alt: 'Ashe at the blue fountain on Summoner’s Rift',
+            kind: 'Browser MOBA · in progress',
             action: 'Enter the Rift',
-            status: 'In progress',
+            hint: 'Meet Ashe’s toolkit',
+            details: [
+                { label: 'Q', title: 'Ranger’s Focus', caption: 'Build up focus, then unleash a flurry of attacks.' },
+                { label: 'W', title: 'Volley', caption: 'A fan of arrows. A whole lane of enemies slowed.' },
+                { label: 'E', title: 'Hawkshot', caption: 'Send a hawk ahead. See what’s hiding in the fog.' },
+                {
+                    label: 'R',
+                    title: 'Enchanted Crystal Arrow',
+                    caption: 'One long-range arrow. One very unfortunate target.',
+                },
+            ],
         },
     },
     {
@@ -429,17 +493,27 @@ export const projects: LinkItem[] = [
         colorDark: '#4ADE80',
         category: 'Projects',
         meta: 'Open-world recreation · in progress',
-        description:
-            'Explore San Andreas from Grove Street. Walk, drive, and fly through a continuous world that streams as you travel, right in your browser.',
-        tags: ['Open world', 'Driving & flying', 'Grove Street'],
         preview: {
-            launchLabel: 'Explore San Andreas',
-            embedUrl: 'https://teozeng.dev/web-gta/',
+            mode: 'scenes',
             image: '/previews/san-andreas.webp',
-            alt: 'Palm-lined Los Santos streets rendered in the browser recreation of San Andreas',
-            kind: 'Open-world recreation',
+            alt: 'Palm-lined streets in the browser recreation of San Andreas',
+            kind: 'Open world · in progress',
             action: 'Explore San Andreas',
-            status: 'In progress',
+            hint: 'A little Los Santos nostalgia',
+            details: [
+                {
+                    label: 'The streets',
+                    title: 'Back in Los Santos',
+                    caption: 'Palm trees, familiar corners, and a whole city to wander.',
+                    image: '/previews/san-andreas.webp',
+                },
+                {
+                    label: 'The opening',
+                    title: 'Welcome home, CJ',
+                    caption: 'Even the opening gets its moment in the browser.',
+                    image: '/previews/san-andreas-story.webp',
+                },
+            ],
         },
     },
     {
@@ -449,17 +523,35 @@ export const projects: LinkItem[] = [
         color: '#81B64C',
         category: 'Projects',
         meta: 'Chess · Stockfish analysis',
-        description:
-            'Play against Stockfish, import games, and review your moves with engine analysis. Explore alternative lines or pick up a saved game.',
-        tags: ['Play the engine', 'Import games', 'Move review'],
         preview: {
-            launchLabel: 'Explore the board',
-            embedUrl:
-                'https://teozeng.dev/web-chess/#game=cm5icWtibnIvcHBwcHBwcHAvOC84LzgvOC9QUFBQUFBQUC9STkJRS0JOUiB3IEtRa3EgLSAwIDF8ZDJkNCBkN2Q1IGMyYzQgZTdlNiBiMWMzIGc4ZjYgYzFnNSBmOGU3IGUyZTMgZThnOCBnMWYzIGg3aDYgZzVoNCBiN2I2IGYxZDMgYzhiNw',
+            mode: 'lenses',
             image: '/previews/chess.webp',
             alt: 'A Queen’s Gambit position with move arrows and Stockfish analysis',
             kind: 'Chess · Stockfish',
             action: 'Open the chessboard',
+            hint: 'Take a closer look',
+            details: [
+                {
+                    label: 'Board',
+                    title: 'Play it. Then question it.',
+                    caption: 'Explore a Queen’s Gambit, one move at a time.',
+                    x: 25,
+                    y: 50,
+                    scale: 1.2,
+                },
+                {
+                    label: 'Coach',
+                    title: 'What would Stockfish do?',
+                    caption: 'Compare your idea with the engine’s best move and reply.',
+                    image: '/previews/chess-coach.webp',
+                },
+                {
+                    label: 'Ideas',
+                    title: 'More than one good idea',
+                    caption: 'Green arrows show candidate moves worth exploring.',
+                    image: '/previews/chess-ideas.webp',
+                },
+            ],
         },
     },
     {
@@ -470,16 +562,35 @@ export const projects: LinkItem[] = [
         colorDark: '#F87171',
         category: 'Projects',
         meta: 'Chinese chess · Pikafish analysis',
-        description:
-            'Review annotated Xiangqi games, compare candidate moves, and play on from any position. Pikafish analysis helps you explore what could happen next.',
-        tags: ['Chinese chess', 'Move comparisons', 'Game library'],
         preview: {
-            launchLabel: 'Explore the board',
-            embedUrl: 'https://teozeng.dev/web-xiangqi/#share=1&moves=h2e2%20h9g7%20h0g2%20b9c7',
+            mode: 'lenses',
             image: '/previews/xiangqi.webp',
-            alt: 'A wooden Xiangqi board showing the Central Cannon opening and its move tree',
+            alt: 'A wooden Xiangqi board with a Central Cannon opening and move tree',
             kind: 'Xiangqi · Pikafish',
             action: 'Explore the board',
+            hint: 'Take a closer look',
+            details: [
+                {
+                    label: 'Opening',
+                    title: 'The cannon takes the center',
+                    caption: 'A classic Xiangqi opening, ready to explore.',
+                    x: 28,
+                    y: 50,
+                    scale: 1.2,
+                },
+                {
+                    label: 'Notation',
+                    title: 'One move, two ways to read it',
+                    caption: 'C2=5 in traditional notation; h2e2 on the board.',
+                    image: '/previews/xiangqi-notation.webp',
+                },
+                {
+                    label: 'Book',
+                    title: 'Four replies to the cannon',
+                    caption: 'Explore the opening book before choosing Black’s reply.',
+                    image: '/previews/xiangqi-book.webp',
+                },
+            ],
         },
     },
     {
@@ -490,17 +601,35 @@ export const projects: LinkItem[] = [
         colorDark: '#A78BFA',
         category: 'Projects',
         meta: 'Go / Weiqi study',
-        description:
-            'Study Go with neural-network analysis, move-quality reviews, and ownership maps. Play against the engine or revisit mistakes from a game.',
-        tags: ['Game analysis', 'Ownership maps', 'Practice mistakes'],
         preview: {
-            launchLabel: 'Study this game',
-            embedUrl:
-                'https://teozeng.dev/web-katrain/#sgf=eJxNkr1u2zAYRXc_Bce2sA0paFok3pwGHuoigVPEA8FBEilbEv8kO04fv9EhEHk7ujjkd0nxy-rxVebZ-Si2G_HwFufiZFyzqBtfWDX79VfeZNntIs8W-Z2aPa_l5k1sG7XeyZ_x43svt8aIF6ODVfudvPvIfv-RP5a3avcov6nZy5PchO-bsPTmrB7k82AujXkX5l9lhni-Fy5czEnki_wmWwq2FpeT-NxzLq6aXRWbi6nVUq3WstdqtZe6GjlGOI5cmZGrBvawHflQjWz0yC1r637kklzX-DV8ID-OXJbkOBVsShy4bMhbuMXv8OlTpf17OMCpJ1wN-LDGsZwlMKuFG7hLnZnbMbcjL3BKPfm6Y1Y3Odow6zA5HffTkjdpLWe35JZZHvb4DselbnBz1SHALRxhS0-XnGLknrUDzkA-sE_knk_4kT6R3NMh0MGRO_6Lrac-BY7DKZKTZnH23rEP9x-4k8gbCLyHAEfuPHp8cg97_pHjLfkA8488ezqckJhZ3rIWDrwBz9uz5I5ZDt865sId-ZEOXa--_gd_PDLb',
+            mode: 'lenses',
             image: '/previews/katrain.webp',
-            alt: 'Move 120 of Gu Li versus Lee Sedol, with a populated Go board and study tools',
+            alt: 'Gu Li versus Lee Sedol at move 120, with a Go board and study tools',
             kind: 'Go / Weiqi study',
             action: 'Study a game',
+            hint: 'Inside a professional game',
+            details: [
+                {
+                    label: 'Game',
+                    title: 'Gu Li × Lee Sedol',
+                    caption: 'Move 120. Two great players, one very crowded board.',
+                    x: 20,
+                    y: 50,
+                    scale: 1.15,
+                },
+                {
+                    label: 'Variations',
+                    title: 'Follow the possibilities',
+                    caption: 'Move through the game tree to explore another sequence.',
+                    image: '/previews/go-tree.webp',
+                },
+                {
+                    label: 'Study',
+                    title: 'A little room to breathe',
+                    caption: 'A two-point jump is faster—but leaves room for invasion.',
+                    image: '/previews/go-study.webp',
+                },
+            ],
         },
     },
 ]

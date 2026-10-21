@@ -16,7 +16,7 @@ import {
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
-import ProjectPreview, { type ProjectWindowSize } from './ProjectPreview'
+import ProjectPreview from './ProjectPreview'
 import useProfileStats from './useProfileStats'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
@@ -49,7 +49,6 @@ function useCanHover() {
 
 export default function Links() {
     const [activeCard, setActiveCard] = useState<string | null>(null)
-    const pinnedCardRef = useRef<string | null>(null)
     const [termOpen, setTermOpen] = useState(false)
     const [termLoaded, setTermLoaded] = useState(false)
     const termChipRef = useRef<HTMLButtonElement>(null)
@@ -86,12 +85,7 @@ export default function Links() {
                             <ul className="flex flex-wrap gap-2">
                                 {items.map(link => (
                                     <li key={link.label}>
-                                        <LinkChip
-                                            link={link}
-                                            activeCard={activeCard}
-                                            setActiveCard={setActiveCard}
-                                            pinnedCardRef={pinnedCardRef}
-                                        />
+                                        <LinkChip link={link} activeCard={activeCard} setActiveCard={setActiveCard} />
                                     </li>
                                 ))}
                             </ul>
@@ -190,7 +184,7 @@ type TooltipPosition = {
     top: number
 }
 
-// Profile stats stay compact; projects open the actual application in an expandable window.
+// Compact project previews and profile stats share the same anchored surface.
 // Padding bridges the pointer's path from the chip to the visible surface.
 function StatCard({
     link,
@@ -198,19 +192,15 @@ function StatCard({
     id,
     onActivate,
     onClose,
-    onInteract,
 }: {
     link: LinkItem
     triggerRef: RefObject<HTMLElement | null>
     id: string
     onActivate?: () => void
     onClose?: () => void
-    onInteract?: () => void
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
-    const [previewSize, setPreviewSize] = useState<ProjectWindowSize>('peek')
-    const previewWidth = previewSize === 'wide' ? '70rem' : previewSize === 'open' ? '50rem' : '30rem'
     const { stats: refreshedStats, freshness, checkedAt, current, unavailable } = useProfileStats(link.statsId)
     const stats = refreshedStats ?? link.stats
 
@@ -235,7 +225,7 @@ function StatCard({
             const centeredLeft = triggerRect.left + triggerRect.width / 2 - cardWidth / 2
             const left = Math.min(Math.max(centeredLeft, margin), window.innerWidth - cardWidth - margin)
 
-            // A pinned project stays reachable even if its pill scrolls offscreen.
+            // Keep every control reachable near the viewport edges.
             setPosition({ left, top: Math.max(margin, Math.min(top, window.innerHeight - cardHeight - margin)) })
         }
 
@@ -263,7 +253,7 @@ function StatCard({
             style={{
                 left: position?.left ?? 0,
                 top: position?.top ?? 0,
-                width: link.preview ? previewWidth : undefined,
+                width: link.preview ? '26rem' : undefined,
                 maxWidth: link.preview ? 'calc(100vw - 1.5rem)' : 'min(16rem, calc(100vw - 1.5rem))',
                 visibility: position ? 'visible' : 'hidden',
             }}
@@ -274,13 +264,7 @@ function StatCard({
             }`}
         >
             {link.preview ? (
-                <ProjectPreview
-                    link={link}
-                    size={previewSize}
-                    onSizeChange={setPreviewSize}
-                    onClose={onClose ?? (() => {})}
-                    onInteract={onInteract ?? (() => {})}
-                />
+                <ProjectPreview link={link} onClose={onClose ?? (() => {})} />
             ) : (
                 <div
                     onClick={
@@ -359,12 +343,10 @@ function LinkChip({
     link,
     activeCard,
     setActiveCard,
-    pinnedCardRef,
 }: {
     link: LinkItem
     activeCard: string | null
     setActiveCard: Dispatch<SetStateAction<string | null>>
-    pinnedCardRef: RefObject<string | null>
 }) {
     const [qrOpen, setQrOpen] = useState(false)
     const cardOpen = activeCard === link.label
@@ -379,27 +361,22 @@ function LinkChip({
     const wrapRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLElement | null>(null)
     const copyResetRef = useRef<number | null>(null)
-    const interactingRef = useRef(false)
+    const enterTimerRef = useRef<number | null>(null)
     const leaveTimerRef = useRef<number | null>(null)
     const canHover = useCanHover()
-    useEffect(() => {
-        if (!cardOpen) {
-            interactingRef.current = false
-            if (pinnedCardRef.current === link.label) pinnedCardRef.current = null
-        }
-    }, [cardOpen, link.label, pinnedCardRef])
     const cancelLeave = () => {
         if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
         leaveTimerRef.current = null
     }
-    const beginInteraction = () => {
-        cancelLeave()
-        interactingRef.current = true
-        pinnedCardRef.current = link.label
+    const cancelEnter = () => {
+        if (enterTimerRef.current !== null) window.clearTimeout(enterTimerRef.current)
+        enterTimerRef.current = null
     }
     // Standard links get a hover/focus stats card; QR chips own their click popover instead.
     const showCard = !link.qrcode && Boolean(link.meta || link.description || link.stats?.length)
     const closeCard = () => {
+        cancelEnter()
+        cancelLeave()
         // Focus first: its focus handler runs before the explicit dismissal.
         // This returns keyboard users from the card without reopening it.
         triggerRef.current?.focus({ preventScroll: true })
@@ -419,13 +396,16 @@ function LinkChip({
               onFocus: (event: FocusEvent<HTMLElement>) => {
                   // Pointer focus on a phone precedes click: let the first tap open
                   // the preview, while keyboard focus still reveals it immediately.
-                  if (canHover || event.currentTarget.matches(':focus-visible')) setCardOpen(true)
+                  if (event.currentTarget.matches(':focus-visible')) {
+                      cancelEnter()
+                      setCardOpen(true)
+                  }
               },
               onBlur: (event: FocusEvent<HTMLElement>) => {
                   if (wrapRef.current?.contains(event.relatedTarget as Node)) return
                   // A tap on the preview itself has no focusable related target.
                   // Keep it mounted long enough for its click to follow the link.
-                  if (!interactingRef.current && (canHover || event.relatedTarget)) setCardOpen(false)
+                  if (canHover || event.relatedTarget) setCardOpen(false)
               },
           }
         : {}
@@ -436,22 +416,23 @@ function LinkChip({
         showCard && canHover
             ? {
                   onPointerEnter: () => {
-                      // Brushing over another pill should not erase a game in progress.
-                      if (pinnedCardRef.current && pinnedCardRef.current !== link.label) return
                       cancelLeave()
-                      setCardOpen(true)
+                      cancelEnter()
+                      if (!cardOpen) enterTimerRef.current = window.setTimeout(() => setCardOpen(true), 90)
                   },
                   onPointerLeave: () => {
-                      if (interactingRef.current || (link.preview && wrapRef.current?.contains(document.activeElement)))
-                          return
+                      cancelEnter()
+                      const focused = document.activeElement
+                      if (focused?.matches(':focus-visible') && wrapRef.current?.contains(focused)) return
                       cancelLeave()
-                      leaveTimerRef.current = window.setTimeout(() => setCardOpen(false), 160)
+                      leaveTimerRef.current = window.setTimeout(() => setCardOpen(false), 220)
                   },
               }
             : {}
 
     useEffect(() => {
         return () => {
+            if (enterTimerRef.current !== null) window.clearTimeout(enterTimerRef.current)
             if (copyResetRef.current !== null) window.clearTimeout(copyResetRef.current)
             if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
         }
@@ -567,11 +548,7 @@ function LinkChip({
             className="relative inline-block"
             {...wrapHoverProps}
             onBlur={event => {
-                if (
-                    !interactingRef.current &&
-                    event.relatedTarget &&
-                    !event.currentTarget.contains(event.relatedTarget as Node)
-                ) {
+                if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) {
                     setCardOpen(false)
                 }
             }}
@@ -601,7 +578,6 @@ function LinkChip({
                     link={link}
                     onActivate={() => window.open(link.href, '_blank', 'noopener,noreferrer')}
                     onClose={closeCard}
-                    onInteract={beginInteraction}
                 />
             )}
         </div>

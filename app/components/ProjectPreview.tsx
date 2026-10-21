@@ -1,194 +1,187 @@
+'use client'
+
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
 
-export type ProjectWindowSize = 'peek' | 'open' | 'wide'
-
-export default function ProjectPreview({
-    link,
-    size,
-    onSizeChange,
-    onClose,
-    onInteract,
-}: {
-    link: LinkItem
-    size: ProjectWindowSize
-    onSizeChange: (size: ProjectWindowSize) => void
-    onClose: () => void
-    onInteract: () => void
-}) {
-    const [running, setRunning] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [slowLoad, setSlowLoad] = useState(false)
-    const [canIsolate, setCanIsolate] = useState(false)
-    const [videoIndex, setVideoIndex] = useState(0)
-    const launchRef = useRef<HTMLButtonElement>(null)
-    const preview = link.preview
+export default function ProjectPreview({ link, onClose }: { link: LinkItem; onClose: () => void }) {
+    const preview = link.preview!
+    const [selected, setSelected] = useState(0)
+    const [reducedMotion, setReducedMotion] = useState(true)
+    const [playIntent, setPlayIntent] = useState<boolean | null>(null)
+    const [playing, setPlaying] = useState(false)
+    const [mediaError, setMediaError] = useState(false)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const detail = preview.details?.[selected]
+    const video = preview.videos?.[selected]
+    const shouldPlay = playIntent ?? !reducedMotion
 
     useEffect(() => {
-        setCanIsolate('credentialless' in HTMLIFrameElement.prototype)
+        const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const update = () => setReducedMotion(query.matches)
+        update()
+        query.addEventListener('change', update)
+        return () => query.removeEventListener('change', update)
     }, [])
 
     useEffect(() => {
-        if (!loading) return
-        const timer = window.setTimeout(() => setSlowLoad(true), 15000)
-        return () => window.clearTimeout(timer)
-    }, [loading])
-
-    if (!preview || !link.href) return null
-    const video = preview.videos?.[videoIndex]
-    const source = video
-        ? `https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&playsinline=1&rel=0`
-        : preview.embedUrl
-    const canEmbed = Boolean(source && (video || canIsolate))
-    const fullUrl = video ? `https://www.youtube.com/watch?v=${video.id}` : link.href
-    const launch = () => {
-        onInteract()
-        setLoading(true)
-        setSlowLoad(false)
-        setRunning(true)
-        onSizeChange('open')
-    }
-    const back = () => {
-        setRunning(false)
-        setLoading(false)
-        setSlowLoad(false)
-        onSizeChange('peek')
-        window.requestAnimationFrame(() => launchRef.current?.focus({ preventScroll: true }))
-    }
-    const selectVideo = (index: number) => {
-        onInteract()
-        setVideoIndex(index)
-        if (running) {
-            setLoading(true)
-            setSlowLoad(false)
+        const element = videoRef.current
+        if (!element) return
+        const update = () => {
+            if (shouldPlay && !document.hidden) void element.play().catch(() => setPlaying(false))
+            else element.pause()
         }
+        update()
+        document.addEventListener('visibilitychange', update)
+        return () => {
+            element.pause()
+            document.removeEventListener('visibilitychange', update)
+        }
+    }, [video?.clip, shouldPlay])
+
+    const choose = (index: number) => {
+        if (selected === index) return
+        setSelected(index)
+        setMediaError(false)
     }
+    const items = preview.videos?.map(item => item.topic) ?? preview.details?.map(item => item.label) ?? []
+    const destination = video ? `https://www.youtube.com/watch?v=${video.id}&t=${video.start}s` : link.href
 
     return (
-        <div
-            className="project-preview relative isolate rounded-2xl bg-white text-left shadow-2xl ring-1 ring-slate-900/10 dark:bg-slate-900 dark:ring-white/15"
-            data-size={size}
-            style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}
-            onPointerDownCapture={onInteract}
-            onKeyDownCapture={onInteract}
-        >
-            <div className="project-window-bar">
-                <span
-                    aria-hidden
-                    className="link-icon h-3.5 w-3.5 shrink-0"
-                    style={
-                        {
-                            '--ic': link.color,
-                            '--icd': link.colorDark,
-                            mask: `url(${link.icon}) center / contain no-repeat`,
-                            WebkitMask: `url(${link.icon}) center / contain no-repeat`,
-                        } as CSSProperties
-                    }
-                />
-                <h3>{link.label}</h3>
-                {running ? (
-                    <button
-                        type="button"
-                        className="project-window-control"
-                        onClick={() => onSizeChange(size === 'wide' ? 'open' : 'wide')}
-                        aria-label={`${size === 'wide' ? 'Compact' : 'Expand'} ${link.label} window`}
-                    >
-                        <span aria-hidden>{size === 'wide' ? '↙' : '↗'}</span>
-                        <span>{size === 'wide' ? 'Compact' : 'Expand'}</span>
-                    </button>
-                ) : (
-                    <span className="project-window-kind">{preview.kind}</span>
-                )}
+        <div className="project-preview" style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}>
+            <header className="preview-header">
+                <div>
+                    <h3>{link.label}</h3>
+                    <p>{preview.kind}</p>
+                </div>
                 <button
                     type="button"
-                    className="project-window-close"
+                    className="preview-close"
                     onClick={onClose}
                     aria-label={`Close ${link.label} preview`}
                 >
-                    ×
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                        <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
                 </button>
-            </div>
-            {running && source ? (
-                <div className={`project-frame-stage ${video ? 'project-frame-video' : ''}`}>
-                    <iframe
-                        key={source}
-                        src={source}
-                        title={video ? video.title : `${link.label} — interactive preview`}
-                        // Set at creation, before navigation. Unsupported browsers use the
-                        // full-project link instead so previews never share saved-game storage.
-                        {...{ credentialless: true }}
-                        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
-                        allow="autoplay; fullscreen; gamepad; encrypted-media; picture-in-picture"
-                        allowFullScreen
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        onLoad={() => setLoading(false)}
+            </header>
+            <div className={`preview-stage preview-stage-${preview.mode}`}>
+                {/* These are captures of the real projects. Only the selected clip loads. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    className="preview-image"
+                    src={video?.image ?? detail?.image ?? preview.image}
+                    alt={video ? video.title : detail?.image ? `${link.label}: ${detail.title}` : preview.alt}
+                    width={840}
+                    height={525}
+                    style={
+                        preview.mode === 'lenses'
+                            ? {
+                                  transform: `scale(${detail?.scale ?? 1})`,
+                                  transformOrigin: `${detail?.x ?? 50}% ${detail?.y ?? 50}%`,
+                              }
+                            : undefined
+                    }
+                />
+                {video && !mediaError && (
+                    <video
+                        key={video.clip}
+                        ref={videoRef}
+                        src={video.clip}
+                        poster={video.image}
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        aria-label={`Silent excerpt: ${video.title}`}
+                        onPlay={() => setPlaying(true)}
+                        onPause={() => setPlaying(false)}
+                        onError={() => {
+                            setMediaError(true)
+                            setPlaying(false)
+                        }}
                     />
-                    {loading && (
-                        <div className="project-frame-loading" role="status">
-                            <span className="project-loading-dot" aria-hidden />
-                            {slowLoad
-                                ? 'Still loading. You can also open the full project below.'
-                                : `Opening ${link.label}…`}
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <div className={`project-cover ${video ? 'project-cover-video' : ''}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={video?.image ?? preview.image}
-                        alt={video?.title ?? preview.alt}
-                        width={840}
-                        height={525}
-                    />
-                    <div className="project-cover-action">
-                        {canEmbed ? (
-                            <button ref={launchRef} type="button" className="project-launch" onClick={launch}>
-                                <span aria-hidden>{video ? '▶' : '↗'}</span>
-                                {preview.launchLabel}
-                            </button>
-                        ) : (
-                            <a className="project-launch" href={fullUrl} target="_blank" rel="noopener noreferrer">
-                                Open project <span aria-hidden>↗</span>
-                            </a>
-                        )}
-                    </div>
-                </div>
-            )}
-            {preview.videos && video && (
-                <div className="project-video-picker">
-                    <div className="project-video-title">
-                        <span>{String(videoIndex + 1).padStart(2, '0')}</span>
-                        <p>{video.title}</p>
-                    </div>
-                    <div className="project-video-options" aria-label="Choose an explainer video">
-                        {preview.videos.map((item, index) => (
-                            <button
-                                key={item.id}
-                                type="button"
-                                aria-label={`Select ${item.title}`}
-                                aria-pressed={index === videoIndex}
-                                onClick={() => selectVideo(index)}
-                            >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={item.image} alt="" width={160} height={90} />
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-            <div className="project-window-footer">
-                {running ? (
-                    <button type="button" onClick={back}>
-                        <span aria-hidden>←</span> Back to preview
-                    </button>
-                ) : (
-                    <span>{video ? 'Visual explainers' : canEmbed ? 'Try it here' : 'Opens in a new tab'}</span>
                 )}
-                <a href={fullUrl} target="_blank" rel="noopener noreferrer">
-                    {video ? 'Watch on YouTube' : 'Open full project'} <span aria-hidden>↗</span>
-                </a>
+                {video && !mediaError && (
+                    <button
+                        type="button"
+                        className="preview-playback"
+                        onClick={() => setPlayIntent(!playing)}
+                        aria-label={playing ? 'Pause excerpt' : 'Play excerpt'}
+                    >
+                        <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
+                        {playing ? 'Pause' : 'Play'}
+                    </button>
+                )}
+                {preview.mode === 'hotspots' &&
+                    preview.details?.map((point, index) => (
+                        <button
+                            key={point.label}
+                            type="button"
+                            className="preview-hotspot"
+                            style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                            aria-label={`Explore ${point.label.toLowerCase()}`}
+                            aria-pressed={selected === index}
+                            onPointerEnter={() => choose(index)}
+                            onFocus={() => choose(index)}
+                            onClick={() => choose(index)}
+                        >
+                            <span aria-hidden="true">{index + 1}</span>
+                        </button>
+                    ))}
+                {preview.mode === 'abilities' && (
+                    <span className="preview-scene-label">
+                        Ashe <span>the Frost Archer</span>
+                    </span>
+                )}
+                {preview.mode === 'lenses' && (
+                    <span className="preview-lens-label" aria-hidden="true">
+                        ⌕ {detail?.label}
+                    </span>
+                )}
             </div>
+            <div className="preview-content">
+                <div className="preview-controls-heading">
+                    <span>{preview.hint}</span>
+                    <span className="preview-counter" aria-hidden="true">
+                        {String(selected + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                    </span>
+                </div>
+                <div
+                    className={`preview-choices ${preview.mode === 'abilities' ? 'preview-keys' : ''}`}
+                    role="group"
+                    aria-label={preview.hint}
+                >
+                    {items.map((label, index) => (
+                        <button
+                            key={label}
+                            type="button"
+                            aria-pressed={selected === index}
+                            onPointerEnter={() => choose(index)}
+                            onFocus={() => choose(index)}
+                            onClick={() => choose(index)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                <div className="preview-caption" aria-live="polite" aria-atomic="true">
+                    <h4>{video?.title ?? detail?.title}</h4>
+                    <p>{video?.caption ?? detail?.caption}</p>
+                </div>
+            </div>
+            <footer className="preview-footer">
+                <span>
+                    {video
+                        ? 'From my explainers'
+                        : preview.mode === 'lenses'
+                        ? 'A look inside the app'
+                        : 'Made for the browser'}
+                </span>
+                <a href={destination} target="_blank" rel="noopener noreferrer">
+                    {preview.action}
+                    <span aria-hidden="true"> ↗</span>
+                </a>
+            </footer>
         </div>
     )
 }
