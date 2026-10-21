@@ -1,0 +1,76 @@
+{
+    "github": {
+        "checkedAt": "2026-10-21T04:02:27Z",
+        "stats": [
+            {
+                "label": "Public repos",
+                "value": "85"
+            },
+            {
+                "label": "Followers",
+                "value": "24"
+            },
+            {
+                "label": "Since",
+                "value": "2017"
+            }
+        ]
+    },
+    "chess": {
+        "checkedAt": "2026-10-21T04:02:27Z",
+        "stats": [
+            {
+                "label": "Blitz",
+                "value": "427"
+            },
+            {
+                "label": "Rapid",
+                "value": "198"
+            },
+            {
+                "label": "Best puzzle",
+                "value": "1506"
+            }
+        ]
+    },
+    "ogs": {
+        "checkedAt": "2026-10-21T04:02:27Z",
+        "stats": [
+            {
+                "label": "Overall rating",
+                "value": "1708"
+            }
+        ]
+    },
+    "genshin": {
+        "checkedAt": "2026-10-21T04:02:28Z",
+        "stats": [
+            {
+                "label": "AR",
+                "value": "59"
+            },
+            {
+                "label": "Achievements",
+                "value": "866"
+            }
+        ]
+    },
+    "blog": {
+        "checkedAt": "2026-10-21T04:02:28Z",
+        "stats": [
+            {
+                "label": "Articles",
+                "value": "8"
+            }
+        ]
+    },
+    "gallery": {
+        "checkedAt": "2026-10-21T04:02:28Z",
+        "stats": [
+            {
+                "label": "Photos",
+                "value": "93"
+            }
+        ]
+    }
+}

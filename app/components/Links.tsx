@@ -12,6 +12,7 @@ import {
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
+import useProfileStats from './useProfileStats'
 import { categories, links, type LinkItem } from '../data/profile'
 
 // The terminal is roughly two thirds of this page's client code and hardly anyone
@@ -192,6 +193,8 @@ function StatCard({
 }) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [position, setPosition] = useState<TooltipPosition | null>(null)
+    const { stats: refreshedStats, freshness, checkedAt, current, unavailable } = useProfileStats(link.statsId)
+    const stats = refreshedStats ?? link.stats
 
     useLayoutEffect(() => {
         const updatePosition = () => {
@@ -228,7 +231,7 @@ function StatCard({
             window.removeEventListener('resize', updatePosition)
             window.removeEventListener('scroll', updatePosition, true)
         }
-    }, [triggerRef])
+    }, [triggerRef, stats, freshness, unavailable])
 
     return (
         <div
@@ -269,9 +272,9 @@ function StatCard({
                 {link.meta && (
                     <p className="mt-0.5 break-words text-xs text-slate-500 dark:text-slate-400">{link.meta}</p>
                 )}
-                {link.stats && link.stats.length > 0 && (
+                {stats && stats.length > 0 && (
                     <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
-                        {link.stats.map(stat => (
+                        {stats.map(stat => (
                             <div key={stat.label} className="flex min-w-0 flex-col">
                                 <dt className="text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                     {stat.label}
@@ -282,6 +285,18 @@ function StatCard({
                             </div>
                         ))}
                     </dl>
+                )}
+                {stats && stats.length > 0 && (
+                    <p className="mt-2 border-t border-slate-100 pt-2 text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                        <span
+                            className="inline-flex items-center gap-1.5"
+                            title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}
+                        >
+                            {current && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                            {freshness}
+                        </span>
+                        {unavailable && <span className="block">Refresh unavailable</span>}
+                    </p>
                 )}
             </div>
         </div>

@@ -1,6 +1,8 @@
 // Single source of truth for the site's content.
 // Edit this file to update anything shown on the page.
 
+import snapshots from './stats.json'
+
 // The few buckets the chips are grouped into on the homepage. Order here is the
 // order the sections render in.
 export const categories = ['Work & Research', 'Social', 'Play & Hobbies', 'Photography'] as const
@@ -8,6 +10,9 @@ export type LinkCategory = (typeof categories)[number]
 
 // A single metric shown in a chip's hover/focus card (e.g. { label: 'Streak', value: '794 days' }).
 export type LinkStat = { label: string; value: string }
+export type StatsId = keyof typeof snapshots
+export type StatsSnapshot = { checkedAt: string; stats: LinkStat[] }
+export const statsSnapshots: Record<StatsId, StatsSnapshot> = snapshots
 
 export type LinkItem = {
     label: string
@@ -20,6 +25,7 @@ export type LinkItem = {
     category: LinkCategory // which grouped section the chip lives in
     meta?: string // short subtitle (handle / id) shown in the hover card
     stats?: LinkStat[] // optional metrics revealed on hover/focus
+    statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
 }
 
 export const profile = {
@@ -48,10 +54,10 @@ export const links: LinkItem[] = [
         category: 'Work & Research',
         meta: '@user5137',
         stats: [
-            { label: 'Solved', value: '155' },
-            { label: 'Easy', value: '63' },
-            { label: 'Medium', value: '78' },
-            { label: 'Hard', value: '14' },
+            { label: 'Solved', value: '186' },
+            { label: 'Easy', value: '70' },
+            { label: 'Medium', value: '100' },
+            { label: 'Hard', value: '16' },
         ],
     },
     {
@@ -85,12 +91,13 @@ export const links: LinkItem[] = [
     },
     {
         label: 'Blog',
-        href: 'https://sir-teo.github.io/blogs/',
+        href: 'https://teozeng.dev/blogs/',
         icon: '/icons/blog.svg',
         color: '#0EA5E9',
         category: 'Work & Research',
         meta: 'Research notebook',
-        stats: [{ label: 'Notes', value: '300+' }],
+        statsId: 'blog',
+        stats: statsSnapshots.blog.stats,
     },
     {
         label: 'Email',
@@ -137,11 +144,8 @@ export const links: LinkItem[] = [
         colorDark: '#f0f6fc',
         category: 'Work & Research',
         meta: '@Sir-Teo',
-        stats: [
-            { label: 'Repos', value: '82' },
-            { label: 'Followers', value: '25' },
-            { label: 'Since', value: '2017' },
-        ],
+        statsId: 'github',
+        stats: statsSnapshots.github.stats,
     },
 
     // ── Social ───────────────────────────────────────────────────────
@@ -153,8 +157,8 @@ export const links: LinkItem[] = [
         category: 'Social',
         meta: '@teozeng3999',
         stats: [
-            { label: 'Videos', value: '10' },
-            { label: 'Subscribers', value: '5' },
+            { label: 'Videos', value: '44' },
+            { label: 'Subscribers', value: '24' },
         ],
     },
     {
@@ -255,12 +259,8 @@ export const links: LinkItem[] = [
         colorDark: '#F2DFA7',
         category: 'Play & Hobbies',
         meta: 'Teo · America · UID 646322102',
-        stats: [
-            { label: 'UID', value: '646322102' },
-            { label: 'AR', value: '59' },
-            { label: 'Achievements', value: '838' },
-            { label: 'Characters', value: '64' },
-        ],
+        statsId: 'genshin',
+        stats: statsSnapshots.genshin.stats,
     },
     {
         label: 'Chess.com',
@@ -269,11 +269,8 @@ export const links: LinkItem[] = [
         color: '#81B64C',
         category: 'Play & Hobbies',
         meta: '@masterteo1205',
-        stats: [
-            { label: 'Blitz', value: '427' },
-            { label: 'Rapid', value: '198' },
-            { label: 'Tactics', value: '1506' },
-        ],
+        statsId: 'chess',
+        stats: statsSnapshots.chess.stats,
     },
     {
         label: 'Duolingo',
@@ -283,8 +280,8 @@ export const links: LinkItem[] = [
         category: 'Play & Hobbies',
         meta: '@sirteo',
         stats: [
-            { label: 'Streak', value: '794 days' },
-            { label: 'XP', value: '121,768' },
+            { label: 'Streak', value: '894 days' },
+            { label: 'XP', value: '127,034' },
             { label: 'Courses', value: '5' },
         ],
     },
@@ -314,7 +311,8 @@ export const links: LinkItem[] = [
         colorDark: '#cbd5e1',
         category: 'Play & Hobbies',
         meta: 'Go (Weiqi)',
-        stats: [{ label: 'Rating', value: '1708' }],
+        statsId: 'ogs',
+        stats: statsSnapshots.ogs.stats,
     },
     {
         label: 'Steam',
@@ -341,6 +339,7 @@ export const links: LinkItem[] = [
         colorDark: '#a78bfa',
         category: 'Photography',
         meta: 'Personal photo gallery',
-        stats: [{ label: 'Photos', value: '90+' }],
+        statsId: 'gallery',
+        stats: statsSnapshots.gallery.stats,
     },
 ]

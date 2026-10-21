@@ -14,6 +14,16 @@ checks without publishing. Pages must use GitHub Actions as its build source,
 with `teozeng.dev` as the custom domain. No hosting credentials are needed by CI.
 The Firebase configuration is retained only for rollback to the former host.
 
+Stats for GitHub, Chess.com, OGS, published blog articles and gallery photos refresh
+in the browser when their hover/focus/tap cards open. Successful responses are cached
+locally (one hour, 12 hours for Chess.com, 24 hours for the archived gallery), with
+an eight-second request timeout and a five-minute retry delay after failures.
+The cards show when the data was checked and retain a labeled snapshot if a service
+is unavailable. `app/data/stats.json` holds the verified fallback values; Genshin is
+snapshot-only because Enka does not allow cross-origin browser requests. Other
+platforms remain labeled profile snapshots. No API keys, proxy, scheduled workflow,
+or new GitHub Action is used for stats; the existing Pages deployment is unchanged.
+
 This project is a pure front-end website based on the Next.js framework, designed to showcase and introduce personal information.
 
 ## Getting Started
