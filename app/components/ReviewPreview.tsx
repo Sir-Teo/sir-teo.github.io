@@ -58,11 +58,16 @@ export default function ReviewPreview({ scene }: { scene: ReviewScene }) {
     }, [scene, retry])
     if (error)
         return (
-            <div className="preview-loading">
+            <div className="preview-loading review-loading">
                 <button onClick={() => setRetry(n => n + 1)}>Retry game review</button>
             </div>
         )
-    if (!game) return <div className="preview-loading">Opening the game…</div>
+    if (!game)
+        return (
+            <div className="preview-loading review-loading" role="status">
+                Opening the game…
+            </div>
+        )
     return <GameReview game={game} />
 }
 
@@ -112,6 +117,9 @@ function GameReview({ game }: { game: ReviewGame }) {
                 if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
                     event.preventDefault()
                     choose(step + (event.key === 'ArrowLeft' ? -1 : 1))
+                } else if (event.key === 'Home' || event.key === 'End') {
+                    event.preventDefault()
+                    choose(event.key === 'Home' ? 0 : last)
                 }
             }}
         >
@@ -136,7 +144,7 @@ function GameReview({ game }: { game: ReviewGame }) {
                             <path d="M4 22H316" className="review-zero" />
                             <path d={graphPath(game.frames)} className="review-curve" />
                             <path d={`M${4 + (312 * step) / last} 2V42`} className="review-cursor" />
-                            <circle cx={4 + (312 * step) / last} cy={40 - frame.balance * 0.36} r="3" />
+                            <circle cx={4 + (312 * step) / last} cy={40 - frame.balance * 0.36} r="3.5" />
                         </svg>
                         <input
                             type="range"
@@ -154,6 +162,8 @@ function GameReview({ game }: { game: ReviewGame }) {
                         <button
                             type="button"
                             aria-label="Previous move"
+                            aria-keyshortcuts="ArrowLeft"
+                            title="Previous move (←)"
                             disabled={step === 0}
                             onClick={() => choose(step - 1)}
                         >
@@ -162,6 +172,9 @@ function GameReview({ game }: { game: ReviewGame }) {
                         <button
                             type="button"
                             aria-label={playing ? 'Pause game replay' : 'Play game replay'}
+                            className="review-play"
+                            data-playing={playing}
+                            title={playing ? 'Pause replay' : step === last ? 'Replay from the start' : 'Play the game'}
                             onClick={() => {
                                 if (!playing && step === last) {
                                     setSelected(0)
@@ -175,12 +188,14 @@ function GameReview({ game }: { game: ReviewGame }) {
                         <button
                             type="button"
                             aria-label="Next move"
+                            aria-keyshortcuts="ArrowRight"
+                            title="Next move (→)"
                             disabled={step === last}
                             onClick={() => choose(step + 1)}
                         >
                             <ControlIcon name="next" />
                         </button>
-                        <span>
+                        <span title="Position in the recorded game">
                             {step} / {last}
                         </span>
                     </div>
@@ -190,7 +205,11 @@ function GameReview({ game }: { game: ReviewGame }) {
                                 key={index}
                                 type="button"
                                 aria-pressed={selected === index}
-                                aria-label={`Show line ${index + 1}: ${candidate.text}`}
+                                aria-label={`Show line ${index + 1}: ${candidate.text}. ${evaluationText(
+                                    game.scene,
+                                    candidate
+                                )}`}
+                                title={`${candidate.text} · ${evaluationText(game.scene, candidate)}`}
                                 onPointerEnter={event => {
                                     if (event.pointerType !== 'touch') {
                                         setPlaying(false)
@@ -212,8 +231,8 @@ function GameReview({ game }: { game: ReviewGame }) {
                         ))}
                         {!frame.lines.length && <span className="review-end">End of the game</span>}
                     </div>
-                    <p className="review-continuation" aria-live="polite">
-                        {line ? `${selected + 1}. ${line.text}` : 'Drag the curve to revisit a move.'}
+                    <p className="review-continuation" aria-live={playing ? 'off' : 'polite'} title={line?.text}>
+                        {line ? line.text : 'Drag the curve to revisit a move.'}
                     </p>
                     <p className="review-source">{game.engine}</p>
                 </div>
@@ -265,161 +284,192 @@ function ReviewBoard({
     return (
         <svg
             className={`review-board review-board-${scene}`}
-            viewBox={`0 0 ${width} ${height}`}
+            viewBox={`-.38 ${scene === 'xiangqi' ? '-.38' : '-.08'} ${width + 0.46} ${
+                height + (scene === 'xiangqi' ? 0.76 : 0.46)
+            }`}
             role="img"
             aria-label={`${scene === 'go' ? 'Go' : scene === 'chess' ? 'Chess' : 'Xiangqi'} board after ${frame.label}${
                 line ? `. Suggested line: ${line.text}` : ''
             }`}
         >
             <defs>
+                <clipPath id={`${id}-board`}>
+                    <rect width={width} height={height} rx=".12" />
+                </clipPath>
                 <marker id={id} markerWidth="3" markerHeight="3" refX="2.3" refY="1.5" orient="auto">
                     <path d="M0 0 3 1.5 0 3Z" fill="currentColor" />
                 </marker>
             </defs>
-            <rect width={width} height={height} rx=".12" fill={chess ? '#f0d9b5' : '#e6c38b'} />
-            {chess ? (
-                frame.board.flatMap((row, y) =>
-                    row
-                        .split('')
-                        .map((_, x) =>
-                            (x + y) % 2 ? (
-                                <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#b58863" />
-                            ) : null
-                        )
-                )
-            ) : (
-                <g stroke="#855f36" strokeWidth=".024" fill="none">
-                    {Array.from({ length: height }, (_, y) => (
-                        <path key={`h${y}`} d={`M.5 ${y + 0.5}H${width - 0.5}`} />
-                    ))}
-                    {grid.map(x => (
-                        <path
-                            key={`v${x}`}
-                            d={
-                                go || x === 0 || x === 8
-                                    ? `M${x + 0.5} .5V${height - 0.5}`
-                                    : `M${x + 0.5} .5V4.5M${x + 0.5} 5.5V9.5`
-                            }
-                        />
-                    ))}
-                    {!go && <path d="m3.5 .5 2 2m-2 0 2-2m-2 7 2 2m-2 0 2-2" />}
-                </g>
-            )}
-            {scene === 'xiangqi' && (
-                <g className="review-river" fill="#855f36">
-                    <text x="2.5" y="5">
-                        楚 河
+            <g className="review-coordinates" aria-hidden="true">
+                {grid.map(x => (
+                    <text key={`file${x}`} x={x + 0.5} y={height + 0.22}>
+                        {chess ? 'abcdefgh'[x] : go ? 'ABCDEFGHJ'[x] : '九八七六五四三二一'[x]}
                     </text>
-                    <text x="6.5" y="5">
-                        漢 界
-                    </text>
-                </g>
-            )}
-            {go &&
-                [
-                    [2, 2],
-                    [6, 2],
-                    [4, 4],
-                    [2, 6],
-                    [6, 6],
-                ].map(([x, y]) => <circle key={`${x}-${y}`} cx={x + 0.5} cy={y + 0.5} r=".055" fill="#6b482b" />)}
-            {frame.last && (
-                <rect
-                    x={frame.last[0] + 0.03}
-                    y={frame.last[1] + 0.03}
-                    width=".94"
-                    height=".94"
-                    rx={go ? '.45' : '.08'}
-                    fill="#eec849"
-                    opacity=".55"
-                />
-            )}
-            <g>
-                {frame.board.flatMap((row, y) =>
-                    row.split('').map((piece, x) => {
-                        if (piece === '.') return null
-                        const first = go ? piece === 'x' : piece === piece.toUpperCase()
-                        if (chess)
-                            return (
-                                <use
-                                    key={`${x}-${y}`}
-                                    href={`/previews/reviews/chess-pieces.svg#${
-                                        first ? 'w' : 'b'
-                                    }${piece.toUpperCase()}`}
-                                    x={x + 0.035}
-                                    y={y + 0.035}
-                                    width=".93"
-                                    height=".93"
-                                />
+                ))}
+                {scene === 'xiangqi'
+                    ? grid.map(x => (
+                          <text key={`opponent${x}`} x={x + 0.5} y="-.19">
+                              {x + 1}
+                          </text>
+                      ))
+                    : Array.from({ length: height }, (_, y) => (
+                          <text key={`rank${y}`} x="-.22" y={y + 0.52}>
+                              {height - y}
+                          </text>
+                      ))}
+            </g>
+            <g clipPath={`url(#${id}-board)`}>
+                <rect width={width} height={height} rx=".12" fill={chess ? '#f0d9b5' : '#e6c38b'} />
+                {chess ? (
+                    frame.board.flatMap((row, y) =>
+                        row
+                            .split('')
+                            .map((_, x) =>
+                                (x + y) % 2 ? (
+                                    <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#b58863" />
+                                ) : null
                             )
+                    )
+                ) : (
+                    <g stroke="#855f36" strokeWidth=".024" fill="none">
+                        {Array.from({ length: height }, (_, y) => (
+                            <path key={`h${y}`} d={`M.5 ${y + 0.5}H${width - 0.5}`} />
+                        ))}
+                        {grid.map(x => (
+                            <path
+                                key={`v${x}`}
+                                d={
+                                    go || x === 0 || x === 8
+                                        ? `M${x + 0.5} .5V${height - 0.5}`
+                                        : `M${x + 0.5} .5V4.5M${x + 0.5} 5.5V9.5`
+                                }
+                            />
+                        ))}
+                        {!go && <path d="m3.5 .5 2 2m-2 0 2-2m-2 7 2 2m-2 0 2-2" />}
+                    </g>
+                )}
+                {scene === 'xiangqi' && (
+                    <g className="review-river" fill="#855f36">
+                        <text x="2.5" y="5">
+                            楚 河
+                        </text>
+                        <text x="6.5" y="5">
+                            漢 界
+                        </text>
+                    </g>
+                )}
+                {go &&
+                    [
+                        [2, 2],
+                        [6, 2],
+                        [4, 4],
+                        [2, 6],
+                        [6, 6],
+                    ].map(([x, y]) => <circle key={`${x}-${y}`} cx={x + 0.5} cy={y + 0.5} r=".055" fill="#6b482b" />)}
+                {frame.last && (
+                    <rect
+                        x={frame.last[0] + 0.03}
+                        y={frame.last[1] + 0.03}
+                        width=".94"
+                        height=".94"
+                        rx={go ? '.45' : '.08'}
+                        fill="#eec849"
+                        opacity=".55"
+                    />
+                )}
+                <g>
+                    {frame.board.flatMap((row, y) =>
+                        row.split('').map((piece, x) => {
+                            if (piece === '.') return null
+                            const first = go ? piece === 'x' : piece === piece.toUpperCase()
+                            if (chess)
+                                return (
+                                    <use
+                                        key={`${x}-${y}`}
+                                        href={`/previews/reviews/chess-pieces.svg#${
+                                            first ? 'w' : 'b'
+                                        }${piece.toUpperCase()}`}
+                                        x={x + 0.035}
+                                        y={y + 0.035}
+                                        width=".93"
+                                        height=".93"
+                                    />
+                                )
+                            return (
+                                <g key={`${x}-${y}`}>
+                                    <circle
+                                        cx={x + 0.5}
+                                        cy={y + 0.5}
+                                        r={go ? '.43' : '.41'}
+                                        fill={go ? (first ? '#22262a' : '#fcfaf4') : '#f9e3b8'}
+                                        stroke={go ? (first ? '#111' : '#aaa79e') : first ? '#b82e25' : '#2d3540'}
+                                        strokeWidth={go ? '.025' : '.03'}
+                                    />
+                                    {!go && (
+                                        <text
+                                            x={x + 0.5}
+                                            y={y + 0.52}
+                                            className="review-xiangqi-piece"
+                                            fill={first ? '#b82e25' : '#2d3540'}
+                                        >
+                                            {glyphs[piece]}
+                                        </text>
+                                    )}
+                                    {go && frame.last?.[0] === x && frame.last?.[1] === y && (
+                                        <circle cx={x + 0.5} cy={y + 0.5} r=".095" fill="#ddab32" />
+                                    )}
+                                </g>
+                            )
+                        })
+                    )}
+                </g>
+                {go ? (
+                    arrows.map((move, i) => {
+                        if (!move || frame.board[move[1]][move[0]] !== '.') return null
+                        const black = (frame.turn === 'Black') === (i % 2 === 0)
                         return (
-                            <g key={`${x}-${y}`}>
+                            <g key={i} opacity=".9">
                                 <circle
-                                    cx={x + 0.5}
-                                    cy={y + 0.5}
-                                    r={go ? '.43' : '.41'}
-                                    fill={go ? (first ? '#22262a' : '#fcfaf4') : '#f9e3b8'}
-                                    stroke={go ? (first ? '#111' : '#aaa79e') : first ? '#b82e25' : '#2d3540'}
-                                    strokeWidth={go ? '.025' : '.03'}
+                                    cx={move[0] + 0.5}
+                                    cy={move[1] + 0.5}
+                                    r=".38"
+                                    fill={black ? '#252b31' : '#fff'}
+                                    stroke="#31977a"
+                                    strokeWidth=".055"
                                 />
-                                {!go && (
-                                    <text
-                                        x={x + 0.5}
-                                        y={y + 0.52}
-                                        className="review-xiangqi-piece"
-                                        fill={first ? '#b82e25' : '#2d3540'}
-                                    >
-                                        {glyphs[piece]}
-                                    </text>
-                                )}
-                                {go && frame.last?.[0] === x && frame.last?.[1] === y && (
-                                    <circle cx={x + 0.5} cy={y + 0.5} r=".095" fill="#ddab32" />
-                                )}
+                                <text
+                                    className="review-go-number"
+                                    x={move[0] + 0.5}
+                                    y={move[1] + 0.52}
+                                    fill={black ? '#fff' : '#252b31'}
+                                >
+                                    {i + 1}
+                                </text>
                             </g>
                         )
                     })
+                ) : (
+                    <g
+                        className="review-arrows"
+                        stroke="currentColor"
+                        strokeWidth=".13"
+                        fill="none"
+                        strokeLinecap="round"
+                    >
+                        {arrows.map(
+                            (move, i) =>
+                                move && (
+                                    <path
+                                        key={i}
+                                        opacity={i === 0 ? '.85' : '.45'}
+                                        d={`M${move[0] + 0.5} ${move[1] + 0.5}L${move[2] + 0.5} ${move[3] + 0.5}`}
+                                        markerEnd={`url(#${id})`}
+                                    />
+                                )
+                        )}
+                    </g>
                 )}
             </g>
-            {go ? (
-                arrows.map((move, i) => {
-                    if (!move || frame.board[move[1]][move[0]] !== '.') return null
-                    const black = (frame.turn === 'Black') === (i % 2 === 0)
-                    return (
-                        <g key={i} opacity=".9">
-                            <circle
-                                cx={move[0] + 0.5}
-                                cy={move[1] + 0.5}
-                                r=".38"
-                                fill={black ? '#252b31' : '#fff'}
-                                stroke="#31977a"
-                                strokeWidth=".055"
-                            />
-                            <text
-                                className="review-go-number"
-                                x={move[0] + 0.5}
-                                y={move[1] + 0.52}
-                                fill={black ? '#fff' : '#252b31'}
-                            >
-                                {i + 1}
-                            </text>
-                        </g>
-                    )
-                })
-            ) : (
-                <g className="review-arrows" stroke="currentColor" strokeWidth=".13" fill="none" strokeLinecap="round">
-                    {arrows.map(
-                        (move, i) =>
-                            move && (
-                                <path
-                                    key={i}
-                                    opacity={i === 0 ? '.85' : '.45'}
-                                    d={`M${move[0] + 0.5} ${move[1] + 0.5}L${move[2] + 0.5} ${move[3] + 0.5}`}
-                                    markerEnd={`url(#${id})`}
-                                />
-                            )
-                    )}
-                </g>
-            )}
         </svg>
     )
 }

@@ -10,7 +10,11 @@ const GamePreview = dynamic(() => import('./GamePreview'), {
 })
 
 const ReviewPreview = dynamic(() => import('./ReviewPreview'), {
-    loading: () => <div className="preview-loading">Opening the game…</div>,
+    loading: () => (
+        <div className="preview-loading review-loading" role="status">
+            Opening the game…
+        </div>
+    ),
 })
 
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
@@ -45,7 +49,12 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
     return (
         <div
             className={`project-preview project-preview-${preview.mode}`}
-            style={{ '--preview-accent': link.colorDark ?? link.color } as CSSProperties}
+            style={
+                {
+                    '--preview-accent-light': link.color,
+                    '--preview-accent-dark': link.colorDark ?? link.color,
+                } as CSSProperties
+            }
         >
             <header className="preview-header">
                 <h3>
