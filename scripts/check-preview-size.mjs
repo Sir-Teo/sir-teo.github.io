@@ -54,6 +54,13 @@ if (mediaBytes > 1600 * 1024) throw new Error('Game media exceeds 1600 KiB total
 console.log(`All three films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
 console.log(`Initial page scripts: ${(initialGzip / 1024).toFixed(1)} KiB gzip (measured locally).`)
 
+const finosImage = '/previews/finos-markets.webp'
+const finosBytes = (await readFile(resolve(root, finosImage.slice(1)))).length
+if (finosBytes > 80 * 1024) throw new Error('FinOS screenshot exceeds 80 KiB')
+// Its URL is serialized as project data, but no image or preload should be rendered until opened.
+if (/<(?:img|link)\b[^>]*(?:src|href)="[^"]*finos-markets/.test(html)) throw new Error('FinOS screenshot must load on demand')
+console.log(`FinOS screenshot: ${(finosBytes / 1024).toFixed(1)} KiB; loaded only when its card opens.`)
+
 let explainerBytes = 0
 for (const name of ['llm', 'quantum', 'relativity']) {
     for (const extension of ['mp4', 'webp']) {

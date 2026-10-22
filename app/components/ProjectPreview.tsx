@@ -76,7 +76,22 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
                     </svg>
                 </button>
             </header>
-            {preview.mode === 'videos' ? (
+            {preview.mode === 'product' ? (
+                <div className="product-preview">
+                    {preview.image && (
+                        // Loaded only when the hover/focus/tap card mounts, like the game posters.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={preview.image.src}
+                            alt={preview.image.alt}
+                            width={preview.image.width}
+                            height={preview.image.height}
+                            decoding="async"
+                        />
+                    )}
+                    {link.description && <p>{link.description}</p>}
+                </div>
+            ) : preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (
                 <ReviewPreview key={preview.mode} scene={preview.mode} />

@@ -2,6 +2,16 @@
 
 Project pills open anchored cards with keyboard and touch support. Cards stay within the viewport, including small portrait and short landscape screens.
 
+## FinOS AgentLab
+
+FinOS leads the project list. Its preview uses the actual Markets screenshot from
+`FinOS-AgentLab/docs/assets/markets.png`, converted to a 960 × 600 WebP. The still
+shows market data and the product interface, not a live feed or personal portfolio.
+Its candlestick icon follows the app's own `frontend/app/icon.svg`. The card has one
+short description and a 44px **Open FinOS** link. The image loads only when the card
+opens; there is no iframe, dashboard runtime, or third-party request. The screenshot
+is capped at 80 KiB by the existing preview-size check.
+
 ## Game films
 
 Each game has one nine-second silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and **Open game** link. Scene tabs, magnification, embedded games and their launch controls have been removed.

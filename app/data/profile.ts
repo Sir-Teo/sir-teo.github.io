@@ -27,9 +27,10 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos'
+        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'product'
         hint: string
         action: string
+        image?: { src: string; alt: string; width: number; height: number }
         videos?: {
             id: string
             title: string
@@ -354,6 +355,27 @@ export const links: LinkItem[] = [
 
 // Kept separate from identity/profile links so projects do not become Person.sameAs URLs.
 export const projects: LinkItem[] = [
+    {
+        label: 'FinOS AgentLab',
+        href: 'https://finos.teozeng.dev/',
+        icon: '/icons/finos.svg',
+        color: '#0284C7',
+        colorDark: '#38BDF8',
+        category: 'Projects',
+        meta: 'Financial research workspace',
+        description: 'Financial research, multi-agent analysis, and portfolio tools in one workspace.',
+        preview: {
+            mode: 'product',
+            hint: 'Market dashboard',
+            action: 'Open FinOS',
+            image: {
+                src: '/previews/finos-markets.webp',
+                alt: 'FinOS AgentLab market dashboard with market movers, a stock heatmap, sector performance and a yield curve.',
+                width: 960,
+                height: 600,
+            },
+        },
+    },
     {
         label: 'Explainer videos',
         href: 'https://www.youtube.com/@teozeng3999/videos',
