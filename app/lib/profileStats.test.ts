@@ -5,6 +5,19 @@ let saved: Map<string, string>
 let fetchMock: ReturnType<typeof vi.fn>
 const github = { login: 'Sir-Teo', public_repos: 86, followers: 26, created_at: '2017-10-07T15:39:14Z' }
 const response = (data: unknown) => ({ ok: true, json: async () => data })
+// Text fields observed in LeetCard's public SVG response; foreign markup is never rendered.
+const leetCard = `<svg><text id="username-text">user5137</text>
+    <text id="total-solved-text">186</text>
+    <text id="easy-solved-count">70 / 972</text>
+    <text id="medium-solved-count">100 / 2131</text>
+    <text id="hard-solved-count">16 / 984</text></svg>`
+const duo = {
+    id: 625409208,
+    username: 'sirteo',
+    streak: 895,
+    totalXp: 127398,
+    courses: [{ id: 'DUOLINGO_ES_EN' }, { id: 'DUOLINGO_FR_EN' }],
+}
 
 beforeEach(async () => {
     vi.resetModules()
@@ -26,6 +39,57 @@ afterEach(() => {
 })
 
 describe('public profile stats', () => {
+    it('extracts LeetCode solved counts without loading the external SVG into the page', async () => {
+        fetchMock.mockResolvedValue({ ok: true, text: async () => leetCard })
+        const result = await api.refreshStats('leetcode')
+        expect(result.status).toBe('current')
+        expect(result.snapshot.stats).toEqual([
+            { label: 'Solved', value: '186' },
+            { label: 'Easy', value: '70' },
+            { label: 'Medium', value: '100' },
+            { label: 'Hard', value: '16' },
+        ])
+    })
+
+    it.each([
+        leetCard.replace('user5137', 'Failed to fetch user data'),
+        leetCard.replace('>186<', '>999<'),
+        leetCard.replace('70 / 972', 'N/A'),
+        '<html>Service unavailable</html>',
+    ])('rejects error cards and inconsistent counts even when HTTP is 200', async svg => {
+        fetchMock.mockResolvedValue({ ok: true, text: async () => svg })
+        expect(await api.refreshStats('leetcode')).toEqual({ ...api.initialStats('leetcode'), status: 'unavailable' })
+        expect(saved.size).toBe(0)
+    })
+
+    it('refreshes Duolingo streak, XP and distinct courses from the expected public account', async () => {
+        fetchMock.mockResolvedValue(response({ ...duo, courses: [...duo.courses, duo.courses[0]] }))
+        const result = await api.refreshStats('duolingo')
+        expect(result.status).toBe('current')
+        expect(result.snapshot.stats).toEqual([
+            { label: 'Day streak', value: '895' },
+            { label: 'XP', value: '127,398' },
+            { label: 'Courses', value: '2' },
+        ])
+    })
+
+    it.each([
+        { error: 'upstream_unavailable' },
+        { ...duo, id: 1 },
+        { ...duo, streak: null },
+        { ...duo, courses: null },
+    ])('keeps the dated Duolingo snapshot for errors or missing data', async data => {
+        fetchMock.mockResolvedValue(response(data))
+        expect(await api.refreshStats('duolingo')).toEqual({ ...api.initialStats('duolingo'), status: 'unavailable' })
+    })
+
+    it('allows a real zero-day streak without treating a missing streak as zero', async () => {
+        fetchMock.mockResolvedValue(response({ ...duo, streak: 0 }))
+        const result = await api.refreshStats('duolingo')
+        expect(result.status).toBe('current')
+        expect(result.snapshot.stats[0]).toEqual({ label: 'Day streak', value: '0' })
+    })
+
     it('uses public GitHub counters and derives the account year', async () => {
         fetchMock.mockResolvedValue(response(github))
         const result = await api.refreshStats('github')

@@ -41,6 +41,8 @@ export type LinkItem = {
     }
     stats?: LinkStat[] // optional metrics revealed on hover/focus
     statsId?: StatsId // public browser refresh, or a dated snapshot when CORS is unavailable
+    statsSource?: string // community provider attribution, when the platform has no public browser API
+    stravaSummary?: string // official, public weekly-summary iframe copied from the athlete profile
 }
 
 export const profile = {
@@ -68,12 +70,9 @@ export const links: LinkItem[] = [
         color: '#FFA116',
         category: 'Work & Research',
         meta: '@user5137',
-        stats: [
-            { label: 'Solved', value: '186' },
-            { label: 'Easy', value: '70' },
-            { label: 'Medium', value: '100' },
-            { label: 'Hard', value: '16' },
-        ],
+        statsId: 'leetcode',
+        statsSource: 'LeetCard',
+        stats: statsSnapshots.leetcode.stats,
     },
     {
         label: 'Kaggle',
@@ -242,13 +241,9 @@ export const links: LinkItem[] = [
         icon: '/icons/strava.svg',
         color: '#FC4C02',
         category: 'Play & Hobbies',
-        meta: 'Boston runner profile',
-        stats: [
-            { label: 'Activities', value: '124' },
-            { label: 'Distance', value: '340.5 mi' },
-            { label: 'Time', value: '60h 17m' },
-            { label: 'Followers', value: '5' },
-        ],
+        meta: 'This week in motion',
+        stravaSummary:
+            'https://www.strava.com/athletes/206183585/activity-summary/9ff06a679bccbf2e555dc5c4088ade021db852c0',
     },
     {
         // Clash of Clans has no official public player page; ClashOfStats hosts
@@ -294,11 +289,9 @@ export const links: LinkItem[] = [
         color: '#58CC02',
         category: 'Play & Hobbies',
         meta: '@sirteo',
-        stats: [
-            { label: 'Streak', value: '894 days' },
-            { label: 'XP', value: '127,034' },
-            { label: 'Courses', value: '5' },
-        ],
+        statsId: 'duolingo',
+        statsSource: 'Duo Streak Tracker',
+        stats: statsSnapshots.duolingo.stats,
     },
     {
         label: 'AllTrails',

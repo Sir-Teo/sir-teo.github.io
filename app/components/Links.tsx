@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
 import ProjectPreview from './ProjectPreview'
 import useProfileStats from './useProfileStats'
+import StravaSummary from './StravaSummary'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
 const allLinks = [...links, ...projects]
@@ -299,6 +300,7 @@ function StatCard({
                         </button>
                     </header>
                     {link.description && <p className="profile-card-description">{link.description}</p>}
+                    {link.stravaSummary && <StravaSummary src={link.stravaSummary} />}
                     {link.tags && link.tags.length > 0 && (
                         <ul className="profile-card-tags" aria-label="Features">
                             {link.tags.map(tag => (
@@ -325,8 +327,10 @@ function StatCard({
                                         {freshness}
                                     </span>
                                     {unavailable && <span>Refresh unavailable</span>}
+                                    {link.statsSource && <span>via {link.statsSource}</span>}
                                 </>
                             )}
+                            {link.stravaSummary && <span>Official weekly summary</span>}
                             {copyStatus === 'copied' && <span>Handle copied</span>}
                             {copyStatus === 'showing' && <span>Select the handle above to copy.</span>}
                         </div>

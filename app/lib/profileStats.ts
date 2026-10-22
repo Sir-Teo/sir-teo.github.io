@@ -19,7 +19,54 @@ function number(value: unknown): number {
 
 const stat = (label: string, value: number): LinkStat => ({ label, value: Math.round(number(value)).toString() })
 
+// Read only the small, named text fields. Never insert third-party SVG markup into the page.
+function leetCardField(svg: string, id: string): string {
+    const matches = Array.from(svg.matchAll(new RegExp(`<text\\b[^>]*\\bid=["']${id}["'][^>]*>([^<]*)<\\/text>`, 'g')))
+    if (matches.length !== 1) throw new Error('Unrecognized LeetCard')
+    return matches[0][1].trim()
+}
+
 const providers: Partial<Record<StatsId, Provider>> = {
+    leetcode: {
+        url: 'https://leetcard.jacoblin.cool/user5137?animation=false&font=sans-serif&cache=3600',
+        ttl: HOUR,
+        html: true,
+        parse(data) {
+            if (typeof data !== 'string' || data.length > 100000) throw new Error('Invalid LeetCard')
+            // LeetCard can return HTTP 200 with an error username and random example counts.
+            // Verify identity before accepting any numbers, even when the request succeeds.
+            if (leetCardField(data, 'username-text') !== 'user5137') throw new Error('Unexpected user')
+            const totalText = leetCardField(data, 'total-solved-text')
+            if (!/^\d+$/.test(totalText)) throw new Error('Invalid total')
+            const total = Number(totalText)
+            const difficulties = ['easy', 'medium', 'hard'].map(difficulty => {
+                const counts = leetCardField(data, `${difficulty}-solved-count`).match(/^(\d+)\s*\/\s*(\d+)$/)
+                if (!counts || Number(counts[1]) > Number(counts[2])) throw new Error('Invalid solved count')
+                return Number(counts[1])
+            })
+            if (difficulties.reduce((sum, count) => sum + count, 0) !== total) throw new Error('Inconsistent total')
+            return [
+                stat('Solved', total),
+                ...['Easy', 'Medium', 'Hard'].map((label, i) => stat(label, difficulties[i])),
+            ]
+        },
+    },
+    duolingo: {
+        url: 'https://duolingo-streak-tracker.vercel.app/api/stats/sirteo',
+        ttl: HOUR,
+        parse(data) {
+            const user = object(data)
+            if (user.username !== 'sirteo' || user.id !== 625409208) throw new Error('Unexpected user')
+            if (!Array.isArray(user.courses)) throw new Error('Invalid course list')
+            const courses = user.courses.map(course => object(course).id)
+            if (courses.some(id => typeof id !== 'string' || !id)) throw new Error('Invalid course')
+            return [
+                stat('Day streak', number(user.streak)),
+                { label: 'XP', value: Math.round(number(user.totalXp)).toLocaleString('en-US') },
+                stat('Courses', new Set(courses).size),
+            ]
+        },
+    },
     github: {
         url: 'https://api.github.com/users/Sir-Teo',
         ttl: HOUR,

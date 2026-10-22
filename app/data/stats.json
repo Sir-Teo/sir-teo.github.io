@@ -72,5 +72,43 @@
                 "value": "93"
             }
         ]
+    },
+    "leetcode": {
+        "checkedAt": "2026-10-22T01:08:37Z",
+        "stats": [
+            {
+                "label": "Solved",
+                "value": "186"
+            },
+            {
+                "label": "Easy",
+                "value": "70"
+            },
+            {
+                "label": "Medium",
+                "value": "100"
+            },
+            {
+                "label": "Hard",
+                "value": "16"
+            }
+        ]
+    },
+    "duolingo": {
+        "checkedAt": "2026-10-22T01:04:06Z",
+        "stats": [
+            {
+                "label": "Day streak",
+                "value": "895"
+            },
+            {
+                "label": "XP",
+                "value": "127,398"
+            },
+            {
+                "label": "Courses",
+                "value": "5"
+            }
+        ]
     }
 }
