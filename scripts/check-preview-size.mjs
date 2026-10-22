@@ -16,8 +16,12 @@ async function javascript(directory) {
 const files = await javascript(resolve(root, '_next/static/chunks'))
 const games = []
 const reviews = []
+const cards = []
+const terminals = []
 for (const path of files) {
     const source = await readFile(path)
+    if (source.includes('profile-card-stats')) cards.push({ path, gzip: gzipSync(source).length })
+    if (source.includes('teo@aboutme:')) terminals.push({ path, gzip: gzipSync(source).length })
     if (source.includes('recorded-review')) reviews.push({ path, bytes: source.length, gzip: gzipSync(source).length })
     if (source.includes('game-film'))
         games.push({ path, bytes: source.length, gzip: gzipSync(source).length })
@@ -29,13 +33,17 @@ if (bytes > 8 * 1024 || gzip > 4 * 1024) {
     throw new Error(`Game preview budget exceeded: ${bytes} raw / ${gzip} gzip bytes (limits 8 / 4 KiB)`)
 }
 const html = await readFile(resolve(root, 'index.html'), 'utf8')
+if (cards.length !== 1 || cards[0].gzip > 20 * 1024) throw new Error('Hover cards must stay in one on-demand chunk below 20 KiB gzip')
+if (terminals.length !== 1) throw new Error('Terminal must stay in a separate on-demand chunk')
 const scripts = [...new Set([...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)].map(match => match[1]))]
 let initialGzip = 0
 for (const script of scripts) {
     const path = resolve(root, script.replace(/^\//, ''))
-    if ([...games, ...reviews].some(game => path === game.path)) throw new Error('Project previews must remain lazy-loaded')
+    if ([...games, ...reviews, ...cards, ...terminals].some(chunk => path === chunk.path)) throw new Error('Hover cards and terminal must remain lazy-loaded')
     initialGzip += gzipSync(await readFile(path)).length
 }
+if (initialGzip > 184 * 1024) throw new Error(`Initial scripts exceed 184 KiB gzip: ${(initialGzip / 1024).toFixed(1)} KiB`)
+console.log(`On demand: ${(cards[0].gzip / 1024).toFixed(1)} KiB hover cards; ${(terminals[0].gzip / 1024).toFixed(1)} KiB terminal (gzip).`)
 console.log(
     `Game film code: ${(bytes / 1024).toFixed(1)} KiB raw / ${(gzip / 1024).toFixed(1)} KiB gzip; loaded on demand.`
 )

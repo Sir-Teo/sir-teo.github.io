@@ -1,35 +1,33 @@
 'use client'
 import {
     forwardRef,
+    memo,
     useCallback,
     useEffect,
     useId,
-    useLayoutEffect,
     useRef,
     useState,
-    type CSSProperties,
     type Dispatch,
     type FocusEvent,
     type PointerEvent as ReactPointerEvent,
     type RefCallback,
-    type RefObject,
     type SetStateAction,
 } from 'react'
 import dynamic from 'next/dynamic'
 import QRCodePopover from './QRCodePopover'
-import ProjectPreview from './ProjectPreview'
-import useProfileStats from './useProfileStats'
-import StravaSummary from './StravaSummary'
-import { PreviewClose, PreviewLink } from './PreviewControls'
+import IconMask from './LinkIcon'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
 const allLinks = [...links, ...projects]
+const linkGroups = categories.map(category => ({
+    category,
+    items: allLinks.filter(link => link.category === category && (link.href || link.qrcode || link.handle)),
+}))
 
-// The terminal is roughly two thirds of this page's client code and hardly anyone
-// opens it. Split it into its own chunk and pull that chunk in once the page has
-// gone idle (or right away if someone clicks first), so it stays off the initial
-// load without changing how the panel itself behaves.
+// Download optional interfaces only when opened. Keep the terminal mounted after
+// its first use so closing it preserves the visitor's command history.
 const Terminal = dynamic(() => import('./Terminal'), { ssr: false })
+const StatCard = dynamic(() => import('./StatCard'), { ssr: false })
 
 // Keyboard focus ring shared by every chip so tab-navigation is clearly visible
 // without affecting the resting (mouse) look.
@@ -55,16 +53,7 @@ export default function Links() {
     const [termOpen, setTermOpen] = useState(false)
     const [termLoaded, setTermLoaded] = useState(false)
     const termChipRef = useRef<HTMLButtonElement>(null)
-
-    // Warm the terminal chunk during idle time so the first open is instant.
-    useEffect(() => {
-        if (typeof window.requestIdleCallback !== 'function') {
-            const id = window.setTimeout(() => setTermLoaded(true), 1500)
-            return () => window.clearTimeout(id)
-        }
-        const id = window.requestIdleCallback(() => setTermLoaded(true), { timeout: 3000 })
-        return () => window.cancelIdleCallback(id)
-    }, [])
+    const canHover = useCanHover()
 
     // Return focus to the launcher when the panel closes (keyboard accessibility).
     const closeTerm = () => {
@@ -75,10 +64,7 @@ export default function Links() {
         <>
             <div className="space-y-5 sm:space-y-6">
                 {/* Profile links and projects share the same pills and preview behavior. */}
-                {categories.map(category => {
-                    const items = allLinks.filter(
-                        link => link.category === category && (link.href || link.qrcode || link.handle)
-                    )
+                {linkGroups.map(({ category, items }) => {
                     if (items.length === 0) return null
                     return (
                         <section key={category} aria-label={category}>
@@ -88,7 +74,12 @@ export default function Links() {
                             <ul className="flex flex-wrap gap-2">
                                 {items.map(link => (
                                     <li key={link.label}>
-                                        <LinkChip link={link} activeCard={activeCard} setActiveCard={setActiveCard} />
+                                        <LinkChip
+                                            link={link}
+                                            cardOpen={activeCard === link.label}
+                                            canHover={canHover}
+                                            setActiveCard={setActiveCard}
+                                        />
                                     </li>
                                 ))}
                             </ul>
@@ -101,7 +92,8 @@ export default function Links() {
                         ref={termChipRef}
                         active={termOpen}
                         onClick={() => {
-                            setTermLoaded(true) // in case the click beats the idle warm-up
+                            setActiveCard(null)
+                            setTermLoaded(true)
                             setTermOpen(o => !o)
                         }}
                     />
@@ -149,36 +141,6 @@ const TerminalChip = forwardRef<HTMLButtonElement, { active: boolean; onClick: (
     )
 })
 
-// Most icons are tinted silhouettes; original brand assets preserve their colors.
-function IconMask({ link, className = 'h-4 w-4' }: { link: LinkItem; className?: string }) {
-    if (link.iconStyle === 'original') {
-        return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={link.icon} alt="" width={18} height={18} className="h-[18px] w-[18px] shrink-0 rounded-[4px]" />
-        )
-    }
-    return (
-        <span
-            aria-hidden
-            className={`link-icon shrink-0 ${className}`}
-            style={
-                {
-                    '--ic': link.color,
-                    '--icd': link.colorDark,
-                    maskImage: `url(${link.icon})`,
-                    WebkitMaskImage: `url(${link.icon})`,
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskPosition: 'center',
-                    maskSize: 'contain',
-                    WebkitMaskSize: 'contain',
-                } as CSSProperties
-            }
-        />
-    )
-}
-
 function ChipInner({ link }: { link: LinkItem }) {
     return (
         <span className="link-chip group inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] ring-1 ring-slate-200 transition active:scale-[0.97] hover:ring-slate-300 motion-safe:hover:-translate-y-0.5 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-slate-600 sm:gap-2 sm:text-sm">
@@ -188,201 +150,17 @@ function ChipInner({ link }: { link: LinkItem }) {
     )
 }
 
-type TooltipPosition = {
-    left: number
-    top: number
-}
-
-// Compact project previews and profile stats share the same anchored surface.
-// Padding bridges the pointer's path from the chip to the visible surface.
-function StatCard({
+const LinkChip = memo(function LinkChip({
     link,
-    triggerRef,
-    id,
-    onCopy,
-    copyStatus,
-    onClose,
-}: {
-    link: LinkItem
-    triggerRef: RefObject<HTMLElement | null>
-    id: string
-    onCopy?: () => void
-    copyStatus?: 'idle' | 'copied' | 'showing'
-    onClose: () => void
-}) {
-    const cardRef = useRef<HTMLDivElement>(null)
-    const [position, setPosition] = useState<TooltipPosition | null>(null)
-    const { stats: refreshedStats, freshness, checkedAt, current, unavailable } = useProfileStats(link.statsId)
-    const stats = refreshedStats ?? link.stats
-
-    useLayoutEffect(() => {
-        const updatePosition = () => {
-            const trigger = triggerRef.current
-            const card = cardRef.current
-            if (!trigger || !card) return
-
-            const triggerRect = trigger.getBoundingClientRect()
-            const cardRect = card.getBoundingClientRect()
-            const margin = 12
-            const availableWidth = Math.max(0, window.innerWidth - margin * 2)
-            const cardWidth = Math.min(cardRect.width || 240, availableWidth)
-            // Includes the padding that bridges the gap between chip and card.
-            const cardHeight = cardRect.height || 120
-            const preferredTop = triggerRect.top - cardHeight
-            const opensAbove = preferredTop >= margin
-            const top = opensAbove
-                ? preferredTop
-                : Math.min(triggerRect.bottom, window.innerHeight - cardHeight - margin)
-            const centeredLeft = triggerRect.left + triggerRect.width / 2 - cardWidth / 2
-            const left = Math.min(Math.max(centeredLeft, margin), window.innerWidth - cardWidth - margin)
-
-            // Keep every control reachable near the viewport edges.
-            setPosition({ left, top: Math.max(margin, Math.min(top, window.innerHeight - cardHeight - margin)) })
-        }
-
-        updatePosition()
-        const frame = window.requestAnimationFrame(updatePosition)
-        const observer = new ResizeObserver(updatePosition)
-        if (cardRef.current) observer.observe(cardRef.current)
-        window.addEventListener('resize', updatePosition)
-        window.addEventListener('scroll', updatePosition, true)
-
-        return () => {
-            window.cancelAnimationFrame(frame)
-            observer.disconnect()
-            window.removeEventListener('resize', updatePosition)
-            window.removeEventListener('scroll', updatePosition, true)
-        }
-    }, [triggerRef, stats, freshness, unavailable])
-
-    return (
-        <div
-            id={id}
-            ref={cardRef}
-            role="dialog"
-            data-preview={link.preview?.mode}
-            aria-label={`${link.label} ${link.preview ? 'preview' : 'details'}`}
-            style={{
-                left: position?.left ?? 0,
-                top: position?.top ?? 0,
-                width: link.preview
-                    ? link.preview.mode === 'videos'
-                        ? 'var(--video-preview-width, 26rem)'
-                        : ['chess', 'xiangqi', 'go'].includes(link.preview.mode)
-                        ? 'var(--review-preview-width, 22rem)'
-                        : '24rem'
-                    : link.stravaSummary
-                    ? '20rem'
-                    : '18rem',
-                maxWidth: 'calc(100vw - 1.5rem)',
-                visibility: position ? 'visible' : 'hidden',
-            }}
-            // py-2 keeps the visible surface clear of the chip while leaving the box
-            // flush against it, so crossing the gap never counts as leaving.
-            className={`fixed z-50 py-2 motion-safe:transition motion-safe:duration-150 motion-safe:ease-out ${
-                position ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
-            }`}
-        >
-            {link.preview ? (
-                <ProjectPreview link={link} onClose={onClose} />
-            ) : (
-                <div className="project-preview profile-card">
-                    <header className="profile-card-header">
-                        <div className="profile-card-title">
-                            <IconMask link={link} />
-                            <h3>{link.label}</h3>
-                        </div>
-                        <div className="preview-actions">
-                            {onCopy ? (
-                                <button
-                                    type="button"
-                                    className="preview-icon-action"
-                                    onClick={onCopy}
-                                    aria-label={copyStatus === 'copied' ? 'Handle copied' : 'Copy handle'}
-                                    title={copyStatus === 'copied' ? 'Copied' : 'Copy handle'}
-                                >
-                                    <svg
-                                        viewBox="0 0 20 20"
-                                        width="14"
-                                        height="14"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.4"
-                                        aria-hidden="true"
-                                    >
-                                        {copyStatus === 'copied' ? (
-                                            <path d="m4 10 4 4 8-9" />
-                                        ) : (
-                                            <>
-                                                <rect x="7" y="7" width="9" height="10" rx="2" />
-                                                <path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
-                                            </>
-                                        )}
-                                    </svg>
-                                </button>
-                            ) : (
-                                link.href && <PreviewLink href={link.href} label={`Open ${link.label}`} />
-                            )}
-                            <PreviewClose onClose={onClose} label={`Close ${link.label} details`} />
-                        </div>
-                    </header>
-                    {(link.handle || (!stats?.length && !link.stravaSummary && link.meta)) && (
-                        <p className="profile-card-meta">{link.handle ?? link.meta}</p>
-                    )}
-                    {link.stravaSummary && <StravaSummary src={link.stravaSummary} />}
-                    {stats && stats.length > 0 && (
-                        <>
-                            <dl className="profile-card-stats" aria-label={`${link.label} stats`}>
-                                {stats.map(stat => (
-                                    <div key={stat.label}>
-                                        <dt>{stat.label}</dt>
-                                        <dd data-numeric={/^[\d,.+−%-]+$/.test(stat.value)}>{stat.value}</dd>
-                                    </div>
-                                ))}
-                            </dl>
-                            <footer
-                                className="profile-card-status"
-                                role="status"
-                                title={[
-                                    checkedAt ? new Date(checkedAt).toLocaleString() : 'Saved profile snapshot',
-                                    unavailable ? 'Refresh unavailable' : '',
-                                    link.statsSource ? `Source: ${link.statsSource}` : '',
-                                ]
-                                    .filter(Boolean)
-                                    .join(' · ')}
-                            >
-                                <span>
-                                    {current && <i aria-hidden="true" />}
-                                    {freshness}
-                                </span>
-                                {link.statsSource && <span>{link.statsSource}</span>}
-                                {unavailable && <span className="sr-only">Refresh unavailable</span>}
-                            </footer>
-                        </>
-                    )}
-                    <span className="sr-only" role="status">
-                        {copyStatus === 'copied'
-                            ? 'Handle copied'
-                            : copyStatus === 'showing'
-                            ? 'Select the handle to copy.'
-                            : ''}
-                    </span>
-                </div>
-            )}
-        </div>
-    )
-}
-
-function LinkChip({
-    link,
-    activeCard,
+    cardOpen,
+    canHover,
     setActiveCard,
 }: {
     link: LinkItem
-    activeCard: string | null
+    cardOpen: boolean
+    canHover: boolean
     setActiveCard: Dispatch<SetStateAction<string | null>>
 }) {
-    const cardOpen = activeCard === link.label
     const setCardOpen = useCallback(
         (open: boolean) => setActiveCard(current => (open ? link.label : current === link.label ? null : current)),
         [link.label, setActiveCard]
@@ -398,7 +176,6 @@ function LinkChip({
     const copyResetRef = useRef<number | null>(null)
     const enterTimerRef = useRef<number | null>(null)
     const leaveTimerRef = useRef<number | null>(null)
-    const canHover = useCanHover()
     const cancelLeave = () => {
         if (leaveTimerRef.current !== null) window.clearTimeout(leaveTimerRef.current)
         leaveTimerRef.current = null
@@ -649,4 +426,4 @@ function LinkChip({
             )}
         </div>
     )
-}
+})

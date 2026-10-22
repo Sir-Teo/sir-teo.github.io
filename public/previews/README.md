@@ -8,6 +8,15 @@ names, tooltips and visible keyboard focus. Repeated subtitles and project
 footers are omitted. Profile cards retain readable stat labels and values, with
 one small freshness/source line; exact timestamps remain in the tooltip.
 
+The shared card interface and stats refresh code load on the first open, in a
+5.5 KiB gzip chunk. The 10.5 KiB terminal waits for its first click and retains
+its session after closing. No optional interface is warmed during page idle.
+Initial scripts total about 180.6 KiB gzip (down from 185.0 KiB), with a 184 KiB
+build budget. The build also verifies that cards, terminal, review and game
+chunks remain outside the initial scripts. All pills share one hover media
+listener; only changed pills rerender, and card geometry is measured at most
+once per animation frame while scrolling or resizing.
+
 ## FinOS AgentLab
 
 FinOS uses the same `PreviewFilm.tsx` player as the games: one ten-second silent
