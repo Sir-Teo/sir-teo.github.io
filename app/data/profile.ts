@@ -339,7 +339,7 @@ export const projects: LinkItem[] = [
         meta: 'Financial research workspace',
         preview: {
             mode: 'finos',
-            hint: 'Workflow illustration',
+            hint: 'Recorded app preview',
             action: 'Open FinOS',
         },
     },

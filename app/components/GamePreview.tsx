@@ -3,9 +3,10 @@
 import PreviewFilm from './PreviewFilm'
 
 const films = {
-    crown: { name: 'crown', title: 'Deploying troops in a Crown & Clan raid' },
-    rift: { name: 'rift', title: 'Ashe attacking and casting Volley in Summoner’s Rift' },
-    postcard: { name: 'gta', title: 'Exploring San Andreas' },
+    crown: { name: 'game-crown', title: 'Deploying troops in a Crown & Clan raid' },
+    rift: { name: 'game-rift', title: 'Ashe attacking and casting Volley in Summoner’s Rift' },
+    postcard: { name: 'game-gta', title: 'Exploring San Andreas' },
+    finos: { name: 'finos-app', title: 'Opening a recorded FinOS research report and reviewing its sources' },
 }
 
 export default function GamePreview({ scene, reducedMotion }: { scene: keyof typeof films; reducedMotion: boolean }) {
@@ -13,8 +14,8 @@ export default function GamePreview({ scene, reducedMotion }: { scene: keyof typ
     return (
         <div className="game-film">
             <PreviewFilm
-                clip={`/previews/game-${film.name}.mp4`}
-                image={`/previews/game-${film.name}.webp`}
+                clip={`/previews/${film.name}.mp4`}
+                image={`/previews/${film.name}.webp`}
                 title={film.title}
                 reducedMotion={reducedMotion}
             />

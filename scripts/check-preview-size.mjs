@@ -16,10 +16,8 @@ async function javascript(directory) {
 const files = await javascript(resolve(root, '_next/static/chunks'))
 const games = []
 const reviews = []
-const finos = []
 for (const path of files) {
     const source = await readFile(path)
-    if (source.includes('finos-workflow')) finos.push({ path, bytes: source.length, gzip: gzipSync(source).length })
     if (source.includes('recorded-review')) reviews.push({ path, bytes: source.length, gzip: gzipSync(source).length })
     if (source.includes('game-film'))
         games.push({ path, bytes: source.length, gzip: gzipSync(source).length })
@@ -35,7 +33,7 @@ const scripts = [...new Set([...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)]
 let initialGzip = 0
 for (const script of scripts) {
     const path = resolve(root, script.replace(/^\//, ''))
-    if ([...games, ...reviews, ...finos].some(game => path === game.path)) throw new Error('Game previews must remain lazy-loaded')
+    if ([...games, ...reviews].some(game => path === game.path)) throw new Error('Project previews must remain lazy-loaded')
     initialGzip += gzipSync(await readFile(path)).length
 }
 console.log(
@@ -56,8 +54,15 @@ if (mediaBytes > 1600 * 1024) throw new Error('Game media exceeds 1600 KiB total
 console.log(`All three films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
 console.log(`Initial page scripts: ${(initialGzip / 1024).toFixed(1)} KiB gzip (measured locally).`)
 
-if (finos.length !== 1 || finos[0].gzip > 5 * 1024) throw new Error('FinOS workflow must stay in one lazy chunk below 5 KiB gzip')
-console.log(`FinOS workflow: ${(finos[0].gzip / 1024).toFixed(1)} KiB gzip; no media assets, loaded on demand.`)
+let finosBytes = 0
+for (const extension of ['mp4', 'webp']) {
+    const file = `/previews/finos-app.${extension}`
+    const size = (await readFile(resolve(root, file.slice(1)))).length
+    if (size > (extension === 'mp4' ? 250 : 50) * 1024) throw new Error(`FinOS asset exceeds budget: ${file}`)
+    if (html.includes(file)) throw new Error(`FinOS media must load only on demand: ${file}`)
+    finosBytes += size
+}
+console.log(`FinOS app clip + poster: ${(finosBytes / 1024).toFixed(1)} KiB; shares the lazy film player.`)
 
 let explainerBytes = 0
 for (const name of ['llm', 'quantum', 'relativity']) {

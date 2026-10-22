@@ -4,22 +4,23 @@ Project pills open anchored cards with keyboard and touch support. Cards stay wi
 
 ## FinOS AgentLab
 
-FinOS leads the project list with a 15-second vector workflow illustration, built
-from small SVG glyphs and CSS animation. Its five stages follow the app's real
-TradingAgents pipeline in `agents-runtime/runner.py`: four analyst reports
-(market, news, social, fundamentals), bull/bear debate and research manager,
-trader plan, three risk perspectives, then a decision ready for human review.
-The preview is labeled as an illustration; it contains no fabricated quotes,
-market figures, recommendations, or live agent calls.
+FinOS uses the same `PreviewFilm.tsx` player as the games: one ten-second silent
+loop captured inside the actual archived app, opening an AAPL deep-research
+report, showing its source links, and scrolling through the report. It replaces
+the custom illustrated workflow and adds no separate animation code or styles.
 
-Only the open card loads `FinosPreview.tsx`. CSS runs the timeline without a frame
-loop; pause/play and hidden-tab pausing preserve the exact animation position.
-Reduced-motion users see the first frame until they explicitly press Play.
-All five stages are described in one accessible image label. Controls remain
-44px; the short landscape layout places the stage title beside its illustration.
-No screenshot, video, third-party asset request, or animation dependency is needed.
-The existing build guard caps this component at 5 KiB gzip and keeps it out of the
-initial scripts.
+Captured on October 22, 2026 from the committed read-only export in
+`FinOS-AgentLab/deploy/static/site`, served locally without changing its source or
+running its backend. The session is the archived AAPL research conversation
+`fe0f75f64072` from the September 2026 snapshot. The visible data and research are
+recorded, not live. No private portfolio or account screen is included.
+
+Browser frames retain capture timestamps, then encode to 640 × 360 H.264 at
+24 fps, CRF 25, with no audio and fast-start metadata. The WebP poster comes from
+the same recording at 2.4 seconds. Clip and poster total about **130 KiB**. The
+existing build guard caps them at 250 KiB and 50 KiB respectively and verifies
+that they are absent from the initial page. Only the open card loads the clip;
+hidden tabs pause playback and reduced-motion users see the poster until Play.
 
 ## Game films
 

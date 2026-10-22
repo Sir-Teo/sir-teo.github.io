@@ -303,7 +303,7 @@ html {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
-/* The same quiet film surface and controls for games and explainers. */
+/* The same quiet film surface and controls for apps, games and explainers. */
 .preview-loading {
     display: grid;
     place-items: center;
@@ -322,14 +322,12 @@ html {
     color: var(--preview-muted);
     font-size: 11px;
 }
-.finos-preview + .preview-footer,
 .game-film + .preview-footer,
 .film-loading + .preview-footer,
 .preview-video-gallery + .preview-footer {
     padding: 4px 12px;
     min-height: 52px;
 }
-.finos-preview + .preview-footer a,
 .game-film + .preview-footer a,
 .film-loading + .preview-footer a,
 .preview-video-gallery + .preview-footer a { min-height: 44px; flex-shrink: 0; }
