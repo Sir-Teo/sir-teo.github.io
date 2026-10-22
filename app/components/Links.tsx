@@ -20,6 +20,7 @@ import QRCodePopover from './QRCodePopover'
 import ProjectPreview from './ProjectPreview'
 import useProfileStats from './useProfileStats'
 import StravaSummary from './StravaSummary'
+import { PreviewClose, PreviewLink } from './PreviewControls'
 import { categories, links, projects, type LinkItem } from '../data/profile'
 
 const allLinks = [...links, ...projects]
@@ -270,7 +271,9 @@ function StatCard({
                         : ['chess', 'xiangqi', 'go'].includes(link.preview.mode)
                         ? 'var(--review-preview-width, 22rem)'
                         : '24rem'
-                    : '20rem',
+                    : link.stravaSummary
+                    ? '20rem'
+                    : '18rem',
                 maxWidth: 'calc(100vw - 1.5rem)',
                 visibility: position ? 'visible' : 'hidden',
             }}
@@ -285,108 +288,85 @@ function StatCard({
             ) : (
                 <div className="project-preview profile-card">
                     <header className="profile-card-header">
-                        <div className="profile-card-identity">
-                            <div className="profile-card-title">
-                                <IconMask link={link} />
-                                <h3>{link.label}</h3>
-                            </div>
-                            {(link.handle || link.meta) && (
-                                <p className="profile-card-meta">{link.handle ?? link.meta}</p>
-                            )}
+                        <div className="profile-card-title">
+                            <IconMask link={link} />
+                            <h3>{link.label}</h3>
                         </div>
-                        <button
-                            type="button"
-                            className="preview-close"
-                            onClick={onClose}
-                            aria-label={`Close ${link.label} details`}
-                        >
-                            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-                                <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                            </svg>
-                        </button>
-                    </header>
-                    {link.description && <p className="profile-card-description">{link.description}</p>}
-                    {link.stravaSummary && <StravaSummary src={link.stravaSummary} />}
-                    {link.tags && link.tags.length > 0 && (
-                        <ul className="profile-card-tags" aria-label="Features">
-                            {link.tags.map(tag => (
-                                <li key={tag}>{tag}</li>
-                            ))}
-                        </ul>
-                    )}
-                    {stats && stats.length > 0 && (
-                        <dl className="profile-card-stats" aria-label={`${link.label} stats`}>
-                            {stats.map(stat => (
-                                <div key={stat.label}>
-                                    <dt>{stat.label}</dt>
-                                    <dd data-numeric={/^[\d,.+−%-]+$/.test(stat.value)}>{stat.value}</dd>
-                                </div>
-                            ))}
-                        </dl>
-                    )}
-                    <footer className="profile-card-footer">
-                        <div className="profile-card-status" role="status">
-                            {stats && stats.length > 0 && (
-                                <>
-                                    <span title={checkedAt ? new Date(checkedAt).toLocaleString() : undefined}>
-                                        {current && <i aria-hidden="true" />}
-                                        {freshness}
-                                    </span>
-                                    {unavailable && <span>Refresh unavailable</span>}
-                                    {link.statsSource && <span>via {link.statsSource}</span>}
-                                </>
-                            )}
-                            {link.stravaSummary && <span>Official weekly summary</span>}
-                            {copyStatus === 'copied' && <span>Handle copied</span>}
-                            {copyStatus === 'showing' && <span>Select the handle above to copy.</span>}
-                        </div>
-                        {onCopy ? (
-                            <button type="button" className="profile-card-action" onClick={onCopy}>
-                                {copyStatus === 'copied' ? 'Copied' : 'Copy handle'}
-                                <svg
-                                    viewBox="0 0 20 20"
-                                    width="15"
-                                    height="15"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.4"
-                                    aria-hidden="true"
+                        <div className="preview-actions">
+                            {onCopy ? (
+                                <button
+                                    type="button"
+                                    className="preview-icon-action"
+                                    onClick={onCopy}
+                                    aria-label={copyStatus === 'copied' ? 'Handle copied' : 'Copy handle'}
+                                    title={copyStatus === 'copied' ? 'Copied' : 'Copy handle'}
                                 >
-                                    <rect x="7" y="7" width="9" height="10" rx="2" />
-                                    <path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
-                                </svg>
-                            </button>
-                        ) : (
-                            link.href && (
-                                <a
-                                    className="profile-card-action"
-                                    href={link.href}
-                                    target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-                                    rel="noopener noreferrer"
-                                    aria-label={`Open ${link.label}`}
-                                >
-                                    {link.href.startsWith('mailto:')
-                                        ? 'Write email'
-                                        : link.label === 'Blog'
-                                        ? 'Read blog'
-                                        : link.label === 'Gallery'
-                                        ? 'View gallery'
-                                        : 'Open profile'}
                                     <svg
                                         viewBox="0 0 20 20"
-                                        width="15"
-                                        height="15"
+                                        width="14"
+                                        height="14"
                                         fill="none"
                                         stroke="currentColor"
                                         strokeWidth="1.4"
                                         aria-hidden="true"
                                     >
-                                        <path d="M5 15 15 5M5 5h10v10" />
+                                        {copyStatus === 'copied' ? (
+                                            <path d="m4 10 4 4 8-9" />
+                                        ) : (
+                                            <>
+                                                <rect x="7" y="7" width="9" height="10" rx="2" />
+                                                <path d="M12 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
+                                            </>
+                                        )}
                                     </svg>
-                                </a>
-                            )
-                        )}
-                    </footer>
+                                </button>
+                            ) : (
+                                link.href && <PreviewLink href={link.href} label={`Open ${link.label}`} />
+                            )}
+                            <PreviewClose onClose={onClose} label={`Close ${link.label} details`} />
+                        </div>
+                    </header>
+                    {(link.handle || (!stats?.length && !link.stravaSummary && link.meta)) && (
+                        <p className="profile-card-meta">{link.handle ?? link.meta}</p>
+                    )}
+                    {link.stravaSummary && <StravaSummary src={link.stravaSummary} />}
+                    {stats && stats.length > 0 && (
+                        <>
+                            <dl className="profile-card-stats" aria-label={`${link.label} stats`}>
+                                {stats.map(stat => (
+                                    <div key={stat.label}>
+                                        <dt>{stat.label}</dt>
+                                        <dd data-numeric={/^[\d,.+−%-]+$/.test(stat.value)}>{stat.value}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                            <footer
+                                className="profile-card-status"
+                                role="status"
+                                title={[
+                                    checkedAt ? new Date(checkedAt).toLocaleString() : 'Saved profile snapshot',
+                                    unavailable ? 'Refresh unavailable' : '',
+                                    link.statsSource ? `Source: ${link.statsSource}` : '',
+                                ]
+                                    .filter(Boolean)
+                                    .join(' · ')}
+                            >
+                                <span>
+                                    {current && <i aria-hidden="true" />}
+                                    {freshness}
+                                </span>
+                                {link.statsSource && <span>{link.statsSource}</span>}
+                                {unavailable && <span className="sr-only">Refresh unavailable</span>}
+                            </footer>
+                        </>
+                    )}
+                    <span className="sr-only" role="status">
+                        {copyStatus === 'copied'
+                            ? 'Handle copied'
+                            : copyStatus === 'showing'
+                            ? 'Select the handle to copy.'
+                            : ''}
+                    </span>
                 </div>
             )}
         </div>

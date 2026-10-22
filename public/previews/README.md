@@ -2,6 +2,12 @@
 
 Project pills open anchored cards with keyboard and touch support. Cards stay within the viewport, including small portrait and short landscape screens.
 
+All hover cards share a compact header with icon-only open/copy and close actions.
+Header targets are 32px on desktop and 44px on touch devices, with accessible
+names, tooltips and visible keyboard focus. Repeated subtitles and project
+footers are omitted. Profile cards retain readable stat labels and values, with
+one small freshness/source line; exact timestamps remain in the tooltip.
+
 ## FinOS AgentLab
 
 FinOS uses the same `PreviewFilm.tsx` player as the games: one ten-second silent
@@ -24,7 +30,7 @@ hidden tabs pause playback and reduced-motion users see the poster until Play.
 
 ## Game films
 
-Each game has one nine-second silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and **Open game** link. Scene tabs, magnification, embedded games and their launch controls have been removed.
+Each game has one nine-second silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and an external-link icon in the header. Scene tabs, magnification, embedded games and their launch controls have been removed.
 
 - **Crown & Clan:** deploying barbarians and archers in a Goblin Forest raid.
 - **Summoner’s Rift:** Ashe attacking a target dummy and casting Volley on the production map.
@@ -46,7 +52,7 @@ Each board pill opens one complete game from the blog's interactive review figur
 
 Use previous/play/next, keyboard arrows, or the draggable evaluation curve to navigate. Home/End jump to the first/last position; file/rank labels orient the board to the notation. Hover, focus or tap one of three candidate lines to see its first two arrows (chess/xiangqi) or up to four numbered stones (Go). The board stays at the recorded game position; these markings preview continuations. State is retained across incidental hover closures. Replay is opt-in, pauses when the tab hides, and stops on unmount. Desktop and short landscape cards place controls beside the board; phone cards stack them.
 
-Evaluations and candidate lines come from the apps' actual offline engine runs already used by the blog. They are labeled as recorded analysis, not fresh searches. Scores identify the favored color (W/B/R in candidate chips). The curve uses the blog's White/Red winning-chance formula for chess/xiangqi and Black's neural win estimate for Go. No engine, rules library, model, or iframe is loaded by these previews. The full apps remain available through **Open app**.
+Evaluations and candidate lines come from the apps' actual offline engine runs already used by the blog. They are labeled as recorded analysis, not fresh searches. The move, score and quality badge share one line; scores identify the favored color (W/B/R). Candidate controls keep full continuation text in accessible labels and tooltips. The compact engine credit retains the game title and engine details in its tooltip. The curve uses the blog's White/Red winning-chance formula for chess/xiangqi and Black's neural win estimate for Go. No engine, rules library, model, or iframe is loaded by these previews. The full apps remain available through the header's external-link icon.
 
 `ReviewPreview.tsx` loads only the selected game's JSON. The three records plus the blog's Cburnett chess pieces total about **144 KiB**, with a roughly **3.6 KiB gzip** UI chunk. Build checks cap the UI at 8 KiB gzip, each record at 80 KiB, and total review assets at 160 KiB, all excluded from initial loading. `scripts/sync-review-previews.mjs [path/to/blogs]` regenerates the checked-in records from the sibling blog's data and notation/score helpers; normal builds do not require that repository. Each record includes its source path and SHA-256. See [reviews/README.md](reviews/README.md) for provenance.
 
@@ -54,6 +60,6 @@ Evaluations and candidate lines come from the apps' actual offline engine runs a
 
 The thumbnail list selects nine-second silent excerpts from Teo’s local `explainer-videos/renders/{llm,quantum,relativity}.mp4` renders. Starts: 10:20, 22:50 and 19:05. YouTube IDs: `o0ENWGEVJm0`, `aaPbLBw0ZYc`, `vdroXP5hjjQ`. WebP posters come from the same first frames. Clips are 640px H.264, 24 fps, no audio. Only the selected clip is mounted; it pauses when closed or hidden. Reduced-motion users get a still frame with an explicit Play control.
 
-The gallery remembers a manual pause while changing clips, holds the poster until the next clip is ready, and lets Up/Down or Home/End select videos. A short hover delay avoids flickering through rows when crossing the list. All playback, close and watch-link targets are at least 44px. Narrow phones stack the film above the list; short landscape screens put them side by side and hide secondary topic text when needed. The three clips and posters total **229 KiB**; the build caps them at 500 KiB total (250 KiB per clip, 50 KiB per poster) and checks they stay out of initial loading.
+The gallery remembers a manual pause while changing clips, holds the poster until the next clip is ready, and lets Up/Down or Home/End select videos. A short hover delay avoids flickering through rows when crossing the list. Rows use one short title, with full video titles retained in accessible labels. Playback, selection and watch-link targets are at least 44px; header controls use the shared desktop/touch sizing. Narrow phones stack the film above the list; short landscape screens put them side by side. The three clips and posters total **229 KiB**; the build caps them at 500 KiB total (250 KiB per clip, 50 KiB per poster) and checks they stay out of initial loading.
 
 Everything deploys through the existing GitHub Pages workflow; no new workflows or scheduled jobs are introduced.

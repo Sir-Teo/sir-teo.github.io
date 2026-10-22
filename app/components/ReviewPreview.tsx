@@ -59,13 +59,15 @@ export default function ReviewPreview({ scene }: { scene: ReviewScene }) {
     if (error)
         return (
             <div className="preview-loading review-loading">
-                <button onClick={() => setRetry(n => n + 1)}>Retry game review</button>
+                <button onClick={() => setRetry(n => n + 1)} aria-label="Retry game review">
+                    Retry
+                </button>
             </div>
         )
     if (!game)
         return (
             <div className="preview-loading review-loading" role="status">
-                Opening the game…
+                <span className="sr-only">Loading game</span>
             </div>
         )
     return <GameReview game={game} />
@@ -125,19 +127,22 @@ function GameReview({ game }: { game: ReviewGame }) {
         >
             <div className="review-layout">
                 <div className="review-stage">
-                    <p className="review-game-title">{game.title}</p>
                     <ReviewBoard scene={game.scene} frame={frame} line={line} />
                 </div>
                 <div className="review-inspector">
                     <div className="review-move" aria-live={playing ? 'off' : 'polite'}>
                         <strong>{frame.label}</strong>
+                        <span
+                            className="review-score"
+                            aria-label={evaluationText(game.scene, frame)}
+                            title={evaluationText(game.scene, frame)}
+                        >
+                            {evaluationText(game.scene, frame, true)}
+                        </span>
                         {frame.quality && (
                             <span data-quality={frame.quality}>{frame.planted ? 'Planted slip' : frame.quality}</span>
                         )}
-                    </div>
-                    <div className="review-evaluation">
-                        <strong>{evaluationText(game.scene, frame)}</strong>
-                        <span>{step === last ? 'Game over' : `${frame.turn} to move`}</span>
+                        <span className="sr-only">{step === last ? 'Game over' : `${frame.turn} to move`}</span>
                     </div>
                     <div className="review-graph">
                         <svg viewBox="0 0 320 44" preserveAspectRatio="none" aria-hidden="true">
@@ -229,12 +234,15 @@ function GameReview({ game }: { game: ReviewGame }) {
                                 <span>{evaluationText(game.scene, candidate, true)}</span>
                             </button>
                         ))}
-                        {!frame.lines.length && <span className="review-end">End of the game</span>}
+                        {!frame.lines.length && <span className="review-end">Game over</span>}
                     </div>
-                    <p className="review-continuation" aria-live={playing ? 'off' : 'polite'} title={line?.text}>
-                        {line ? line.text : 'Drag the curve to revisit a move.'}
+                    <p className="sr-only" aria-live={playing ? 'off' : 'polite'}>
+                        {line?.text}
                     </p>
-                    <p className="review-source">{game.engine}</p>
+                    <p className="review-source" title={`${game.title} · ${game.engine}`}>
+                        {game.scene === 'go' ? 'Demo model' : game.scene === 'chess' ? 'Stockfish' : 'Pikafish'} ·
+                        recorded
+                    </p>
                 </div>
             </div>
         </div>

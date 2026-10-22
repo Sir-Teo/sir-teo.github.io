@@ -29,12 +29,10 @@ export type LinkItem = {
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
         mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'finos'
-        hint: string
-        action: string
         videos?: {
             id: string
             title: string
-            topic: string
+            shortTitle: string
             image: string
             clip: string
             start: number
@@ -339,8 +337,6 @@ export const projects: LinkItem[] = [
         meta: 'Financial research workspace',
         preview: {
             mode: 'finos',
-            hint: 'Recorded app preview',
-            action: 'Open FinOS',
         },
     },
     {
@@ -352,13 +348,11 @@ export const projects: LinkItem[] = [
         meta: 'Animated explainers',
         preview: {
             mode: 'videos',
-            hint: 'Ideas, made visible.',
-            action: 'All videos',
             videos: [
                 {
                     id: 'o0ENWGEVJm0',
                     title: 'How Large Language Models Work',
-                    topic: 'AI · attention & transformers',
+                    shortTitle: 'Language models',
                     image: '/previews/clip-llm.webp',
                     clip: '/previews/clip-llm.mp4',
                     start: 620,
@@ -366,7 +360,7 @@ export const projects: LinkItem[] = [
                 {
                     id: 'aaPbLBw0ZYc',
                     title: 'Quantum Mechanics, Visualized',
-                    topic: 'Physics · waves & interference',
+                    shortTitle: 'Quantum mechanics',
                     image: '/previews/clip-quantum.webp',
                     clip: '/previews/clip-quantum.mp4',
                     start: 1370,
@@ -374,7 +368,7 @@ export const projects: LinkItem[] = [
                 {
                     id: 'vdroXP5hjjQ',
                     title: 'General Relativity, Derived',
-                    topic: 'Physics · spacetime & curvature',
+                    shortTitle: 'General relativity',
                     image: '/previews/clip-relativity.webp',
                     clip: '/previews/clip-relativity.mp4',
                     start: 1145,
@@ -389,7 +383,7 @@ export const projects: LinkItem[] = [
         color: '#E9A409',
         category: 'Projects',
         meta: 'Village-building strategy',
-        preview: { mode: 'crown', hint: 'Build. Raid. Repeat.', action: 'Open game' },
+        preview: { mode: 'crown' },
     },
     {
         label: 'Summoner’s Rift',
@@ -399,7 +393,7 @@ export const projects: LinkItem[] = [
         colorDark: '#E4BF72',
         category: 'Projects',
         meta: 'Browser MOBA',
-        preview: { mode: 'rift', hint: 'Ashe · Lux · Browser practice', action: 'Open game' },
+        preview: { mode: 'rift' },
     },
     {
         label: 'San Andreas',
@@ -409,7 +403,7 @@ export const projects: LinkItem[] = [
         colorDark: '#4ADE80',
         category: 'Projects',
         meta: 'Open-world recreation',
-        preview: { mode: 'postcard', hint: 'Los Santos, in the browser', action: 'Open game' },
+        preview: { mode: 'postcard' },
     },
     {
         label: 'Web Chess',
@@ -418,7 +412,7 @@ export const projects: LinkItem[] = [
         color: '#81B64C',
         category: 'Projects',
         meta: 'Chess · play & analyze',
-        preview: { mode: 'chess', hint: 'Recorded game review', action: 'Open app' },
+        preview: { mode: 'chess' },
     },
     {
         label: 'Web Xiangqi',
@@ -428,7 +422,7 @@ export const projects: LinkItem[] = [
         colorDark: '#F87171',
         category: 'Projects',
         meta: 'Chinese chess · play & analyze',
-        preview: { mode: 'xiangqi', hint: 'Recorded game review', action: 'Open app' },
+        preview: { mode: 'xiangqi' },
     },
     {
         label: 'Web KaTrain',
@@ -438,6 +432,6 @@ export const projects: LinkItem[] = [
         colorDark: '#A78BFA',
         category: 'Projects',
         meta: 'Go / Weiqi · play & analyze',
-        preview: { mode: 'go', hint: 'Recorded game review', action: 'Open app' },
+        preview: { mode: 'go' },
     },
 ]

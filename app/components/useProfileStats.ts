@@ -22,15 +22,15 @@ export default function useProfileStats(id?: StatsId) {
     }, [id])
 
     const checkedAt = state?.snapshot.checkedAt
-    let freshness = 'Profile snapshot'
+    let freshness = 'Snapshot'
     if (checkedAt) {
         const date = new Date(checkedAt)
         const label = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-        if (checking) freshness = 'Checking for updates…'
+        if (checking) freshness = 'Updating…'
         else if (state?.status === 'current') {
             const age = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000))
             freshness =
-                age < 1 ? 'Checked just now' : age < 60 ? `Checked ${age}m ago` : `Checked ${Math.floor(age / 60)}h ago`
+                age < 1 ? 'Updated now' : age < 60 ? `Updated ${age}m ago` : `Updated ${Math.floor(age / 60)}h ago`
         } else freshness = `Snapshot · ${label}`
     }
 

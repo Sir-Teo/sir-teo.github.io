@@ -4,11 +4,12 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import type { LinkItem } from '../data/profile'
 import dynamic from 'next/dynamic'
 import PreviewFilm from './PreviewFilm'
+import { ExternalArrow, PreviewClose, PreviewLink } from './PreviewControls'
 
 const GamePreview = dynamic(() => import('./GamePreview'), {
     loading: () => (
         <div className="film-loading" role="status">
-            Opening the preview…
+            <span className="sr-only">Loading preview</span>
         </div>
     ),
 })
@@ -16,28 +17,12 @@ const GamePreview = dynamic(() => import('./GamePreview'), {
 const ReviewPreview = dynamic(() => import('./ReviewPreview'), {
     loading: () => (
         <div className="preview-loading review-loading" role="status">
-            Opening the game…
+            <span className="sr-only">Loading game</span>
         </div>
     ),
 })
 
 type Video = NonNullable<NonNullable<LinkItem['preview']>['videos']>[number]
-
-function Arrow() {
-    return (
-        <svg
-            viewBox="0 0 20 20"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            aria-hidden="true"
-        >
-            <path d="M5 15 15 5M5 5h10v10" />
-        </svg>
-    )
-}
 
 export default function ProjectPreview({ link, onClose }: { link: LinkItem; onClose: () => void }) {
     const preview = link.preview!
@@ -65,16 +50,10 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
                     <span className="preview-title-dot" aria-hidden="true" />
                     {link.label}
                 </h3>
-                <button
-                    type="button"
-                    className="preview-close"
-                    onClick={onClose}
-                    aria-label={`Close ${link.label} preview`}
-                >
-                    <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-                        <path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
-                </button>
+                <div className="preview-actions">
+                    {link.href && <PreviewLink href={link.href} label={`Open ${link.label}`} />}
+                    <PreviewClose onClose={onClose} label={`Close ${link.label} preview`} />
+                </div>
             </header>
             {preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
@@ -83,13 +62,6 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
             ) : (
                 <GamePreview key={preview.mode} scene={preview.mode} reducedMotion={reducedMotion} />
             )}
-            <footer className="preview-footer">
-                <span>{preview.hint}</span>
-                <a href={link.href} target="_blank" rel="noopener noreferrer">
-                    {preview.action}
-                    <Arrow />
-                </a>
-            </footer>
         </div>
     )
 }
@@ -157,8 +129,7 @@ function VideoGallery({ videos, reducedMotion }: { videos: Video[]; reducedMotio
                                 <img src={item.image} alt="" width={80} height={45} />
                             </span>
                             <span className="video-row-text">
-                                <strong>{item.title}</strong>
-                                <span>{item.topic}</span>
+                                <strong>{item.shortTitle}</strong>
                             </span>
                         </button>
                         <a
@@ -169,7 +140,7 @@ function VideoGallery({ videos, reducedMotion }: { videos: Video[]; reducedMotio
                             aria-label={`Watch ${item.title} on YouTube`}
                             title="Watch on YouTube"
                         >
-                            <Arrow />
+                            <ExternalArrow />
                         </a>
                     </li>
                 ))}

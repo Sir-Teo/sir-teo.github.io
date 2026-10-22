@@ -15,7 +15,7 @@ export default function StravaSummary({ src }: { src: string }) {
         <div className="profile-strava-summary" aria-busy={status === 'loading'}>
             {status !== 'loaded' && (
                 <p className="profile-embed-message" role="status">
-                    {status === 'loading' ? 'Loading weekly summary…' : 'Summary unavailable. Open the profile below.'}
+                    {status === 'loading' ? 'Loading…' : 'Summary unavailable'}
                 </p>
             )}
             {/* Strava renders the stats in HTML. Script-free sandboxing keeps its analytics,

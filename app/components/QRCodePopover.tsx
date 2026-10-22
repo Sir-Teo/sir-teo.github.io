@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { PreviewClose } from './PreviewControls'
 
 interface QRCodePopoverProps {
     id: string
@@ -20,21 +21,8 @@ const QRCodePopover = ({ id, isOpen, qrCodeImg, label, onClose }: QRCodePopoverP
                     <div className="profile-card-title">
                         <h3>{label}</h3>
                     </div>
-                    <p className="profile-card-meta">Scan to add</p>
                 </div>
-                <button type="button" onClick={onClose} aria-label={`Close ${label} QR code`} className="preview-close">
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                    >
-                        <path d="M6 6l12 12M18 6 6 18" />
-                    </svg>
-                </button>
+                <PreviewClose onClose={onClose} label={`Close ${label} QR code`} />
             </header>
             <Image
                 src={qrCodeImg}
