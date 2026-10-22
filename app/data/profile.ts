@@ -17,7 +17,8 @@ export const statsSnapshots: Record<StatsId, StatsSnapshot> = snapshots
 export type LinkItem = {
     label: string
     href?: string // omit/empty to hide the link
-    icon: string // monochrome silhouette in /public/icons; tinted to `color` via CSS mask
+    icon: string // local icon asset, tinted through a mask unless iconStyle is original
+    iconStyle?: 'original' // preserve a brand asset's own colors
     color: string // brand color for the icon
     colorDark?: string // override for dark mode when the brand color is too dark to read
     qrcode?: string // for QR-only links like WeChat
@@ -27,10 +28,9 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'product'
+        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'finos'
         hint: string
         action: string
-        image?: { src: string; alt: string; width: number; height: number }
         videos?: {
             id: string
             title: string
@@ -262,17 +262,7 @@ export const links: LinkItem[] = [
             { label: 'Best', value: '5,561' },
         ],
     },
-    {
-        label: 'Genshin Impact',
-        href: 'https://dak.gg/genshin/profile/646322102?hl=en',
-        icon: '/icons/genshin-impact.svg',
-        color: '#C9A86A',
-        colorDark: '#F2DFA7',
-        category: 'Play & Hobbies',
-        meta: 'Teo · America · UID 646322102',
-        statsId: 'genshin',
-        stats: statsSnapshots.genshin.stats,
-    },
+
     {
         label: 'Chess.com',
         href: 'https://www.chess.com/member/masterteo1205',
@@ -286,7 +276,8 @@ export const links: LinkItem[] = [
     {
         label: 'Duolingo',
         href: 'https://www.duolingo.com/profile/sirteo',
-        icon: '/icons/duolingo.svg',
+        icon: '/icons/duolingo.webp',
+        iconStyle: 'original',
         color: '#58CC02',
         category: 'Play & Hobbies',
         meta: '@sirteo',
@@ -294,24 +285,7 @@ export const links: LinkItem[] = [
         statsSource: 'Duo Streak Tracker',
         stats: statsSnapshots.duolingo.stats,
     },
-    {
-        label: 'AllTrails',
-        href: 'https://www.alltrails.com/members/teo-zeng',
-        icon: '/icons/alltrails.svg',
-        color: '#428813',
-        colorDark: '#8CC63F',
-        category: 'Play & Hobbies',
-        meta: 'Hiking & trails',
-    },
-    {
-        label: 'PlayStation',
-        href: 'https://profile.playstation.com/masterteo1205',
-        icon: '/icons/playstation.svg',
-        color: '#0070D1',
-        colorDark: '#4DA3E4',
-        category: 'Play & Hobbies',
-        meta: 'PSN: masterteo1205',
-    },
+
     {
         label: 'OGS',
         href: 'https://online-go.com/user/view/622443',
@@ -363,17 +337,10 @@ export const projects: LinkItem[] = [
         colorDark: '#38BDF8',
         category: 'Projects',
         meta: 'Financial research workspace',
-        description: 'Financial research, multi-agent analysis, and portfolio tools in one workspace.',
         preview: {
-            mode: 'product',
-            hint: 'Market dashboard',
+            mode: 'finos',
+            hint: 'Workflow illustration',
             action: 'Open FinOS',
-            image: {
-                src: '/previews/finos-markets.webp',
-                alt: 'FinOS AgentLab market dashboard with market movers, a stock heatmap, sector performance and a yield curve.',
-                width: 960,
-                height: 600,
-            },
         },
     },
     {

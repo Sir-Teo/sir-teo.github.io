@@ -312,21 +312,6 @@ html {
     color: var(--preview-muted);
 }
 .game-film { padding: 0 12px; }
-.product-preview { padding: 0 12px; }
-.product-preview img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border: 1px solid var(--preview-line);
-    border-radius: 10px;
-    background: #101112;
-}
-.product-preview p {
-    padding: 12px 3px 4px;
-    color: var(--preview-muted);
-    font-size: 12px;
-    line-height: 1.6;
-}
 .film-loading {
     display: grid;
     place-items: center;
@@ -337,14 +322,14 @@ html {
     color: var(--preview-muted);
     font-size: 11px;
 }
-.product-preview + .preview-footer,
+.finos-preview + .preview-footer,
 .game-film + .preview-footer,
 .film-loading + .preview-footer,
 .preview-video-gallery + .preview-footer {
     padding: 4px 12px;
     min-height: 52px;
 }
-.product-preview + .preview-footer a,
+.finos-preview + .preview-footer a,
 .game-film + .preview-footer a,
 .film-loading + .preview-footer a,
 .preview-video-gallery + .preview-footer a { min-height: 44px; flex-shrink: 0; }

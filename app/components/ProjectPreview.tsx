@@ -5,6 +5,14 @@ import type { LinkItem } from '../data/profile'
 import dynamic from 'next/dynamic'
 import PreviewFilm from './PreviewFilm'
 
+const FinosPreview = dynamic(() => import('./FinosPreview'), {
+    loading: () => (
+        <div className="film-loading" role="status">
+            Opening the workflow…
+        </div>
+    ),
+})
+
 const GamePreview = dynamic(() => import('./GamePreview'), {
     loading: () => (
         <div className="film-loading" role="status">
@@ -76,21 +84,8 @@ export default function ProjectPreview({ link, onClose }: { link: LinkItem; onCl
                     </svg>
                 </button>
             </header>
-            {preview.mode === 'product' ? (
-                <div className="product-preview">
-                    {preview.image && (
-                        // Loaded only when the hover/focus/tap card mounts, like the game posters.
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={preview.image.src}
-                            alt={preview.image.alt}
-                            width={preview.image.width}
-                            height={preview.image.height}
-                            decoding="async"
-                        />
-                    )}
-                    {link.description && <p>{link.description}</p>}
-                </div>
+            {preview.mode === 'finos' ? (
+                <FinosPreview reducedMotion={reducedMotion} />
             ) : preview.mode === 'videos' ? (
                 <VideoGallery videos={preview.videos ?? []} reducedMotion={reducedMotion} />
             ) : preview.mode === 'chess' || preview.mode === 'xiangqi' || preview.mode === 'go' ? (

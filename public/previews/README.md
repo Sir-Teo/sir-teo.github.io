@@ -4,13 +4,22 @@ Project pills open anchored cards with keyboard and touch support. Cards stay wi
 
 ## FinOS AgentLab
 
-FinOS leads the project list. Its preview uses the actual Markets screenshot from
-`FinOS-AgentLab/docs/assets/markets.png`, converted to a 960 × 600 WebP. The still
-shows market data and the product interface, not a live feed or personal portfolio.
-Its candlestick icon follows the app's own `frontend/app/icon.svg`. The card has one
-short description and a 44px **Open FinOS** link. The image loads only when the card
-opens; there is no iframe, dashboard runtime, or third-party request. The screenshot
-is capped at 80 KiB by the existing preview-size check.
+FinOS leads the project list with a 15-second vector workflow illustration, built
+from small SVG glyphs and CSS animation. Its five stages follow the app's real
+TradingAgents pipeline in `agents-runtime/runner.py`: four analyst reports
+(market, news, social, fundamentals), bull/bear debate and research manager,
+trader plan, three risk perspectives, then a decision ready for human review.
+The preview is labeled as an illustration; it contains no fabricated quotes,
+market figures, recommendations, or live agent calls.
+
+Only the open card loads `FinosPreview.tsx`. CSS runs the timeline without a frame
+loop; pause/play and hidden-tab pausing preserve the exact animation position.
+Reduced-motion users see the first frame until they explicitly press Play.
+All five stages are described in one accessible image label. Controls remain
+44px; the short landscape layout places the stage title beside its illustration.
+No screenshot, video, third-party asset request, or animation dependency is needed.
+The existing build guard caps this component at 5 KiB gzip and keeps it out of the
+initial scripts.
 
 ## Game films
 
