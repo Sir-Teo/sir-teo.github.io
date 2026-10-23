@@ -50,9 +50,9 @@ export const profile = {
     url: 'https://teozeng.dev',
     // Third-person summary for search results and link previews. The first-person
     // `tagline` below is what the page itself renders.
-    description: 'Teo Zeng — data scientist and machine-learning researcher in New York.',
+    description: 'Teo Zeng — data scientist and machine-learning researcher in Greater Boston.',
     jobTitle: 'Data Scientist',
-    location: 'New York',
+    location: 'Greater Boston',
     tagline:
         'I am Teo Zeng. I like traveling, running, any sports with an emphasis on basketball, researching, and playing video games.',
     avatar: '/user/shifu.webp',
@@ -80,12 +80,8 @@ export const links: LinkItem[] = [
         color: '#20BEFF',
         category: 'Work & Research',
         meta: '@sirteo',
-        stats: [
-            { label: 'Competitions', value: '19' },
-            { label: 'Code', value: '3' },
-            { label: 'Writeups', value: '2' },
-            { label: 'Joined', value: '6y ago' },
-        ],
+        statsId: 'kaggle',
+        stats: statsSnapshots.kaggle.stats,
     },
     {
         label: 'Devpost',
@@ -95,12 +91,8 @@ export const links: LinkItem[] = [
         colorDark: '#7dd3fc',
         category: 'Work & Research',
         meta: '@zengwc-teo2016',
-        stats: [
-            { label: 'Projects', value: '1' },
-            { label: 'Hackathons', value: '1' },
-            { label: 'Achievements', value: '1' },
-            { label: 'Likes', value: '1' },
-        ],
+        statsId: 'devpost',
+        stats: statsSnapshots.devpost.stats,
     },
     {
         label: 'Blog',
@@ -129,11 +121,8 @@ export const links: LinkItem[] = [
         colorDark: '#4DA3E4',
         category: 'Work & Research',
         meta: 'in/teozeng',
-        stats: [
-            { label: 'Connections', value: '500+' },
-            { label: 'Role', value: 'Data Scientist' },
-            { label: 'Location', value: 'New York' },
-        ],
+        statsId: 'linkedin',
+        stats: statsSnapshots.linkedin.stats,
     },
     {
         label: 'Google Scholar',
@@ -142,12 +131,8 @@ export const links: LinkItem[] = [
         color: '#4285F4',
         category: 'Work & Research',
         meta: 'Publications',
-        stats: [
-            { label: 'Articles', value: '5' },
-            { label: 'Citations', value: '7' },
-            { label: 'h-index', value: '1' },
-            { label: 'i10-index', value: '0' },
-        ],
+        statsId: 'scholar',
+        stats: statsSnapshots.scholar.stats,
     },
     {
         label: 'GitHub',
@@ -169,10 +154,8 @@ export const links: LinkItem[] = [
         color: '#FF0000',
         category: 'Social',
         meta: '@teozeng3999',
-        stats: [
-            { label: 'Videos', value: '44' },
-            { label: 'Subscribers', value: '24' },
-        ],
+        statsId: 'youtube',
+        stats: statsSnapshots.youtube.stats,
     },
     {
         label: 'Reddit',
@@ -181,12 +164,8 @@ export const links: LinkItem[] = [
         color: '#FF4500',
         category: 'Social',
         meta: 'u/Puzzleheaded_Bid_178',
-        stats: [
-            { label: 'Karma', value: '23' },
-            { label: 'Post', value: '22' },
-            { label: 'Comment', value: '1' },
-            { label: 'Cake day', value: 'Aug 2021' },
-        ],
+        statsId: 'reddit',
+        stats: statsSnapshots.reddit.stats,
     },
     {
         label: 'WeChat',
@@ -212,12 +191,8 @@ export const links: LinkItem[] = [
         color: '#FB7299',
         category: 'Social',
         meta: 'space/299736746',
-        stats: [
-            { label: 'Videos', value: '51' },
-            { label: 'Followers', value: '78' },
-            { label: 'Likes', value: '1,053' },
-            { label: 'Level', value: '5' },
-        ],
+        statsId: 'bilibili',
+        stats: statsSnapshots.bilibili.stats,
     },
     {
         label: 'Instagram',
@@ -226,11 +201,8 @@ export const links: LinkItem[] = [
         color: '#E4405F',
         category: 'Social',
         meta: '@sir_teo',
-        stats: [
-            { label: 'Posts', value: '78' },
-            { label: 'Followers', value: '535' },
-            { label: 'Following', value: '577' },
-        ],
+        statsId: 'instagram',
+        stats: statsSnapshots.instagram.stats,
     },
 
     // ── Play & Hobbies ───────────────────────────────────────────────
@@ -303,12 +275,8 @@ export const links: LinkItem[] = [
         colorDark: '#66C0F4',
         category: 'Play & Hobbies',
         meta: 'Master Teo',
-        stats: [
-            { label: 'Level', value: '47' },
-            { label: 'Games', value: '57' },
-            { label: 'Badges', value: '11' },
-            { label: 'Reviews', value: '17' },
-        ],
+        statsId: 'steam',
+        stats: statsSnapshots.steam.stats,
     },
 
     // ── Photography ──────────────────────────────────────────────────

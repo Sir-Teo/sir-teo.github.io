@@ -1,6 +1,6 @@
 {
     "github": {
-        "checkedAt": "2026-10-21T04:02:27Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Public repos",
@@ -8,7 +8,7 @@
             },
             {
                 "label": "Followers",
-                "value": "24"
+                "value": "25"
             },
             {
                 "label": "Since",
@@ -17,7 +17,7 @@
         ]
     },
     "chess": {
-        "checkedAt": "2026-10-21T04:02:27Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Blitz",
@@ -34,7 +34,7 @@
         ]
     },
     "ogs": {
-        "checkedAt": "2026-10-21T04:02:27Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Overall rating",
@@ -56,7 +56,7 @@
         ]
     },
     "blog": {
-        "checkedAt": "2026-10-21T04:02:28Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Articles",
@@ -65,7 +65,7 @@
         ]
     },
     "gallery": {
-        "checkedAt": "2026-10-21T04:02:28Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Photos",
@@ -74,7 +74,7 @@
         ]
     },
     "leetcode": {
-        "checkedAt": "2026-10-22T01:08:37Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Solved",
@@ -95,19 +95,184 @@
         ]
     },
     "duolingo": {
-        "checkedAt": "2026-10-22T01:04:06Z",
+        "checkedAt": "2026-10-23T19:36:55Z",
         "stats": [
             {
                 "label": "Day streak",
-                "value": "895"
+                "value": "896"
             },
             {
                 "label": "XP",
-                "value": "127,398"
+                "value": "127,518"
             },
             {
                 "label": "Courses",
                 "value": "5"
+            }
+        ]
+    },
+    "kaggle": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Competitions",
+                "value": "43"
+            },
+            {
+                "label": "Code",
+                "value": "4"
+            },
+            {
+                "label": "Writeups",
+                "value": "2"
+            },
+            {
+                "label": "Joined",
+                "value": "2019"
+            }
+        ]
+    },
+    "devpost": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Projects",
+                "value": "1"
+            },
+            {
+                "label": "Hackathons",
+                "value": "2"
+            },
+            {
+                "label": "Achievements",
+                "value": "1"
+            },
+            {
+                "label": "Likes",
+                "value": "1"
+            }
+        ]
+    },
+    "scholar": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Articles",
+                "value": "5"
+            },
+            {
+                "label": "Citations",
+                "value": "9"
+            },
+            {
+                "label": "h-index",
+                "value": "1"
+            },
+            {
+                "label": "i10-index",
+                "value": "0"
+            }
+        ]
+    },
+    "youtube": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Videos",
+                "value": "44"
+            },
+            {
+                "label": "Subscribers",
+                "value": "30"
+            }
+        ]
+    },
+    "reddit": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Karma",
+                "value": "32"
+            },
+            {
+                "label": "Contributions",
+                "value": "28"
+            },
+            {
+                "label": "Since",
+                "value": "2021"
+            }
+        ]
+    },
+    "bilibili": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Videos",
+                "value": "70"
+            },
+            {
+                "label": "Followers",
+                "value": "200"
+            },
+            {
+                "label": "Likes",
+                "value": "1,387"
+            },
+            {
+                "label": "Level",
+                "value": "5"
+            }
+        ]
+    },
+    "instagram": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Followers",
+                "value": "533"
+            },
+            {
+                "label": "Following",
+                "value": "577"
+            }
+        ]
+    },
+    "steam": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Level",
+                "value": "47"
+            },
+            {
+                "label": "Games",
+                "value": "57"
+            },
+            {
+                "label": "Badges",
+                "value": "11"
+            },
+            {
+                "label": "Reviews",
+                "value": "17"
+            }
+        ]
+    },
+    "linkedin": {
+        "checkedAt": "2026-10-23T19:48:21Z",
+        "stats": [
+            {
+                "label": "Connections",
+                "value": "500+"
+            },
+            {
+                "label": "Role",
+                "value": "Data Scientist"
+            },
+            {
+                "label": "Location",
+                "value": "Greater Boston"
             }
         ]
     }

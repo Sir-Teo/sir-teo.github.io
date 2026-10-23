@@ -48,7 +48,7 @@ console.log(
     `Game film code: ${(bytes / 1024).toFixed(1)} KiB raw / ${(gzip / 1024).toFixed(1)} KiB gzip; loaded on demand.`
 )
 let mediaBytes = 0
-for (const game of ['crown', 'royale', 'rift', 'gta']) {
+for (const game of ['crown', 'royale-arena', 'rift', 'gta']) {
     for (const extension of ['mp4', 'webp']) {
         const file = `/previews/game-${game}.${extension}`
         const size = (await readFile(resolve(root, file.slice(1)))).length
@@ -74,7 +74,7 @@ console.log(`FinOS app clip + poster: ${(finosBytes / 1024).toFixed(1)} KiB; sha
 
 let ideasBytes = 0
 for (const extension of ['mp4', 'webp']) {
-    const file = `/previews/ideas-app.${extension}`
+    const file = `/previews/ideas-map.${extension}`
     const size = (await readFile(resolve(root, file.slice(1)))).length
     if (size > (extension === 'mp4' ? 250 : 50) * 1024) throw new Error(`Ideas asset exceeds budget: ${file}`)
     if (html.includes(file)) throw new Error(`Ideas media must load only on demand: ${file}`)

@@ -19,10 +19,32 @@ in the browser when their hover/focus/tap cards open. Successful responses are c
 locally (one hour, 12 hours for Chess.com, 24 hours for the archived gallery), with
 an eight-second request timeout and a five-minute retry delay after failures.
 The cards show when the data was checked and retain a labeled snapshot if a service
-is unavailable. `app/data/stats.json` holds the verified fallback values; Genshin is
-snapshot-only because Enka does not allow cross-origin browser requests. Other
-platforms remain labeled profile snapshots. No API keys, self-hosted backend, scheduled workflow,
+is unavailable. `app/data/stats.json` holds the verified fallback values. A newer
+bundled snapshot supersedes older browser caches, including when a provider fails.
+Other platforms remain labeled, dated profile snapshots. No API keys, self-hosted backend, scheduled workflow,
 or new GitHub Action is used for stats; the existing Pages deployment is unchanged.
+
+The October 23, 2026 refresh checked all seven existing public-data providers and
+the following profile pages. These manual sources do not gain browser polling:
+
+| Profile | Verified snapshot |
+| --- | --- |
+| [Kaggle](https://www.kaggle.com/sirteo) | 43 competitions, 4 code notebooks, 2 writeups, joined 2019 |
+| [Devpost](https://devpost.com/zengwc-teo2016) | 1 project, 2 hackathons, 1 achievement, 1 like |
+| [Scholar](https://scholar.google.com/citations?user=lLhU3igAAAAJ&hl=en) | 5 articles, 9 citations, h-index 1, i10-index 0 |
+| [YouTube](https://www.youtube.com/@teozeng3999) | 44 videos, 30 subscribers |
+| [Reddit](https://www.reddit.com/user/Puzzleheaded_Bid_178/) | 32 karma, 28 contributions, joined 2021 |
+| [Bilibili](https://space.bilibili.com/299736746) | 70 videos, 200 followers, 1,387 likes, level 5 |
+| [Instagram](https://www.instagram.com/sir_teo) | 533 followers, 577 following |
+| [Steam](https://steamcommunity.com/profiles/76561198413328513/) | level 47, 57 games, 11 badges, 17 reviews |
+| [LinkedIn](https://www.linkedin.com/in/teozeng/) | 500+ connections, Data Scientist, Greater Boston |
+
+Bilibili's 73 submissions include other formats; the video count is 70. Instagram
+does not expose a post count on the public private-profile view, so the card keeps
+only its visible follower/following counts. Reddit now uses the displayed
+contributions total instead of the previously ambiguous Post/Comment labels.
+Clash of Stats blocked verification; its prior snapshot has no new check date.
+Strava's official embed was verified to show the current October 19–25 week.
 
 LeetCode uses the public [LeetCard](https://github.com/JacobLinCool/LeetCode-Stats-Card)
 service with fonts and animation disabled (~7 KB). Only its named text counters are

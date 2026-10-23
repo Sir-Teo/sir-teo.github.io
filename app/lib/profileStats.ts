@@ -172,7 +172,10 @@ export function canRefreshStats(id: StatsId): boolean {
 export function refreshStats(id: StatsId): Promise<StatsState> {
     const provider = providers[id]
     if (!provider) return Promise.resolve(initialStats(id))
-    const cached = readCache(id)
+    const stored = readCache(id)
+    // A newly verified bundled snapshot should supersede older browser data.
+    const cached =
+        stored && Date.parse(stored.checkedAt) >= Date.parse(statsSnapshots[id].checkedAt) ? stored : undefined
     const fallback = cached ?? statsSnapshots[id]
     if (cached && Date.now() - Date.parse(cached.checkedAt) < provider.ttl) {
         return Promise.resolve({ snapshot: cached, status: 'current' })

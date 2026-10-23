@@ -7,11 +7,13 @@ export default function PreviewFilm({
     image,
     title,
     reducedMotion,
+    height = 360,
 }: {
     clip: string
     image: string
     title: string
     reducedMotion: boolean
+    height?: number
 }) {
     const [playIntent, setPlayIntent] = useState<boolean | null>(null)
     const [playingClip, setPlayingClip] = useState<string | null>(null)
@@ -47,7 +49,7 @@ export default function PreviewFilm({
         <div className="preview-film">
             {/* The poster stays visible while a newly selected clip prepares its first frame. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt={mediaError ? title : ''} width={640} height={360} decoding="async" />
+            <img src={image} alt={mediaError ? title : ''} width={640} height={height} decoding="async" />
             {!mediaError && (
                 <video
                     ref={videoRef}

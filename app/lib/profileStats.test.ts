@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import snapshots from '../data/stats.json'
 
 let api: typeof import('./profileStats')
 let saved: Map<string, string>
 let fetchMock: ReturnType<typeof vi.fn>
 const github = { login: 'Sir-Teo', public_repos: 86, followers: 26, created_at: '2017-10-07T15:39:14Z' }
 const response = (data: unknown) => ({ ok: true, json: async () => data })
+const testNow = new Date(Math.max(...Object.values(snapshots).map(s => Date.parse(s.checkedAt))) + 60 * 60 * 1000)
 // Text fields observed in LeetCard's public SVG response; foreign markup is never rendered.
 const leetCard = `<svg><text id="username-text">user5137</text>
     <text id="total-solved-text">186</text>
@@ -22,7 +24,7 @@ const duo = {
 beforeEach(async () => {
     vi.resetModules()
     vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-10-21T05:00:00Z'))
+    vi.setSystemTime(testNow)
     saved = new Map()
     vi.stubGlobal('localStorage', {
         getItem: (key: string) => saved.get(key) ?? null,
@@ -147,7 +149,7 @@ describe('public profile stats', () => {
         const result = await api.refreshStats('blog')
         expect(result.status).toBe('unavailable')
         expect(result.snapshot.stats[0].value).toBe('0')
-        expect(result.snapshot.checkedAt).toBe('2026-10-21T05:00:00.000Z')
+        expect(result.snapshot.checkedAt).toBe(testNow.toISOString())
     })
 
     it('keeps the last successful values and timestamp on failure and backs off', async () => {
@@ -167,6 +169,22 @@ describe('public profile stats', () => {
         vi.resetModules()
         const reloaded = await import('./profileStats')
         expect(await reloaded.refreshStats('github')).toEqual(first)
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not let an older browser cache replace a newly verified snapshot', async () => {
+        const snapshot = api.initialStats('github').snapshot
+        const checked = Date.parse(snapshot.checkedAt)
+        vi.setSystemTime(checked + 5 * 60 * 1000)
+        saved.set(
+            'teozeng:profile-stats:v1:github',
+            JSON.stringify({
+                checkedAt: new Date(checked - 5 * 60 * 1000).toISOString(),
+                stats: [{ label: 'Followers', value: '1' }],
+            })
+        )
+        fetchMock.mockResolvedValue({ ok: false, status: 429 })
+        expect(await api.refreshStats('github')).toEqual({ snapshot, status: 'unavailable' })
         expect(fetchMock).toHaveBeenCalledTimes(1)
     })
 

@@ -231,10 +231,12 @@ html {
     color: var(--preview-muted);
 }
 .game-film { padding: 0 10px; }
+.project-preview-ideas { --film-aspect: 4 / 3; }
+.project-preview-royale { --film-aspect: 160 / 111; }
 .film-loading {
     display: grid;
     place-items: center;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: var(--film-aspect, 16 / 9);
     margin: 0 10px;
     border-radius: 10px;
     background: var(--preview-soft);
@@ -244,7 +246,7 @@ html {
 /* Clips load only inside the open card. Posters hold the frame during switching. */
 .preview-film {
     position: relative;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: var(--film-aspect, 16 / 9);
     min-width: 0;
     background: #0b1115;
     border-radius: 10px;
