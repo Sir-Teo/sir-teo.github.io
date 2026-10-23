@@ -48,7 +48,7 @@ console.log(
     `Game film code: ${(bytes / 1024).toFixed(1)} KiB raw / ${(gzip / 1024).toFixed(1)} KiB gzip; loaded on demand.`
 )
 let mediaBytes = 0
-for (const game of ['crown', 'rift', 'gta']) {
+for (const game of ['crown', 'royale', 'rift', 'gta']) {
     for (const extension of ['mp4', 'webp']) {
         const file = `/previews/game-${game}.${extension}`
         const size = (await readFile(resolve(root, file.slice(1)))).length
@@ -59,7 +59,7 @@ for (const game of ['crown', 'rift', 'gta']) {
     }
 }
 if (mediaBytes > 1600 * 1024) throw new Error('Game media exceeds 1600 KiB total')
-console.log(`All three films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
+console.log(`All four game films + posters: ${(mediaBytes / 1024).toFixed(1)} KiB; only the open card loads its film.`)
 console.log(`Initial page scripts: ${(initialGzip / 1024).toFixed(1)} KiB gzip (measured locally).`)
 
 let finosBytes = 0
@@ -71,6 +71,16 @@ for (const extension of ['mp4', 'webp']) {
     finosBytes += size
 }
 console.log(`FinOS app clip + poster: ${(finosBytes / 1024).toFixed(1)} KiB; shares the lazy film player.`)
+
+let ideasBytes = 0
+for (const extension of ['mp4', 'webp']) {
+    const file = `/previews/ideas-app.${extension}`
+    const size = (await readFile(resolve(root, file.slice(1)))).length
+    if (size > (extension === 'mp4' ? 250 : 50) * 1024) throw new Error(`Ideas asset exceeds budget: ${file}`)
+    if (html.includes(file)) throw new Error(`Ideas media must load only on demand: ${file}`)
+    ideasBytes += size
+}
+console.log(`Ideas visualization clip + poster: ${(ideasBytes / 1024).toFixed(1)} KiB; shares the lazy film player.`)
 
 let explainerBytes = 0
 for (const name of ['llm', 'quantum', 'relativity']) {

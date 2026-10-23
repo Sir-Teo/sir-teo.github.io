@@ -11,7 +11,7 @@ one small freshness/source line; exact timestamps remain in the tooltip.
 The shared card interface and stats refresh code load on the first open, in a
 5.5 KiB gzip chunk. The 10.5 KiB terminal waits for its first click and retains
 its session after closing. No optional interface is warmed during page idle.
-Initial scripts total about 180.6 KiB gzip (down from 185.0 KiB), with a 184 KiB
+Initial scripts total about 180.7 KiB gzip (down from 185.0 KiB), with a 184 KiB
 build budget. The build also verifies that cards, terminal, review and game
 chunks remain outside the initial scripts. All pills share one hover media
 listener; only changed pills rerender, and card geometry is measured at most
@@ -39,17 +39,37 @@ hidden tabs pause playback and reduced-motion users see the poster until Play.
 
 ## Game films
 
-Each game has one nine-second silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and an external-link icon in the header. Scene tabs, magnification, embedded games and their launch controls have been removed.
+Each game has one short silent loop of actual gameplay, using the same `PreviewFilm.tsx` surface as the explainers. The card contains a title, film, small pause/play control and an external-link icon in the header. Scene tabs, magnification, embedded games and their launch controls have been removed.
 
 - **Crown & Clan:** deploying barbarians and archers in a Goblin Forest raid.
+- **Clash Royale:** troops and a Fireball during an offline AI battle in Goblin Stadium.
 - **Summoner’s Rift:** Ashe attacking a target dummy and casting Volley on the production map.
 - **San Andreas:** CJ leaving the starting alley and exploring East Los Santos on foot.
 
 Recorded through the deployed apps on October 21, 2026: `coc.teozeng.dev`, `teozeng.dev/web-lol`, and `teozeng.dev/web-gta`. Frames retain capture timestamps before conversion to 640 × 360 H.264 at 24 fps, CRF 28–29, with no audio and fast-start metadata. WebP posters come from the recordings. Artwork belongs to the source projects and their respective rights holders.
 
+Clash Royale was captured from `teozeng.dev/web-clash-royale/` on October 23,
+2026. Its 9.5-second clip uses the same format at CRF 28, with a poster at 1.5
+seconds. Clip and poster total **127 KiB**. The pill's crown icon adapts the
+source app's `public/crown.svg` to the site's monochrome icon treatment.
+
 Only the open card mounts its clip. Closing unmounts and pauses it; hidden tabs pause playback. Reduced-motion users see the poster until they press Play, with `preload="none"` preventing automatic video downloads. Media errors retain a still preview and the external game link. Both film types use an inset rounded frame, a 44px play/pause target and a subtle loop-progress line; the footage has no overlaid labels during normal playback. No game engines, iframe windows, or asset packs are loaded by these previews.
 
-The three clips and posters total approximately **716 KiB**. `npm run build` checks a lazy game-film chunk capped at **4 KiB gzip / 8 KiB raw**, **600 KiB per clip / 50 KiB per poster / 1600 KiB combined**, and absence of game films and their UI chunk from the initial HTML. Replaced screenshot assets have been removed.
+The four game clips and posters total approximately **843 KiB**. `npm run build` checks a lazy game-film chunk capped at **4 KiB gzip / 8 KiB raw**, **600 KiB per clip / 50 KiB per poster / 1600 KiB combined**, and absence of game films and their UI chunk from the initial HTML. Replaced screenshot assets have been removed.
+
+## Ideas, Visualized
+
+The atlas pill shares the same compact film player and playback behavior. Its
+nine-second loop shows the actual Beats visualization: two tones, their sum and
+envelope, and rotating phasors. It was captured on October 23, 2026 from
+`teozeng.dev/theorems-visualizations/?embed=1#/t/waves-3.1`, cropped to the
+visualization panels and legend. The header opens the full atlas.
+
+The recording uses 640 × 360 H.264 at 24 fps, CRF 27, no audio and fast-start
+metadata. Its WebP poster is from 1.5 seconds. Clip and poster total **101 KiB**;
+build checks cap them at 250 KiB and 50 KiB and keep them out of initial HTML.
+No atlas scripts or iframe are loaded. The connected-node pill icon follows
+the source atlas favicon's motif.
 
 ## Single-game board reviews
 

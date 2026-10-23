@@ -28,7 +28,7 @@ export type LinkItem = {
     description?: string // project introduction shown in the hover/focus/tap preview
     tags?: string[] // a few useful features or topics for project previews
     preview?: {
-        mode: 'crown' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'finos'
+        mode: 'crown' | 'royale' | 'rift' | 'postcard' | 'chess' | 'xiangqi' | 'go' | 'videos' | 'finos' | 'ideas'
         videos?: {
             id: string
             title: string
@@ -377,6 +377,16 @@ export const projects: LinkItem[] = [
         },
     },
     {
+        label: 'Ideas, Visualized',
+        href: 'https://teozeng.dev/theorems-visualizations/',
+        icon: '/icons/ideas.svg',
+        color: '#7C3AED',
+        colorDark: '#A78BFA',
+        category: 'Projects',
+        meta: 'An interactive atlas of ideas',
+        preview: { mode: 'ideas' },
+    },
+    {
         label: 'Crown & Clan',
         href: 'https://coc.teozeng.dev/',
         icon: '/icons/clashofclans.svg',
@@ -384,6 +394,16 @@ export const projects: LinkItem[] = [
         category: 'Projects',
         meta: 'Village-building strategy',
         preview: { mode: 'crown' },
+    },
+    {
+        label: 'Clash Royale',
+        href: 'https://teozeng.dev/web-clash-royale/',
+        icon: '/icons/royale.svg',
+        color: '#D39619',
+        colorDark: '#FBCB58',
+        category: 'Projects',
+        meta: 'Real-time card battles',
+        preview: { mode: 'royale' },
     },
     {
         label: 'Summoner’s Rift',

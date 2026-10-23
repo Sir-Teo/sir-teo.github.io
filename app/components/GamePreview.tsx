@@ -4,9 +4,11 @@ import PreviewFilm from './PreviewFilm'
 
 const films = {
     crown: { name: 'game-crown', title: 'Deploying troops in a Crown & Clan raid' },
+    royale: { name: 'game-royale', title: 'Troops and a Fireball in a Clash Royale arena battle' },
     rift: { name: 'game-rift', title: 'Ashe attacking and casting Volley in Summoner’s Rift' },
     postcard: { name: 'game-gta', title: 'Exploring San Andreas' },
     finos: { name: 'finos-app', title: 'Opening a recorded FinOS research report and reviewing its sources' },
+    ideas: { name: 'ideas-app', title: 'Two tones forming beats in Ideas, Visualized' },
 }
 
 export default function GamePreview({ scene, reducedMotion }: { scene: keyof typeof films; reducedMotion: boolean }) {
