@@ -175,16 +175,6 @@ export const links: LinkItem[] = [
     },
 
     {
-        label: 'Chess.com',
-        href: 'https://www.chess.com/member/masterteo1205',
-        icon: '/icons/chess.svg',
-        color: '#81B64C',
-        category: 'Play & Hobbies',
-        meta: '@masterteo1205',
-        statsId: 'chess',
-        stats: statsSnapshots.chess.stats,
-    },
-    {
         label: 'Duolingo',
         href: 'https://www.duolingo.com/profile/sirteo',
         icon: '/icons/duolingo.webp',

@@ -14,9 +14,9 @@ checks without publishing. Pages must use GitHub Actions as its build source,
 with `teozeng.dev` as the custom domain. No hosting credentials are needed by CI.
 The Firebase configuration is retained only for rollback to the former host.
 
-Stats for GitHub, Chess.com, OGS, LeetCode, Duolingo, published blog articles and gallery photos refresh
+Stats for GitHub, OGS, LeetCode, Duolingo, published blog articles and gallery photos refresh
 in the browser when their hover/focus/tap cards open. Successful responses are cached
-locally (one hour, 12 hours for Chess.com, 24 hours for the archived gallery), with
+locally (one hour, 24 hours for the archived gallery), with
 an eight-second request timeout and a five-minute retry delay after failures.
 The cards show when the data was checked and retain a labeled snapshot if a service
 is unavailable. `app/data/stats.json` holds the verified fallback values. A newer
