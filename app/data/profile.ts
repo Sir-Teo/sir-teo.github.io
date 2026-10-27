@@ -5,7 +5,7 @@ import snapshots from './stats.json'
 
 // The few buckets the chips are grouped into on the homepage. Order here is the
 // order the sections render in.
-export const categories = ['Work & Research', 'Social', 'Play & Hobbies', 'Photography', 'Projects'] as const
+export const categories = ['Work & Research', 'Play & Hobbies', 'Photography', 'Projects'] as const
 export type LinkCategory = (typeof categories)[number]
 
 // A single metric shown in a chip's hover/focus card (e.g. { label: 'Streak', value: '794 days' }).
@@ -144,65 +144,6 @@ export const links: LinkItem[] = [
         meta: '@Sir-Teo',
         statsId: 'github',
         stats: statsSnapshots.github.stats,
-    },
-
-    // ── Social ───────────────────────────────────────────────────────
-    {
-        label: 'YouTube',
-        href: 'https://www.youtube.com/@teozeng3999',
-        icon: '/icons/youtube.svg',
-        color: '#FF0000',
-        category: 'Social',
-        meta: '@teozeng3999',
-        statsId: 'youtube',
-        stats: statsSnapshots.youtube.stats,
-    },
-    {
-        label: 'Reddit',
-        href: 'https://www.reddit.com/user/Puzzleheaded_Bid_178/',
-        icon: '/icons/reddit.svg',
-        color: '#FF4500',
-        category: 'Social',
-        meta: 'u/Puzzleheaded_Bid_178',
-        statsId: 'reddit',
-        stats: statsSnapshots.reddit.stats,
-    },
-    {
-        label: 'WeChat',
-        qrcode: '/user/wechat_qrcode.jpg',
-        icon: '/icons/wechat.svg',
-        color: '#07C160',
-        category: 'Social',
-        meta: 'Scan to add',
-    },
-    {
-        label: 'Discord',
-        handle: 'teozeng',
-        icon: '/icons/discord.svg',
-        color: '#5865F2',
-        colorDark: '#8b93f8',
-        category: 'Social',
-        meta: 'Click to copy',
-    },
-    {
-        label: 'Bilibili',
-        href: 'https://space.bilibili.com/299736746',
-        icon: '/icons/bilibili.svg',
-        color: '#FB7299',
-        category: 'Social',
-        meta: 'space/299736746',
-        statsId: 'bilibili',
-        stats: statsSnapshots.bilibili.stats,
-    },
-    {
-        label: 'Instagram',
-        href: 'https://www.instagram.com/sir_teo',
-        icon: '/icons/instagram.svg',
-        color: '#E4405F',
-        category: 'Social',
-        meta: '@sir_teo',
-        statsId: 'instagram',
-        stats: statsSnapshots.instagram.stats,
     },
 
     // ── Play & Hobbies ───────────────────────────────────────────────
